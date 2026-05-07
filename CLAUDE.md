@@ -69,7 +69,7 @@ Strong success criteria let you loop independently. Weak criteria ("make it work
 **파일을 생성, 수정, 삭제한 후에는 반드시 커밋하고 푸시한다.**
 
 - 작업 완료 후 변경된 파일을 스테이징하고 커밋 메시지를 작성한다.
-- 커밋 후 즉시 `git push`까지 실행한다.
+- 커밋 후 즉시 `git push origin main`까지 실행한다.
 - 커밋 메시지는 변경 내용을 간결하게 한국어 또는 영어로 작성한다.
 - 사용자에게 별도로 확인을 구하지 않고 자동으로 수행한다.
 
