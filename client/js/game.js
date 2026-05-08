@@ -169,7 +169,7 @@ function renderSeats() {
     div.style.top  = `${top}%`;
     div.innerHTML = `
       <img class="seat-frame" src="/Resource/UI/seat_frame.png" alt="">
-      <div class="seat-content">
+      <div class="seat-info">
         <div class="seat-name">${p.nickname}</div>
         <div class="seat-cards">${p.finished ? '완료' : p.cardCount + '장'}</div>
         ${rank ? `<div class="seat-rank"><img src="${rankImg(rank)}" alt="${rankLabel(rank)}"></div>` : ''}
