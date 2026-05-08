@@ -19,13 +19,15 @@ function createRoom(sessionId, nickname, roomName) {
 function joinRoom(roomId, sessionId, socketId, nickname) {
   const room = rooms.get(roomId);
   if (!room) return { error: 'room-not-found' };
-  if (room.status !== 'waiting') return { error: 'game-in-progress' };
 
   const existing = room.players.find(p => p.id === sessionId);
   if (existing) {
     existing.socketId = socketId;
     return room;
   }
+
+  if (room.status !== 'waiting') return { error: 'game-in-progress' };
+
   if (room.players.length >= room.maxPlayers) return { error: 'room-full' };
   room.players.push({ id: sessionId, nickname, socketId });
   return room;

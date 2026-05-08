@@ -19,12 +19,12 @@
 
 | 상태 | 위치 | 문제 | 비고 |
 |------|------|------|------|
-| 🔲 | `game.js` | 카드 내기 관련 문제 전반 — 추가 조사 필요 | 사용자 보고, 상세 원인 미파악 |
 
 ## 해결 완료
 
 | 상태 | 위치 | 문제 | 해결 방법 |
 |------|------|------|-----------|
+| ✅ | `room-manager.js:22`, `game.js:117` | 게임 중 새로고침 시 "낼 수 없는 카드" 메시지 출현 | `joinRoom`에서 기존 플레이어 재접속 체크를 `status` 체크보다 먼저 수행. `error` 핸들러에서 `invalid-play` / `card-not-in-hand`만 메시지 표시하도록 분기 |
 | ✅ | `game.html` | 턴 순서 패널 세로 잘림 | `max-height + overflow-y:auto` 추가 |
 | ✅ | `game.html` | 턴 순서 패널 가로 잘림 — 고정 `width:190px` 하드코딩 | `width:max-content; max-width:240px` 로 변경 |
 | ✅ | `server.js` | 카드 이미지 경로 깨짐 | `Resource/` 정적 경로 별도 등록 |

@@ -114,7 +114,11 @@ socket.on('game-over', ({ ranks }) => {
   }, 800);
 });
 
-socket.on('error', () => animateMessage('낼 수 없는 카드입니다', '#e94560'));
+socket.on('error', ({ message }) => {
+  if (message === 'invalid-play' || message === 'card-not-in-hand') {
+    animateMessage('낼 수 없는 카드입니다', '#e94560');
+  }
+});
 
 btnPlay.onclick = () => {
   if (selectedCards.length === 0) return;

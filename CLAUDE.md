@@ -83,6 +83,16 @@ Strong success criteria let you loop independently. Weak criteria ("make it work
 - 구현 도중 설계가 바뀌면 `docs/plan.md`에 즉시 반영한다.
 - 세션이 끝날 때 현재 진행 상태가 `docs/plan.md`만 봐도 파악되도록 유지한다.
 
+## 7. Bug Fix Documentation
+
+**버그를 수정할 때마다 `docs/troubleshooting/index.md`에 기록한다.**
+
+- 버그를 수정하기 전에 먼저 원인을 분석하고, 수정 후 내역을 테이블에 추가한다.
+- 상태: `🔲 미완료` → `✅ 완료`
+- 컬럼: 상태 / 위치(파일:줄) / 문제 설명 / 해결 방법
+- 미완료 버그를 발견하면 즉시 테이블에 추가해 두고 나중에 처리한다.
+- 사용자가 버그를 보고할 때도 먼저 `docs/troubleshooting/index.md`에 등록한 뒤 수정한다.
+
 ## Project: 대부호 (President Card Game)
 
 게임 규칙 상세: `docs/game-rules.md` 참조  
