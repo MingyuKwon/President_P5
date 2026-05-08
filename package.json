@@ -1,0 +1,32 @@
+{
+  "name": "president_p5",
+  "version": "1.0.0",
+  "description": "트럼프 카드 게임 \"대부호\"의 웹 구현입니다.",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "start": "node server/server.js",
+    "test": "jest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MingyuKwon/President_P5.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/MingyuKwon/President_P5/issues"
+  },
+  "homepage": "https://github.com/MingyuKwon/President_P5#readme",
+  "dependencies": {
+    "express": "^5.2.1",
+    "socket.io": "^4.8.3"
+  },
+  "devDependencies": {
+    "jest": "^30.4.0"
+  }
+}
