@@ -89,13 +89,14 @@ players.forEach(p => { if (p.rank) playerRanks[p.id] = p.rank; });
 let currentTableCards = [];
 let currentRevolution = false;
 
-const seatsEl  = document.getElementById('player-seats');
-const tableEl  = document.getElementById('table');
-const handEl   = document.getElementById('hand');
-const myAreaEl = document.getElementById('my-area');
-const btnPlay  = document.getElementById('btn-play');
-const btnPass  = document.getElementById('btn-pass');
-const revBadge = document.getElementById('revolution-badge');
+const seatsEl     = document.getElementById('player-seats');
+const tableEl     = document.getElementById('table');
+const handEl      = document.getElementById('hand');
+const myAreaEl    = document.getElementById('my-area');
+const btnPlay     = document.getElementById('btn-play');
+const btnPass     = document.getElementById('btn-pass');
+const revBadge    = document.getElementById('revolution-badge');
+const orderBarEl  = document.getElementById('card-order-bar');
 
 socket.on('connect', () => {
   socket.emit('join-room', { roomId, nickname, sessionId: myId });
@@ -115,6 +116,7 @@ socket.on('game-started', ({ hand, turnOrder: to, currentPlayerId: cpId, players
   revBadge.style.display = 'none';
   renderHand();   // 버튼 상태 포함
   renderSeats();
+  renderCardOrder();
 });
 
 socket.on('game-state-sync', ({ hand, tableCards, currentPlayerId: cpId, revolution, players: ps, turnOrder: to }) => {
@@ -129,6 +131,7 @@ socket.on('game-state-sync', ({ hand, tableCards, currentPlayerId: cpId, revolut
   renderHand();
   renderSeats();
   renderTable(tableCards);
+  renderCardOrder();
 });
 
 socket.on('state-updated', ({ tableCards, currentPlayerId: cpId, revolution, players: ps }) => {
@@ -142,6 +145,7 @@ socket.on('state-updated', ({ tableCards, currentPlayerId: cpId, revolution, pla
   renderTable(tableCards);
   revBadge.style.display = revolution ? 'block' : 'none';
   renderHand();
+  renderCardOrder();
 });
 
 socket.on('hand-updated', ({ hand }) => {
@@ -301,6 +305,22 @@ function renderTable(cards) {
   });
 }
 
+function renderCardOrder() {
+  const order = currentRevolution
+    ? ['2','A','K','Q','J','10','9','8','7','6','5','4','3','Joker']
+    : ['3','4','5','6','7','8','9','10','J','Q','K','A','2','Joker'];
+
+  const nonJoker = currentTableCards.filter(c => c !== 'Joker');
+  const activeRank = currentTableCards.length === 0 ? null
+    : nonJoker.length > 0 ? nonJoker[0].slice(0, -1)
+    : 'Joker';
+
+  orderBarEl.innerHTML = order.map((rank, i) =>
+    `<span class="order-rank${rank === activeRank ? ' active' : ''}">${rank}</span>`
+    + (i < order.length - 1 ? '<span class="order-sep"><</span>' : '')
+  ).join('');
+}
+
 
 function animateMessage(text, color = '#fff') {
   const el = document.createElement('div');
@@ -329,3 +349,4 @@ if (myHand.length > 0) {
   renderHand();
   renderSeats();
 }
+renderCardOrder();
