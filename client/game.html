@@ -20,7 +20,11 @@
       text-align:center;
       min-width:80px;
     }
-    .player-seat.me { border-color:rgba(255,255,255,.4); }
+    /* 시트 프레임 이미지 — /Resource/UI/seat_frame.png 제공 시 자동 적용 */
+    .seat-frame { position:absolute; inset:0; width:100%; height:100%;
+      object-fit:fill; border-radius:12px; pointer-events:none; }
+    .seat-frame[src=""] { display:none; }
+    .seat-content { position:relative; z-index:1; }
     .player-seat.finished { opacity:.4; }
     @keyframes seat-glow {
       0%, 100% { border-color:#e94560; box-shadow:0 0 10px rgba(233,69,96,.6); background:rgba(233,69,96,.12); }
@@ -29,7 +33,10 @@
     .player-seat.active { animation:seat-glow 1.2s ease-in-out infinite; }
     .seat-name  { font-size:0.95rem; color:#fff; font-weight:bold; white-space:nowrap; max-width:100px; overflow:hidden; text-overflow:ellipsis; }
     .seat-cards { font-size:0.82rem; color:#aaa; margin-top:3px; }
-    .seat-rank  { font-size:0.8rem;  color:#f0a500; margin-top:2px; }
+    .seat-rank  { margin-top:4px; }
+    /* 계급 이미지 — /Resource/UI/rank_*.png 제공 시 자동 적용 */
+    .seat-rank img { height:18px; width:auto; vertical-align:middle; }
+    .seat-rank img[src=""] { display:none; }
 
     /* 테이블 */
     #table { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);
@@ -38,7 +45,7 @@
     .table-card { width:70px; height:100px; border-radius:8px; overflow:hidden; box-shadow:0 4px 12px rgba(0,0,0,.5); }
     .table-card img { width:100%; height:100%; object-fit:cover; }
 
-#revolution-badge { display:none; position:absolute; top:8px; right:16px;
+    #revolution-badge { display:none; position:absolute; top:8px; right:16px;
       background:#e94560; padding:4px 12px; border-radius:10px; font-size:0.85rem; font-weight:bold; }
 
     /* 내 손패 */
@@ -53,7 +60,9 @@
     #my-info { display:flex; justify-content:space-between; align-items:center;
       margin-bottom:10px; padding:0 4px; }
     #my-name { font-size:1.1rem; color:#fff; font-weight:bold; }
-    #my-rank { font-size:1rem; color:#f0a500; }
+    /* 내 계급 이미지 — /Resource/UI/rank_*.png 제공 시 자동 적용 */
+    #my-rank { height:28px; width:auto; }
+    #my-rank[src=""] { display:none; }
     #hand { display:flex; gap:6px; flex-wrap:wrap; justify-content:center; min-height:110px; align-items:flex-end; }
     .hand-card { width:70px; height:100px; border-radius:8px; overflow:hidden;
       cursor:pointer; transition:transform .15s, box-shadow .15s; border:3px solid transparent;
@@ -62,8 +71,19 @@
     .hand-card.selected { transform:translateY(-16px); border-color:#e94560; }
     .hand-card img { width:100%; height:100%; object-fit:cover; pointer-events:none; }
     #action-btns { display:flex; gap:10px; justify-content:center; margin-top:10px; }
-    #action-btns button { padding:10px 28px; font-size:1rem; min-width:120px; }
-    #btn-pass { background:#555; }
+    /* 버튼 이미지 — /Resource/UI/btn_play.png, btn_pass.png 제공 시 자동 적용 */
+    #action-btns button { padding:0; background:none; border:none; cursor:pointer; }
+    #action-btns button:disabled { cursor:default; }
+    #action-btns button img { display:block; height:48px; width:auto;
+      transition:opacity .15s, transform .1s; }
+    #action-btns button:disabled img { opacity:0.35; }
+    #action-btns button:not(:disabled):hover img { transform:scale(1.05); }
+    /* 이미지 없을 때 폴백 텍스트 */
+    #action-btns button img[src=""] { display:none; }
+    #action-btns button img[src=""] + span { display:inline-block; padding:10px 28px;
+      background:#e94560; border-radius:6px; font-size:1rem; color:#fff; }
+    #btn-pass img[src=""] + span { background:#555; }
+    #action-btns button:disabled img[src=""] + span { opacity:0.5; }
   </style>
 </head>
 <body>
@@ -75,12 +95,16 @@
     <div id="my-area">
       <div id="my-info">
         <span id="my-name"></span>
-        <span id="my-rank"></span>
+        <img id="my-rank" src="" alt="">
       </div>
       <div id="hand"></div>
       <div id="action-btns">
-        <button id="btn-play" disabled>카드 내기</button>
-        <button id="btn-pass" disabled>패스</button>
+        <button id="btn-play" disabled>
+          <img src="/Resource/UI/btn_play.png" alt="카드 내기"><span>카드 내기</span>
+        </button>
+        <button id="btn-pass" disabled>
+          <img src="/Resource/UI/btn_pass.png" alt="패스"><span>패스</span>
+        </button>
       </div>
     </div>
   </div>

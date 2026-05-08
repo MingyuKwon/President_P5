@@ -33,7 +33,7 @@ let players = JSON.parse(sessionStorage.getItem('players') || '[]');
 let turnOrder = JSON.parse(sessionStorage.getItem('turnOrder') || '[]');
 let originalOrder = [...turnOrder];
 let playerRanks = {};
-players.forEach(p => { if (p.rank) playerRanks[p.id] = rankLabel(p.rank); });
+players.forEach(p => { if (p.rank) playerRanks[p.id] = p.rank; });
 
 const seatsEl  = document.getElementById('player-seats');
 const tableEl  = document.getElementById('table');
@@ -58,7 +58,7 @@ socket.on('game-started', ({ hand, turnOrder: to, currentPlayerId: cpId, players
   players = ps;
   selectedCards = [];
   playerRanks = {};
-  ps.forEach(p => { if (p.rank) playerRanks[p.id] = rankLabel(p.rank); });
+  ps.forEach(p => { if (p.rank) playerRanks[p.id] = p.rank; });
   renderHand();
   renderSeats();
 });
@@ -96,8 +96,8 @@ socket.on('revolution', ({ active }) => animateMessage(active ? '혁명 발동!'
 socket.on('player-finished', ({ playerId, rank }) => {
   const p = players.find(p => p.id === playerId);
   animateMessage(`${p ? p.nickname : playerId} — ${rankLabel(rank)}`);
-  playerRanks[playerId] = rankLabel(rank);
-  if (playerId === myId) myRankEl.textContent = rankLabel(rank);
+  playerRanks[playerId] = rank;
+  if (playerId === myId) { myRankEl.src = rankImg(rank); myRankEl.alt = rankLabel(rank); }
   renderSeats();
 });
 
@@ -163,9 +163,12 @@ function renderSeats() {
     div.style.left = `${left}%`;
     div.style.top  = `${top}%`;
     div.innerHTML = `
-      <div class="seat-name">${p.nickname}${isMe ? ' (나)' : ''}</div>
-      <div class="seat-cards">${p.finished ? '완료' : p.cardCount + '장'}</div>
-      ${rank ? `<div class="seat-rank">${rank}</div>` : ''}
+      <img class="seat-frame" src="/Resource/UI/seat_frame.png" alt="">
+      <div class="seat-content">
+        <div class="seat-name">${p.nickname}</div>
+        <div class="seat-cards">${p.finished ? '완료' : p.cardCount + '장'}</div>
+        ${rank ? `<div class="seat-rank"><img src="${rankImg(rank)}" alt="${rankLabel(rank)}"></div>` : ''}
+      </div>
     `;
     seatsEl.appendChild(div);
   });
@@ -220,9 +223,14 @@ function rankLabel(rank) {
   const map = { president:'대부호', 'vice-president':'부호', citizen:'평민', 'vice-scum':'빈민', scum:'대빈민' };
   return map[rank] || rank;
 }
+function rankImg(rank) {
+  if (!rank) return '';
+  return `/Resource/UI/rank_${rank}.png`;
+}
 
 myNameEl.textContent = nickname;
-myRankEl.textContent = playerRanks[myId] || '';
+myRankEl.src = rankImg(playerRanks[myId] || '');
+myRankEl.alt = rankLabel(playerRanks[myId] || '');
 myAreaEl.classList.toggle('active', currentPlayerId === myId);
 
 if (myHand.length > 0) {
