@@ -38,11 +38,15 @@ players.forEach(p => { if (p.rank) playerRanks[p.id] = rankLabel(p.rank); });
 const seatsEl  = document.getElementById('player-seats');
 const tableEl  = document.getElementById('table');
 const handEl   = document.getElementById('hand');
+const myAreaEl = document.getElementById('my-area');
+const myNameEl = document.getElementById('my-name');
+const myRankEl = document.getElementById('my-rank');
 const btnPlay  = document.getElementById('btn-play');
 const btnPass  = document.getElementById('btn-pass');
 const revBadge = document.getElementById('revolution-badge');
 
 socket.on('connect', () => {
+  myNameEl.textContent = nickname;
   socket.emit('join-room', { roomId, nickname, sessionId: myId });
 });
 
@@ -66,6 +70,7 @@ socket.on('state-updated', ({ tableCards, currentPlayerId: cpId, revolution, pla
   renderTable(tableCards);
   revBadge.style.display = revolution ? 'block' : 'none';
   const isMyTurn = cpId === myId;
+  myAreaEl.classList.toggle('active', isMyTurn);
   btnPass.disabled = !isMyTurn;
   btnPlay.disabled = !isMyTurn || selectedCards.length === 0;
 });
@@ -92,6 +97,7 @@ socket.on('player-finished', ({ playerId, rank }) => {
   const p = players.find(p => p.id === playerId);
   animateMessage(`${p ? p.nickname : playerId} — ${rankLabel(rank)}`);
   playerRanks[playerId] = rankLabel(rank);
+  if (playerId === myId) myRankEl.textContent = rankLabel(rank);
   renderSeats();
 });
 
@@ -214,6 +220,9 @@ function rankLabel(rank) {
   const map = { president:'대부호', 'vice-president':'부호', citizen:'평민', 'vice-scum':'빈민', scum:'대빈민' };
   return map[rank] || rank;
 }
+
+myNameEl.textContent = nickname;
+myRankEl.textContent = playerRanks[myId] || '';
 
 if (myHand.length > 0) {
   renderHand();
