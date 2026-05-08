@@ -125,6 +125,11 @@ btnPlay.onclick = () => {
   socket.emit('play-cards', { cards: [...selectedCards], sessionId: myId });
 };
 btnPass.onclick = () => socket.emit('pass', { sessionId: myId });
+document.getElementById('btn-exit').onclick = () => {
+  if (!confirm('게임을 나가시겠습니까?')) return;
+  socket.emit('leave-room', { sessionId: myId });
+  location.href = '/';
+};
 
 // 플레이어 시트 — 원형 배치
 // 원점: 화면 중앙(cx, cy), 타원 반지름(rx, ry), 모두 뷰포트 % 기준
