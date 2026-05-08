@@ -223,6 +223,7 @@ function rankLabel(rank) {
 
 myNameEl.textContent = nickname;
 myRankEl.textContent = playerRanks[myId] || '';
+myAreaEl.classList.toggle('active', currentPlayerId === myId);
 
 if (myHand.length > 0) {
   renderHand();
