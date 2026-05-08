@@ -166,7 +166,7 @@ function renderSeats() {
     if (isMe) {
       // #my-area 자식으로 붙여야 브라우저 크기에 반응
       // 50% = #my-area 폭(= 뷰포트 폭) 기준
-      div.style.cssText = 'position:absolute; left:50%; bottom:calc(100% + 100px); top:auto; transform:translate(-50%,0);';
+      div.style.cssText = 'position:absolute; left:50%; bottom:calc(100% + 50px); top:auto; transform:translate(-50%,0);';
       myAreaEl.appendChild(div);
       return;
     }
