@@ -8,7 +8,6 @@ function getSessionId() {
 }
 
 const nicknameInput = document.getElementById('nickname');
-const searchInput = document.getElementById('search');
 const roomListEl = document.getElementById('room-list');
 const noRoomsEl = document.getElementById('no-rooms');
 const createModal = document.getElementById('create-modal');
@@ -24,8 +23,6 @@ document.getElementById('btn-confirm-create').onclick = () => {
   socket.emit('create-room', { roomName, nickname: getNickname(), sessionId: getSessionId() });
   createModal.classList.remove('open');
 };
-searchInput.oninput = () => renderRooms();
-
 socket.on('room-list', ({ rooms: r }) => { rooms = r; renderRooms(); });
 socket.on('room-joined', ({ roomId }) => {
   sessionStorage.setItem('nickname', getNickname());
@@ -39,11 +36,9 @@ function getNickname() {
 }
 
 function renderRooms() {
-  const q = searchInput.value.toLowerCase();
-  const filtered = rooms.filter(r => r.name.toLowerCase().includes(q));
-  noRoomsEl.style.display = filtered.length ? 'none' : '';
+  noRoomsEl.style.display = rooms.length ? 'none' : '';
   roomListEl.querySelectorAll('.room-item').forEach(el => el.remove());
-  filtered.forEach(room => {
+  rooms.forEach(room => {
     const div = document.createElement('div');
     div.className = 'room-item';
     div.innerHTML = `
