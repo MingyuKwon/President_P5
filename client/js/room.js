@@ -5,6 +5,12 @@ const nickname = sessionStorage.getItem('nickname');
 
 if (!nickname || !roomId) location.href = '/';
 
+function getSessionId() {
+  let id = sessionStorage.getItem('sessionId');
+  if (!id) { id = Math.random().toString(36).slice(2, 10); sessionStorage.setItem('sessionId', id); }
+  return id;
+}
+
 let isHost = false;
 
 const roomIdDisplay = document.getElementById('room-id-display');
@@ -16,14 +22,14 @@ roomIdDisplay.onclick = () => {
   });
 };
 
-document.getElementById('btn-start').onclick = () => socket.emit('start-game');
+document.getElementById('btn-start').onclick = () => socket.emit('start-game', { sessionId: getSessionId() });
 document.getElementById('btn-leave').onclick = () => {
-  socket.emit('leave-room');
+  socket.emit('leave-room', { sessionId: getSessionId() });
   location.href = '/';
 };
 
 socket.on('connect', () => {
-  socket.emit('join-room', { roomId, nickname });
+  socket.emit('join-room', { roomId, nickname, sessionId: getSessionId() });
 });
 
 socket.on('room-joined', (data) => {
@@ -45,9 +51,10 @@ socket.on('error', ({ message }) => alert(`오류: ${message}`));
 
 function renderPlayers(players) {
   const el = document.getElementById('player-list');
+  const mySessionId = getSessionId();
   el.innerHTML = players.map(p => `
     <div class="player-item">
-      <span>${p.nickname}${p.id === socket.id ? ' (나)' : ''}</span>
+      <span>${p.nickname}${p.id === mySessionId ? ' (나)' : ''}</span>
       ${p.id === players[0].id ? '<span class="badge">방장</span>' : ''}
     </div>
   `).join('');

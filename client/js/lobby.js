@@ -1,6 +1,12 @@
 const socket = io();
 let rooms = [];
 
+function getSessionId() {
+  let id = sessionStorage.getItem('sessionId');
+  if (!id) { id = Math.random().toString(36).slice(2, 10); sessionStorage.setItem('sessionId', id); }
+  return id;
+}
+
 const nicknameInput = document.getElementById('nickname');
 const searchInput = document.getElementById('search');
 const roomListEl = document.getElementById('room-list');
@@ -15,8 +21,7 @@ document.getElementById('btn-create').onclick = () => {
 document.getElementById('btn-cancel').onclick = () => createModal.classList.remove('open');
 document.getElementById('btn-confirm-create').onclick = () => {
   const roomName = document.getElementById('room-name').value.trim() || `${getNickname()}의 방`;
-  const maxPlayers = parseInt(document.getElementById('max-players').value);
-  socket.emit('create-room', { roomName, maxPlayers, nickname: getNickname() });
+  socket.emit('create-room', { roomName, nickname: getNickname(), sessionId: getSessionId() });
   createModal.classList.remove('open');
 };
 searchInput.oninput = () => renderRooms();
@@ -43,12 +48,12 @@ function renderRooms() {
     div.className = 'room-item';
     div.innerHTML = `
       <strong>${room.name}</strong>
-      <span>${room.currentPlayers}/${room.maxPlayers}명 · ${room.status === 'waiting' ? '대기중' : '게임중'}</span>
-      <button ${room.status !== 'waiting' || room.currentPlayers >= room.maxPlayers ? 'disabled' : ''}>입장</button>
+      <span>${room.currentPlayers}/8명 · ${room.status === 'waiting' ? '대기중' : '게임중'}</span>
+      <button ${room.status !== 'waiting' || room.currentPlayers >= 8 ? 'disabled' : ''}>입장</button>
     `;
     div.querySelector('button').onclick = () => {
       if (!getNickname()) return;
-      socket.emit('join-room', { roomId: room.id, nickname: getNickname() });
+      socket.emit('join-room', { roomId: room.id, nickname: getNickname(), sessionId: getSessionId() });
     };
     roomListEl.appendChild(div);
   });

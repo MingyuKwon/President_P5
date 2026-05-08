@@ -2,7 +2,7 @@ const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
 const path = require('path');
-const { createRoom, joinRoom, leaveRoom, getRoomList, getRoom, setRoomStatus } = require('./room-manager');
+const { createRoom, joinRoom, leaveRoom, getRoomList, getRoom, setRoomStatus, updateSocketId } = require('./room-manager');
 const { createGameState, playCards, pass } = require('./game/game-state');
 
 const app = express();
@@ -11,51 +11,71 @@ const io = new Server(server);
 
 app.use(express.static(path.join(__dirname, '../client')));
 
-const gameStates = new Map();  // roomId → gameState
-const playerRooms = new Map(); // socketId → roomId
+const gameStates = new Map();   // roomId → gameState
+const sessionMap = new Map();   // sessionId → { socketId, roomId }
+const socketSession = new Map(); // socketId → sessionId
 
 io.on('connection', (socket) => {
+
+  function getSession(sessionId) {
+    if (!sessionMap.has(sessionId)) sessionMap.set(sessionId, { socketId: socket.id, roomId: null });
+    const session = sessionMap.get(sessionId);
+    session.socketId = socket.id;
+    socketSession.set(socket.id, sessionId);
+    return session;
+  }
+
   socket.on('get-room-list', () => {
     socket.emit('room-list', { rooms: getRoomList() });
   });
 
-  socket.on('create-room', ({ roomName, maxPlayers, nickname }) => {
-    const room = createRoom(socket.id, nickname, roomName, maxPlayers);
+  socket.on('create-room', ({ roomName, nickname, sessionId }) => {
+    const session = getSession(sessionId);
+    const room = createRoom(sessionId, nickname, roomName);
     socket.join(room.id);
-    playerRooms.set(socket.id, room.id);
-    socket.emit('room-joined', { roomId: room.id, players: room.players, isHost: true });
+    session.roomId = room.id;
+    updateSocketId(room.id, sessionId, socket.id);
+    socket.emit('room-joined', { roomId: room.id, players: publicPlayers(room.players), isHost: true });
     io.emit('room-list', { rooms: getRoomList() });
   });
 
-  socket.on('join-room', ({ roomId, nickname }) => {
-    const result = joinRoom(roomId, socket.id, nickname);
+  socket.on('join-room', ({ roomId, nickname, sessionId }) => {
+    const session = getSession(sessionId);
+    const result = joinRoom(roomId, sessionId, socket.id, nickname);
     if (result.error) return socket.emit('error', { message: result.error });
     socket.join(roomId);
-    playerRooms.set(socket.id, roomId);
-    socket.emit('room-joined', { roomId, players: result.players, isHost: result.hostId === socket.id });
-    socket.to(roomId).emit('room-updated', { players: result.players });
+    session.roomId = roomId;
+    const isHost = result.hostId === sessionId;
+    socket.emit('room-joined', { roomId, players: publicPlayers(result.players), isHost });
+    socket.to(roomId).emit('room-updated', { players: publicPlayers(result.players) });
     io.emit('room-list', { rooms: getRoomList() });
   });
 
-  socket.on('leave-room', () => {
-    handleLeave(socket);
+  socket.on('leave-room', ({ sessionId }) => {
+    doLeave(sessionId, socket);
   });
 
-  socket.on('start-game', () => {
-    const roomId = playerRooms.get(socket.id);
+  socket.on('start-game', ({ sessionId }) => {
+    const session = sessionMap.get(sessionId);
+    if (!session) return;
+    const roomId = session.roomId;
     const room = getRoom(roomId);
-    if (!room || room.hostId !== socket.id) return;
+    if (!room || room.hostId !== sessionId) return;
     if (room.players.length < 3) return socket.emit('error', { message: 'need-3-players' });
 
     const prevState = gameStates.get(roomId);
     const prevRanks = prevState?.ranks || {};
     const gameNumber = (prevState?.gameNumber || 0) + 1;
-    const state = createGameState(room.players, gameNumber, prevRanks);
+
+    // game-state용 players 배열 (id = sessionId)
+    const players = room.players.map(p => ({ id: p.id, nickname: p.nickname }));
+    const state = createGameState(players, gameNumber, prevRanks);
     gameStates.set(roomId, state);
     setRoomStatus(roomId, 'playing');
 
     room.players.forEach(p => {
-      const playerSocket = io.sockets.sockets.get(p.id);
+      const sess = sessionMap.get(p.id);
+      const playerSocket = sess ? io.sockets.sockets.get(sess.socketId) : null;
       if (playerSocket) {
         playerSocket.emit('game-started', {
           hand: state.players[p.id].hand,
@@ -68,43 +88,48 @@ io.on('connection', (socket) => {
     io.emit('room-list', { rooms: getRoomList() });
   });
 
-  socket.on('play-cards', ({ cards }) => {
-    const roomId = playerRooms.get(socket.id);
-    const state = gameStates.get(roomId);
+  socket.on('play-cards', ({ cards, sessionId }) => {
+    const session = sessionMap.get(sessionId);
+    if (!session) return;
+    const state = gameStates.get(session.roomId);
     if (!state) return;
-    const result = playCards(state, socket.id, cards);
+    const result = playCards(state, sessionId, cards);
     if (result.error) return socket.emit('error', { message: result.error });
-    gameStates.set(roomId, result.state);
-    broadcastGameUpdate(roomId, result.state, result.events);
+    gameStates.set(session.roomId, result.state);
+    broadcastGameUpdate(session.roomId, result.state, result.events);
   });
 
-  socket.on('pass', () => {
-    const roomId = playerRooms.get(socket.id);
-    const state = gameStates.get(roomId);
+  socket.on('pass', ({ sessionId }) => {
+    const session = sessionMap.get(sessionId);
+    if (!session) return;
+    const state = gameStates.get(session.roomId);
     if (!state) return;
-    const result = pass(state, socket.id);
+    const result = pass(state, sessionId);
     if (result.error) return socket.emit('error', { message: result.error });
-    gameStates.set(roomId, result.state);
-    broadcastGameUpdate(roomId, result.state, result.events);
+    gameStates.set(session.roomId, result.state);
+    broadcastGameUpdate(session.roomId, result.state, result.events);
   });
 
+  // 페이지 이동 시 소켓만 끊기므로 즉시 방에서 제거하지 않음
   socket.on('disconnect', () => {
-    handleLeave(socket);
+    socketSession.delete(socket.id);
   });
 
-  function handleLeave(socket) {
-    const roomId = playerRooms.get(socket.id);
-    if (!roomId) return;
-    playerRooms.delete(socket.id);
+  function doLeave(sessionId, socket) {
+    const session = sessionMap.get(sessionId);
+    if (!session?.roomId) return;
+    const roomId = session.roomId;
     socket.leave(roomId);
-    const room = leaveRoom(roomId, socket.id);
+    session.roomId = null;
+    const room = leaveRoom(roomId, sessionId);
     if (room) {
-      io.to(roomId).emit('room-updated', { players: room.players });
+      io.to(roomId).emit('room-updated', { players: publicPlayers(room.players) });
     }
     io.emit('room-list', { rooms: getRoomList() });
   }
 
   function broadcastGameUpdate(roomId, state, events) {
+    const room = getRoom(roomId);
     const publicState = {
       tableCards: state.tableCards,
       currentPlayerId: state.turnOrder[state.currentIndex] || null,
@@ -118,8 +143,8 @@ io.on('connection', (socket) => {
 
     for (const event of events) {
       if (event.type === 'card-played') {
-        // 손패 업데이트는 해당 플레이어에게만
-        const playerSocket = io.sockets.sockets.get(event.playerId);
+        const sess = sessionMap.get(event.playerId);
+        const playerSocket = sess ? io.sockets.sockets.get(sess.socketId) : null;
         if (playerSocket) {
           playerSocket.emit('hand-updated', { hand: state.players[event.playerId].hand });
         }
@@ -128,6 +153,10 @@ io.on('connection', (socket) => {
     }
   }
 });
+
+function publicPlayers(players) {
+  return players.map(p => ({ id: p.id, nickname: p.nickname }));
+}
 
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));
