@@ -133,6 +133,7 @@ const CX = 50, CY = 38, RX = 36, RY = 26;
 
 function renderSeats() {
   seatsEl.innerHTML = '';
+  myAreaEl.querySelector('.player-seat.me')?.remove();
   const order = originalOrder.length > 0 ? originalOrder : turnOrder;
   const total = order.length;
   if (total === 0) return;
@@ -142,13 +143,6 @@ function renderSeats() {
   order.forEach((playerId, i) => {
     const p = players.find(p => p.id === playerId);
     if (!p) return;
-
-    // 나를 아래(90°)에 고정, 나머지를 시계 방향으로 배분
-    const offset = (i - myIdx + total) % total;
-    const deg = 90 + offset * (360 / total);
-    const rad = deg * Math.PI / 180;
-    const left = CX + RX * Math.cos(rad);
-    const top  = CY + RY * Math.sin(rad);
 
     const isMe     = playerId === myId;
     const isActive = playerId === currentPlayerId;
@@ -160,8 +154,6 @@ function renderSeats() {
       isActive ? 'active'   : '',
       p.finished ? 'finished' : '',
     ].filter(Boolean).join(' ');
-    div.style.left = `${left}%`;
-    div.style.top  = `${top}%`;
     div.innerHTML = `
       <img class="seat-frame" src="/Resource/UI/seat_frame.png" alt="">
       <div class="seat-content">
@@ -170,7 +162,20 @@ function renderSeats() {
         ${rank ? `<div class="seat-rank"><img src="${rankImg(rank)}" alt="${rankLabel(rank)}"></div>` : ''}
       </div>
     `;
-    seatsEl.appendChild(div);
+
+    if (isMe) {
+      // 손패 영역 왼쪽 위에 고정
+      div.style.cssText = 'position:absolute; left:12px; bottom:calc(100% + 4px); transform:none;';
+      myAreaEl.appendChild(div);
+    } else {
+      // 나를 아래(90°)에 고정, 나머지를 시계 방향으로 배분
+      const offset = (i - myIdx + total) % total;
+      const deg = 90 + offset * (360 / total);
+      const rad = deg * Math.PI / 180;
+      div.style.left = `${CX + RX * Math.cos(rad)}%`;
+      div.style.top  = `${CY + RY * Math.sin(rad)}%`;
+      seatsEl.appendChild(div);
+    }
   });
 }
 
