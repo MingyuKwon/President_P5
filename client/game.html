@@ -67,7 +67,8 @@
     #btn-exit:hover { background:rgba(255,255,255,.1); color:#fff; }
 
     /* 내 손패 */
-    #my-area { position:absolute; bottom:0; left:0; right:0; padding:16px;
+    #bottom-ui { position:absolute; bottom:0; left:0; right:0; display:flex; flex-direction:column; align-items:center; }
+    #my-area { position:relative; width:100%; padding:16px;
       background:rgba(0,0,0,.6); border:2px solid rgba(255,255,255,.1);
       transition:border-color .3s; }
     @keyframes my-area-glow {
@@ -84,7 +85,7 @@
     .hand-card.selected { transform:translateY(-20px); border-color:#e94560; z-index:5; }
     .hand-card.dimmed { filter:brightness(0.35); }
     .hand-card img { width:100%; height:100%; object-fit:cover; pointer-events:none; }
-    #action-btns { display:flex; gap:10px; justify-content:center; margin-top:10px; }
+    #action-btns { display:flex; gap:10px; justify-content:center; padding-bottom:50px; }
     /* 버튼 이미지 — /Resource/UI/btn_play.png, btn_pass.png 제공 시 자동 적용 */
     #action-btns button { padding:0; background:none; border:none; cursor:pointer; }
     #action-btns button:disabled { cursor:default; }
@@ -106,8 +107,7 @@
     <div id="player-seats"></div>
     <div id="table"></div>
 
-    <div id="my-area">
-      <div id="hand"></div>
+    <div id="bottom-ui">
       <div id="action-btns">
         <button id="btn-play" disabled>
           <img src="/Resource/UI/btn_play.png" alt="카드 내기"
@@ -120,7 +120,10 @@
           <span>패스</span>
         </button>
       </div>
-      <button id="btn-exit">나가기</button>
+      <div id="my-area">
+        <div id="hand"></div>
+        <button id="btn-exit">나가기</button>
+      </div>
     </div>
   </div>
 
