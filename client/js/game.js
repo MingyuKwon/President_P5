@@ -315,10 +315,17 @@ function renderCardOrder() {
     : nonJoker.length > 0 ? nonJoker[0].slice(0, -1)
     : 'Joker';
 
-  orderBarEl.innerHTML = order.map((rank, i) =>
-    `<span class="order-rank${rank === activeRank ? ' active' : ''}">${rank}</span>`
-    + (i < order.length - 1 ? '<span class="order-sep"><</span>' : '')
-  ).join('');
+  const last = order.length - 1;
+  const ranks = order.map((rank, i) => {
+    // 그라데이션: 약(#666) → 강(#fff)
+    const b = Math.round(102 + 153 * (i / last));
+    const color = rank === activeRank ? '#e94560' : `rgb(${b},${b},${b})`;
+    const weight = rank === activeRank ? 'bold' : '500';
+    const sep = i < last ? '<span class="order-sep">→</span>' : '';
+    return `<span class="order-rank" style="color:${color};font-weight:${weight}">${rank}</span>${sep}`;
+  }).join('');
+
+  orderBarEl.innerHTML = `<span class="order-label">강약</span>${ranks}`;
 }
 
 
