@@ -127,11 +127,58 @@ btnAutoPass.onclick = () => {
 };
 
 let autoPlay = false;
+let autoPlayTimer = null;
 const gameBoardEl = document.getElementById('game-board');
+
+function clearAutoPlayTimer() {
+  if (autoPlayTimer) { clearTimeout(autoPlayTimer); autoPlayTimer = null; }
+}
+
+function selectCardsToPlay() {
+  const N = currentTableCards.length || 1;
+  const selectable0 = computeSelectableSet(myHand, [], currentTableCards, currentRevolution);
+  if (selectable0.size === 0) return null;
+
+  // 약한 카드 우선, 조커는 마지막
+  const candidates = [...selectable0].sort((a, b) => {
+    if (a === 'Joker') return 1;
+    if (b === 'Joker') return -1;
+    return playRank(a, currentRevolution) - playRank(b, currentRevolution);
+  });
+
+  for (const startCard of candidates) {
+    let selected = [startCard];
+    let ok = true;
+    for (let i = 1; i < N; i++) {
+      const sel = computeSelectableSet(myHand, selected, currentTableCards, currentRevolution);
+      const rank = startCard === 'Joker' ? null : startCard.slice(0, -1);
+      const next = [...sel].find(c => c !== 'Joker' && (rank === null || c.slice(0, -1) === rank))
+                || ([...sel].includes('Joker') ? 'Joker' : null);
+      if (!next) { ok = false; break; }
+      selected.push(next);
+    }
+    if (ok) return selected;
+  }
+  return null;
+}
+
+function tryAutoPlay() {
+  if (!autoPlay || currentPlayerId !== myId) return;
+  clearAutoPlayTimer();
+  autoPlayTimer = setTimeout(() => {
+    if (!autoPlay || currentPlayerId !== myId) return;
+    const cards = selectCardsToPlay();
+    if (cards) socket.emit('play-cards', { cards, sessionId: myId });
+    else socket.emit('pass', { sessionId: myId });
+  }, 1000);
+}
+
 btnAuto.onclick = () => {
   autoPlay = !autoPlay;
   btnAuto.classList.toggle('on', autoPlay);
   gameBoardEl.classList.toggle('auto-mode', autoPlay);
+  if (!autoPlay) clearAutoPlayTimer();
+  else tryAutoPlay();
 };
 
 function clearTimerUI() {
@@ -198,11 +245,11 @@ socket.on('state-updated', ({ tableCards, tablePile, currentPlayerId: cpId, revo
   players = ps;
   currentTableCards = tableCards || [];
   currentRevolution = revolution;
-  if (wasMyTurn && cpId !== myId) { selectedCards = []; clearAutoPassTimer(); }
+  if (wasMyTurn && cpId !== myId) { selectedCards = []; clearAutoPassTimer(); clearAutoPlayTimer(); }
   renderSeats();
   renderHand();
   renderCardOrder();
-  if (!wasMyTurn && cpId === myId) tryAutoPass();
+  if (!wasMyTurn && cpId === myId) { tryAutoPass(); tryAutoPlay(); }
 });
 
 socket.on('card-played', ({ cards }) => {
@@ -222,6 +269,7 @@ socket.on('turn-timer', ({ playerId, duration }) => {
 socket.on('round-end', ({ reason }) => {
   clearTimerUI();
   clearAutoPassTimer();
+  clearAutoPlayTimer();
   if (reason === '8-clear') animateMessage('8-Clear!');
   else if (reason === 'spade-reversal') animateMessage('♠ Reversal!');
   gsap.to('#table .table-group', {
