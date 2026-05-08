@@ -38,9 +38,10 @@ players.forEach(p => { if (p.rank) playerRanks[p.id] = p.rank; });
 const seatsEl  = document.getElementById('player-seats');
 const tableEl  = document.getElementById('table');
 const handEl   = document.getElementById('hand');
-const myAreaEl = document.getElementById('my-area');
-const myNameEl = document.getElementById('my-name');
-const myRankEl = document.getElementById('my-rank');
+const myAreaEl    = document.getElementById('my-area');
+const myNameEl    = document.getElementById('my-name');
+const myRankEl    = document.getElementById('my-rank');
+const myCardCount = document.getElementById('my-card-count');
 const btnPlay  = document.getElementById('btn-play');
 const btnPass  = document.getElementById('btn-pass');
 const revBadge = document.getElementById('revolution-badge');
@@ -169,7 +170,7 @@ function renderSeats() {
     div.style.top  = `${top}%`;
     div.innerHTML = `
       <img class="seat-frame" src="/Resource/UI/seat_frame.png" alt="">
-      <div class="seat-info">
+      <div class="seat-content">
         <div class="seat-name">${p.nickname}</div>
         <div class="seat-cards">${p.finished ? '완료' : p.cardCount + '장'}</div>
         ${rank ? `<div class="seat-rank"><img src="${rankImg(rank)}" alt="${rankLabel(rank)}"></div>` : ''}
@@ -181,6 +182,7 @@ function renderSeats() {
 
 function renderHand() {
   handEl.innerHTML = '';
+  myCardCount.textContent = myHand.length + '장';
   myHand.forEach((card) => {
     const div = document.createElement('div');
     div.className = 'hand-card';
@@ -236,6 +238,7 @@ function rankImg(rank) {
 myNameEl.textContent = nickname;
 myRankEl.src = rankImg(playerRanks[myId] || '');
 myRankEl.alt = rankLabel(playerRanks[myId] || '');
+myCardCount.textContent = myHand.length + '장';
 myAreaEl.classList.toggle('active', currentPlayerId === myId);
 
 if (myHand.length > 0) {
