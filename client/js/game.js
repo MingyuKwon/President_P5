@@ -283,7 +283,7 @@ function renderHand() {
 
     const angleDeg = n <= 1 ? 0 : (i - (n - 1) / 2) / (n - 1) * totalAngle;
     const maxHalf = totalAngle / 2;
-    const drop = maxHalf > 0 ? (angleDeg / maxHalf) ** 2 * 8 : 0;
+    const drop = maxHalf > 0 ? (angleDeg / maxHalf) ** 2 * 20 : 0;
     div.style.setProperty('--rot', `${angleDeg}deg`);
     div.style.setProperty('--drop', `${drop}px`);
 
