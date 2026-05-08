@@ -87,16 +87,16 @@
     .hand-card img { width:100%; height:100%; object-fit:cover; pointer-events:none; }
     #action-btns { display:flex; flex-wrap:wrap; gap:32px; justify-content:center; }
     /* 버튼 이미지 — /Resource/UI/btn_play.png, btn_pass.png 제공 시 자동 적용 */
-    #action-btns button { padding:0; background:none; border:none; cursor:pointer; }
-    #action-btns button:disabled { cursor:default; }
-    #action-btns button img { display:block; height:48px; width:auto;
+    #action-btns button:not(#btn-autopass) { padding:0; background:none; border:none; cursor:pointer; }
+    #action-btns button:not(#btn-autopass):disabled { cursor:default; }
+    #action-btns button:not(#btn-autopass) img { display:block; height:48px; width:auto;
       transition:opacity .15s, transform .1s; }
-    #action-btns button:disabled img { opacity:0.35; }
-    #action-btns button:not(:disabled):hover img { transform:scale(1.05); }
+    #action-btns button:not(#btn-autopass):disabled img { opacity:0.35; }
+    #action-btns button:not(#btn-autopass):not(:disabled):hover img { transform:scale(1.05); }
     #autopass-row { width:100%; display:flex; justify-content:center; margin-top:8px; }
-    #btn-autopass { padding:7px 22px; border-radius:8px; font-size:0.85rem; font-weight:bold; cursor:pointer; border:2px solid rgba(255,255,255,.35); background:rgba(255,255,255,.1); color:#ccc; transition:all .15s; letter-spacing:.03em; box-shadow:0 2px 6px rgba(0,0,0,.4); }
-    #btn-autopass.on { border-color:#4caf50; background:rgba(76,175,80,.25); color:#4caf50; box-shadow:0 0 10px rgba(76,175,80,.4); }
-    #btn-autopass:hover { transform:scale(1.04); filter:brightness(1.15); }
+    #btn-autopass { padding:8px 24px; border-radius:8px; font-size:0.85rem; font-weight:bold; cursor:pointer; border:2px solid rgba(255,255,255,.5); background:rgba(255,255,255,.12); color:#ddd; transition:all .15s; letter-spacing:.03em; box-shadow:0 2px 8px rgba(0,0,0,.5); }
+    #btn-autopass.on { border-color:#4caf50; background:rgba(76,175,80,.28); color:#4caf50; box-shadow:0 0 12px rgba(76,175,80,.45); }
+    #btn-autopass:hover { transform:scale(1.05); filter:brightness(1.2); }
     /* 이미지 없을 때 폴백 텍스트 (기본 숨김, onerror 시 표시) */
     #action-btns button span { display:none; padding:10px 28px;
       border-radius:6px; font-size:1rem; color:#fff; }
