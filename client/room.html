@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>대부호 - 대기실</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .player-list { margin: 20px 0; }
+    .player-item { background:#16213e; border-radius:8px; padding:12px 18px; margin-bottom:8px;
+      display:flex; justify-content:space-between; align-items:center; }
+    .badge { font-size:0.75rem; background:#e94560; padding:2px 8px; border-radius:10px; }
+    #room-id-display { font-size:0.85rem; color:#aaa; margin-bottom:16px; cursor:pointer; }
+    #btn-start { width:100%; padding:14px; font-size:1.1rem; margin-top:12px; }
+    #btn-leave { width:100%; margin-top:8px; background:#555; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>대기실</h1>
+    <div id="room-id-display"></div>
+    <div class="player-list" id="player-list"></div>
+    <button id="btn-start" disabled>게임 시작 (최소 3명)</button>
+    <button id="btn-leave">나가기</button>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="js/room.js"></script>
+</body>
+</html>
