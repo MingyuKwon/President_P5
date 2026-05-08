@@ -295,9 +295,9 @@ function toggleCard(card) {
 function addCardGroupToTable(cards, animate = true) {
   const group = document.createElement('div');
   group.className = 'table-group';
-  const ox = (Math.random() - 0.5) * 40;
-  const oy = (Math.random() - 0.5) * 30;
-  const rot = (Math.random() - 0.5) * 12;
+  const ox = (Math.random() - 0.5) * 120;
+  const oy = (Math.random() - 0.5) * 80;
+  const rot = (Math.random() - 0.5) * 30;
   group.style.transform = `translate(calc(-50% + ${ox}px), calc(-50% + ${oy}px)) rotate(${rot}deg)`;
   cards.forEach(card => {
     const div = document.createElement('div');
