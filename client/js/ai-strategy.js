@@ -20,27 +20,27 @@
  */
 function myStrategy(ctx) {
   const { hand, tableCards, revolution, isLead, needCount,
-          playRank, canBeat, groupByRank, weakest, strongest } = ctx;
+          playRank, canBeat, groupByRank } = ctx;
 
-  // ── 여기에 전략을 작성하세요 ──────────────────────────────────────
-
-  // 기본: 낼 수 있는 가장 약한 조합을 낸다
   const groups = groupByRank(hand);
 
+  // 조커 제외한 숫자 그룹을 약한 순으로 정렬
+  const ranked = Object.entries(groups)
+    .filter(([rank]) => rank !== 'Joker')
+    .sort((a, b) => playRank(a[1][0]) - playRank(b[1][0]));
+
   if (isLead) {
-    // 선: 가장 약한 카드 1장
-    const nonJoker = hand.filter(c => c !== 'Joker');
-    if (nonJoker.length === 0) return null;
-    return [weakest(nonJoker)];
+    // 선: 가장 약한 숫자의 카드를 최대한 많이 낸다
+    for (const [, cards] of ranked) {
+      if (cards.length > 0) return cards;
+    }
+    return null;
   }
 
   // 선이 아닐 때: 테이블 장수에 맞춰 낼 수 있는 가장 약한 조합
   const N = needCount;
-  const ranked = Object.entries(groups)
-    .filter(([rank, cards]) => rank !== 'Joker' && cards.length >= N)
-    .sort((a, b) => playRank(a[1][0], revolution) - playRank(b[1][0], revolution));
-
-  for (const [rank, cards] of ranked) {
+  for (const [, cards] of ranked) {
+    if (cards.length < N) continue;
     const candidate = cards.slice(0, N);
     if (canBeat(candidate, tableCards)) return candidate;
   }
