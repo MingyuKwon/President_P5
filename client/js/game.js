@@ -249,7 +249,7 @@ socket.on('state-updated', ({ tableCards, tablePile, currentPlayerId: cpId, revo
   renderSeats();
   renderHand();
   renderCardOrder();
-  if (!wasMyTurn && cpId === myId) { tryAutoPass(); tryAutoPlay(); }
+  if (cpId === myId) { tryAutoPass(); tryAutoPlay(); }
 });
 
 socket.on('card-played', ({ cards }) => {
