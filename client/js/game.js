@@ -112,7 +112,8 @@ socket.on('game-started', ({ hand, turnOrder: to, currentPlayerId: cpId, players
   currentRevolution = false;
   playerRanks = {};
   ps.forEach(p => { if (p.rank) playerRanks[p.id] = p.rank; });
-  renderHand();
+  revBadge.style.display = 'none';
+  renderHand();   // 버튼 상태 포함
   renderSeats();
 });
 
@@ -124,14 +125,10 @@ socket.on('game-state-sync', ({ hand, tableCards, currentPlayerId: cpId, revolut
   players = ps;
   if (to.length > 0) { turnOrder = to; if (originalOrder.length === 0) originalOrder = [...to]; }
   selectedCards = [];
-  const isMyTurn = cpId === myId;
-  myAreaEl.classList.toggle('active', isMyTurn);
-  btnPass.disabled = !isMyTurn;
-  btnPlay.disabled = true;
+  revBadge.style.display = revolution ? 'block' : 'none';
   renderHand();
   renderSeats();
   renderTable(tableCards);
-  revBadge.style.display = revolution ? 'block' : 'none';
 });
 
 socket.on('state-updated', ({ tableCards, currentPlayerId: cpId, revolution, players: ps }) => {
@@ -140,14 +137,10 @@ socket.on('state-updated', ({ tableCards, currentPlayerId: cpId, revolution, pla
   players = ps;
   currentTableCards = tableCards || [];
   currentRevolution = revolution;
-  const isMyTurn = cpId === myId;
-  if (wasMyTurn && !isMyTurn) selectedCards = [];
+  if (wasMyTurn && cpId !== myId) selectedCards = [];
   renderSeats();
   renderTable(tableCards);
   revBadge.style.display = revolution ? 'block' : 'none';
-  myAreaEl.classList.toggle('active', isMyTurn);
-  btnPass.disabled = !isMyTurn;
-  btnPlay.disabled = !isMyTurn || selectedCards.length === 0;
   renderHand();
 });
 
@@ -155,7 +148,6 @@ socket.on('hand-updated', ({ hand }) => {
   myHand = sortHand(hand);
   selectedCards = [];
   renderHand();
-  btnPlay.disabled = true;
 });
 
 socket.on('round-end', ({ reason }) => {
@@ -264,6 +256,7 @@ function renderSeats() {
 }
 
 function renderHand() {
+  const isMyTurn = currentPlayerId === myId;
   const selectable = computeSelectableSet(myHand, selectedCards, currentTableCards, currentRevolution);
   const tempSel = [...selectedCards];
   handEl.innerHTML = '';
@@ -281,6 +274,9 @@ function renderHand() {
     div.onclick = () => toggleCard(card);
     handEl.appendChild(div);
   });
+  myAreaEl.classList.toggle('active', isMyTurn);
+  btnPass.disabled = !isMyTurn;
+  btnPlay.disabled = !isMyTurn || selectedCards.length === 0;
 }
 
 function toggleCard(card) {
@@ -289,7 +285,6 @@ function toggleCard(card) {
   if (idx === -1) selectedCards.push(card);
   else selectedCards.splice(idx, 1);
   renderHand();
-  btnPlay.disabled = currentPlayerId !== myId || selectedCards.length === 0;
 }
 
 function renderTable(cards) {
