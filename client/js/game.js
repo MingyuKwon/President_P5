@@ -99,6 +99,7 @@ const btnPass        = document.getElementById('btn-pass');
 const orderBarEl     = document.getElementById('card-order-bar');
 const timerEl        = document.getElementById('turn-timer');
 const btnAutoPass    = document.getElementById('btn-autopass');
+const btnAuto        = document.getElementById('btn-auto');
 
 let timerInterval    = null;
 let autoPass         = false;
@@ -123,6 +124,12 @@ btnAutoPass.onclick = () => {
   btnAutoPass.classList.toggle('on', autoPass);
   if (!autoPass) clearAutoPassTimer();
   else tryAutoPass();
+};
+
+let autoPlay = false;
+btnAuto.onclick = () => {
+  autoPlay = !autoPlay;
+  btnAuto.classList.toggle('on', autoPlay);
 };
 
 function clearTimerUI() {
