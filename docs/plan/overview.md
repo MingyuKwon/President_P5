@@ -116,4 +116,4 @@ President_P5/
 |-------|------|------|
 | [Phase 1](phase1.md) | 프로젝트 초기 설정 + 게임 로직 | ✅ 완료 |
 | [Phase 2](phase2.md) | 서버 + Socket.io 통신 | ✅ 완료 |
-| [Phase 3](phase3.md) | 클라이언트 UI | 🔲 미완료 |
+| [Phase 3](phase3.md) | 클라이언트 UI | ✅ 완료 |
