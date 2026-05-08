@@ -85,7 +85,7 @@ io.on('connection', (socket) => {
           gameNumber,
           players: Object.values(state.players).map(q => ({
             id: q.id, nickname: q.nickname, cardCount: q.hand.length, finished: q.finished,
-            rank: state.ranks[q.id] || null,
+            rank: state.ranks[q.id] || 'citizen',
           })),
         });
       }
