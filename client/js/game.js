@@ -17,7 +17,16 @@ function cardImg(card) {
   return `/Resource/CardImage/${card}.png`;
 }
 
-let myHand = JSON.parse(sessionStorage.getItem('hand') || '[]');
+const CARD_ORDER = ['3','4','5','6','7','8','9','10','J','Q','K','A','2','Joker'];
+function cardRank(card) {
+  const num = card === 'Joker' ? 'Joker' : card.slice(0, -1);
+  return CARD_ORDER.indexOf(num);
+}
+function sortHand(hand) {
+  return [...hand].sort((a, b) => cardRank(a) - cardRank(b));
+}
+
+let myHand = sortHand(JSON.parse(sessionStorage.getItem('hand') || '[]'));
 let selectedCards = [];
 let currentPlayerId = sessionStorage.getItem('currentPlayerId');
 let players = JSON.parse(sessionStorage.getItem('players') || '[]');
@@ -39,7 +48,7 @@ socket.on('connect', () => {
 });
 
 socket.on('game-started', ({ hand, turnOrder: to, currentPlayerId: cpId, players: ps }) => {
-  myHand = hand;
+  myHand = sortHand(hand);
   currentPlayerId = cpId;
   turnOrder = to;
   players = ps;
@@ -62,7 +71,7 @@ socket.on('state-updated', ({ tableCards, currentPlayerId: cpId, revolution, pla
 });
 
 socket.on('hand-updated', ({ hand }) => {
-  myHand = hand;
+  myHand = sortHand(hand);
   selectedCards = [];
   renderHand();
   btnPlay.disabled = true;
