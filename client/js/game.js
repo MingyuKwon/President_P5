@@ -127,9 +127,11 @@ btnAutoPass.onclick = () => {
 };
 
 let autoPlay = false;
+const gameBoardEl = document.getElementById('game-board');
 btnAuto.onclick = () => {
   autoPlay = !autoPlay;
   btnAuto.classList.toggle('on', autoPlay);
+  gameBoardEl.classList.toggle('auto-mode', autoPlay);
 };
 
 function clearTimerUI() {
