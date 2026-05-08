@@ -43,11 +43,11 @@
 
     /* 내 손패 */
     #my-area { position:absolute; bottom:0; left:0; right:0; padding:16px;
-      background:rgba(0,0,0,.6); border-top:2px solid rgba(255,255,255,.1);
+      background:rgba(0,0,0,.6); border:2px solid rgba(255,255,255,.1);
       transition:border-color .3s; }
     @keyframes my-area-glow {
-      0%, 100% { border-color:#e94560; box-shadow:0 -4px 16px rgba(233,69,96,.5); }
-      50%       { border-color:#ff7a8a; box-shadow:0 -4px 28px rgba(233,69,96,.9); }
+      0%, 100% { border-color:#e94560; box-shadow:inset 0 0 20px rgba(233,69,96,.45); }
+      50%       { border-color:#ff7a8a; box-shadow:inset 0 0 36px rgba(233,69,96,.85); }
     }
     #my-area.active { animation:my-area-glow 1.2s ease-in-out infinite; }
     #my-info { display:flex; justify-content:space-between; align-items:center;
