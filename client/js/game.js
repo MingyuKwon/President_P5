@@ -134,32 +134,37 @@ function clearAutoPlayTimer() {
   if (autoPlayTimer) { clearTimeout(autoPlayTimer); autoPlayTimer = null; }
 }
 
-function selectCardsToPlay() {
-  const N = currentTableCards.length || 1;
-  const selectable0 = computeSelectableSet(myHand, [], currentTableCards, currentRevolution);
-  if (selectable0.size === 0) return null;
-
-  // 약한 카드 우선, 조커는 마지막
-  const candidates = [...selectable0].sort((a, b) => {
-    if (a === 'Joker') return 1;
-    if (b === 'Joker') return -1;
-    return playRank(a, currentRevolution) - playRank(b, currentRevolution);
-  });
-
-  for (const startCard of candidates) {
-    let selected = [startCard];
-    let ok = true;
-    for (let i = 1; i < N; i++) {
-      const sel = computeSelectableSet(myHand, selected, currentTableCards, currentRevolution);
-      const rank = startCard === 'Joker' ? null : startCard.slice(0, -1);
-      const next = [...sel].find(c => c !== 'Joker' && (rank === null || c.slice(0, -1) === rank))
-                || ([...sel].includes('Joker') ? 'Joker' : null);
-      if (!next) { ok = false; break; }
-      selected.push(next);
-    }
-    if (ok) return selected;
+function groupByRank(hand) {
+  const map = {};
+  for (const c of hand) {
+    const r = c === 'Joker' ? 'Joker' : c.slice(0, -1);
+    (map[r] = map[r] || []).push(c);
   }
-  return null;
+  return map;
+}
+function weakestCard(cards) {
+  return cards.reduce((a, b) => playRank(a, currentRevolution) <= playRank(b, currentRevolution) ? a : b);
+}
+function strongestCard(cards) {
+  return cards.reduce((a, b) => playRank(a, currentRevolution) >= playRank(b, currentRevolution) ? a : b);
+}
+
+function selectCardsToPlay() {
+  const isLead   = currentTableCards.length === 0;
+  const needCount = isLead ? 1 : currentTableCards.length;
+  const ctx = {
+    hand: myHand,
+    tableCards: currentTableCards,
+    revolution: currentRevolution,
+    isLead,
+    needCount,
+    playRank: (card) => playRank(card, currentRevolution),
+    canBeat:  (cards) => canBeat(cards, currentTableCards, currentRevolution),
+    groupByRank,
+    weakest:  weakestCard,
+    strongest: strongestCard,
+  };
+  return myStrategy(ctx);
 }
 
 function tryAutoPlay() {
