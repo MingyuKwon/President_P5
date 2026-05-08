@@ -54,6 +54,7 @@ socket.on('game-started', ({ hand, turnOrder: to, currentPlayerId: cpId, players
   players = ps;
   selectedCards = [];
   playerRanks = {};
+  ps.forEach(p => { if (p.rank) playerRanks[p.id] = rankLabel(p.rank); });
   renderHand();
   renderSeats();
   updateStatus(cpId);
