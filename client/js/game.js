@@ -133,7 +133,6 @@ const CX = 50, CY = 38, RX = 36, RY = 26;
 
 function renderSeats() {
   seatsEl.innerHTML = '';
-  myAreaEl.querySelector('.player-seat.me')?.remove();
   const order = originalOrder.length > 0 ? originalOrder : turnOrder;
   const total = order.length;
   if (total === 0) return;
@@ -164,9 +163,9 @@ function renderSeats() {
     `;
 
     if (isMe) {
-      // 손패 영역 왼쪽 위에 고정
-      div.style.cssText = 'position:absolute; left:80px; bottom:calc(100% + 40px); transform:none;';
-      myAreaEl.appendChild(div);
+      // 화면 중앙 기준 왼쪽 200px
+      div.style.left = 'calc(50% - 200px)';
+      div.style.top  = '78%';
     } else {
       // 나를 아래(90°)에 고정, 나머지를 시계 방향으로 배분
       const offset = (i - myIdx + total) % total;
@@ -174,8 +173,8 @@ function renderSeats() {
       const rad = deg * Math.PI / 180;
       div.style.left = `${CX + RX * Math.cos(rad)}%`;
       div.style.top  = `${CY + RY * Math.sin(rad)}%`;
-      seatsEl.appendChild(div);
     }
+    seatsEl.appendChild(div);
   });
 }
 
