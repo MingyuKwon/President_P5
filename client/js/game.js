@@ -308,7 +308,7 @@ function addCardGroupToTable(cards, animate = true) {
     group.appendChild(div);
   });
   tableEl.appendChild(group);
-  if (animate) gsap.from(group, { scale: 0.6, opacity: 0, duration: 0.25 });
+  if (animate) gsap.from(group, { scale: 0.6, opacity: 0, duration: 0.25, clearProps: 'opacity' });
 }
 
 function renderTablePile(pile) {
