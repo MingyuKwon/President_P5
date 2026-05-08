@@ -33,6 +33,7 @@ let players = JSON.parse(sessionStorage.getItem('players') || '[]');
 let turnOrder = JSON.parse(sessionStorage.getItem('turnOrder') || '[]');
 let originalOrder = [...turnOrder];
 let playerRanks = {};
+players.forEach(p => { if (p.rank) playerRanks[p.id] = rankLabel(p.rank); });
 
 const seatsEl  = document.getElementById('player-seats');
 const tableEl  = document.getElementById('table');
