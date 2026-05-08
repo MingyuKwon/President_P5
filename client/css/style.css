@@ -1,19 +1,19 @@
 * { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: sans-serif; background: #1a1a2e; color: #eee; min-height: 100vh; }
+body { font-family: sans-serif; background: #111111; color: #eee; min-height: 100vh; }
 .container { max-width: 600px; margin: 40px auto; padding: 20px; }
 h1 { text-align: center; margin-bottom: 24px; font-size: 2rem; color: #e94560; }
 input, button, select { padding: 10px 16px; border-radius: 6px; border: none; font-size: 1rem; }
-input { background: #16213e; color: #eee; border: 1px solid #444; width: 100%; margin-bottom: 10px; }
+input { background: #1c1c1c; color: #eee; border: 1px solid #444; width: 100%; margin-bottom: 10px; }
 button { background: #e94560; color: #fff; cursor: pointer; }
 button:hover { background: #c73652; }
 button:disabled { background: #555; cursor: default; }
 .room-list { margin-top: 24px; }
-.room-item { background: #16213e; border-radius: 8px; padding: 14px 18px; margin-bottom: 10px;
+.room-item { background: #1c1c1c; border-radius: 8px; padding: 14px 18px; margin-bottom: 10px;
   display: flex; justify-content: space-between; align-items: center; }
 .room-item span { font-size: 0.9rem; color: #aaa; }
 .modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.6); justify-content:center; align-items:center; }
 .modal-overlay.open { display:flex; }
-.modal { background:#16213e; border-radius:12px; padding:28px; min-width:320px; }
+.modal { background:#1c1c1c; border-radius:12px; padding:28px; min-width:320px; }
 .modal h2 { margin-bottom:16px; }
 .row { display:flex; gap:10px; }
 .row input { flex:1; }
