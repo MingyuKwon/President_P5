@@ -73,6 +73,17 @@ Strong success criteria let you loop independently. Weak criteria ("make it work
 - 커밋 메시지는 변경 내용을 간결하게 한국어 또는 영어로 작성한다.
 - 사용자에게 별도로 확인을 구하지 않고 자동으로 수행한다.
 
+## 6. Session Continuity
+
+**작업 내용을 항상 문서에 남겨서 다음 세션에서 이어받을 수 있도록 한다.**
+
+- 설계 결정, 구현 계획, 진행 상황은 `docs/plan.md`에 기록한다.
+- 새로운 Phase나 Task를 시작하면 `docs/plan.md`에 먼저 추가한 뒤 구현한다.
+- 완료된 Task는 `🔲 미완료` → `✅ 완료`로 업데이트한다.
+- 구현 도중 설계가 바뀌면 `docs/plan.md`에 즉시 반영한다.
+- 세션이 끝날 때 현재 진행 상태가 `docs/plan.md`만 봐도 파악되도록 유지한다.
+
 ## Project: 대부호 (President Card Game)
 
-게임 규칙 상세: `docs/game-rules.md` 참조
+게임 규칙 상세: `docs/game-rules.md` 참조  
+구현 계획 및 진행 상황: `docs/plan.md` 참조
