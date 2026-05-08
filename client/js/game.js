@@ -133,6 +133,7 @@ const CX = 50, CY = 38, RX = 36, RY = 26;
 
 function renderSeats() {
   seatsEl.innerHTML = '';
+  myAreaEl.querySelector('.player-seat.me')?.remove();
   const order = originalOrder.length > 0 ? originalOrder : turnOrder;
   const total = order.length;
   if (total === 0) return;
@@ -163,19 +164,18 @@ function renderSeats() {
     `;
 
     if (isMe) {
-      // 화면 중앙 기준 왼쪽 600px, 손패 영역 위 300px
-      div.style.left      = 'calc(50% - 600px)';
-      div.style.top       = 'auto';
-      div.style.bottom    = '300px';
-      div.style.transform = 'translate(-50%, 0)';
-    } else {
-      // 나를 아래(90°)에 고정, 나머지를 시계 방향으로 배분
-      const offset = (i - myIdx + total) % total;
-      const deg = 90 + offset * (360 / total);
-      const rad = deg * Math.PI / 180;
-      div.style.left = `${CX + RX * Math.cos(rad)}%`;
-      div.style.top  = `${CY + RY * Math.sin(rad)}%`;
+      // #my-area 자식으로 붙여야 브라우저 크기에 반응
+      // 50% = #my-area 폭(= 뷰포트 폭) 기준
+      div.style.cssText = 'position:absolute; left:calc(50% - 600px); bottom:calc(100% + 300px); top:auto; transform:translate(-50%,0);';
+      myAreaEl.appendChild(div);
+      return;
     }
+    // 나를 아래(90°)에 고정, 나머지를 시계 방향으로 배분
+    const offset = (i - myIdx + total) % total;
+    const deg = 90 + offset * (360 / total);
+    const rad = deg * Math.PI / 180;
+    div.style.left = `${CX + RX * Math.cos(rad)}%`;
+    div.style.top  = `${CY + RY * Math.sin(rad)}%`;
     seatsEl.appendChild(div);
   });
 }
