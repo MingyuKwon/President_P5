@@ -50,6 +50,24 @@ io.on('connection', (socket) => {
     socket.emit('room-joined', { roomId, players: publicPlayers(result.players), isHost });
     socket.to(roomId).emit('room-updated', { players: publicPlayers(result.players) });
     io.emit('room-list', { rooms: getRoomList() });
+
+    // 게임 진행 중이면 현재 상태 동기화
+    const gameState = gameStates.get(roomId);
+    if (gameState && result.status === 'playing') {
+      const playerState = gameState.players[sessionId];
+      if (playerState) {
+        socket.emit('game-state-sync', {
+          hand: playerState.hand,
+          tableCards: gameState.tableCards,
+          currentPlayerId: gameState.turnOrder[gameState.currentIndex] || null,
+          revolution: gameState.revolution,
+          players: Object.values(gameState.players).map(p => ({
+            id: p.id, nickname: p.nickname, cardCount: p.hand.length, finished: p.finished,
+          })),
+          turnOrder: gameState.turnOrder,
+        });
+      }
+    }
   });
 
   socket.on('leave-room', ({ sessionId }) => {

@@ -116,15 +116,35 @@ socket.on('game-started', ({ hand, turnOrder: to, currentPlayerId: cpId, players
   renderSeats();
 });
 
+socket.on('game-state-sync', ({ hand, tableCards, currentPlayerId: cpId, revolution, players: ps, turnOrder: to }) => {
+  myHand = sortHand(hand);
+  currentPlayerId = cpId;
+  currentTableCards = tableCards || [];
+  currentRevolution = revolution;
+  players = ps;
+  if (to.length > 0) { turnOrder = to; if (originalOrder.length === 0) originalOrder = [...to]; }
+  selectedCards = [];
+  const isMyTurn = cpId === myId;
+  myAreaEl.classList.toggle('active', isMyTurn);
+  btnPass.disabled = !isMyTurn;
+  btnPlay.disabled = true;
+  renderHand();
+  renderSeats();
+  renderTable(tableCards);
+  revBadge.style.display = revolution ? 'block' : 'none';
+});
+
 socket.on('state-updated', ({ tableCards, currentPlayerId: cpId, revolution, players: ps }) => {
+  const wasMyTurn = currentPlayerId === myId;
   currentPlayerId = cpId;
   players = ps;
   currentTableCards = tableCards || [];
   currentRevolution = revolution;
+  const isMyTurn = cpId === myId;
+  if (wasMyTurn && !isMyTurn) selectedCards = [];
   renderSeats();
   renderTable(tableCards);
   revBadge.style.display = revolution ? 'block' : 'none';
-  const isMyTurn = cpId === myId;
   myAreaEl.classList.toggle('active', isMyTurn);
   btnPass.disabled = !isMyTurn;
   btnPlay.disabled = !isMyTurn || selectedCards.length === 0;
