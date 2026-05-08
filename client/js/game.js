@@ -186,13 +186,15 @@ socket.on('game-over', ({ ranks }) => {
 });
 
 socket.on('error', ({ message }) => {
+  console.log('[error] server error:', message);
   if (message === 'invalid-play' || message === 'card-not-in-hand') {
     animateMessage('낼 수 없는 카드입니다', '#e94560');
   }
 });
 
 btnPlay.onclick = () => {
-  if (selectedCards.length === 0) return;
+  console.log('[play] click — selectedCards:', [...selectedCards], '| myId:', myId, '| currentPlayerId:', currentPlayerId, '| disabled:', btnPlay.disabled);
+  if (selectedCards.length === 0) { console.warn('[play] selectedCards 비어있음, 전송 취소'); return; }
   socket.emit('play-cards', { cards: [...selectedCards], sessionId: myId });
 };
 btnPass.onclick = () => socket.emit('pass', { sessionId: myId });

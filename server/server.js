@@ -112,12 +112,15 @@ io.on('connection', (socket) => {
   });
 
   socket.on('play-cards', ({ cards, sessionId }) => {
+    console.log('[play-cards] received — sessionId:', sessionId, '| cards:', cards);
     const session = sessionMap.get(sessionId);
-    if (!session) return;
+    if (!session) { console.warn('[play-cards] session 없음:', sessionId); return; }
     const state = gameStates.get(session.roomId);
-    if (!state) return;
+    if (!state) { console.warn('[play-cards] gameState 없음 — roomId:', session.roomId); return; }
+    const expectedPlayer = state.turnOrder[state.currentIndex];
+    console.log('[play-cards] currentPlayer:', expectedPlayer, '| requester:', sessionId);
     const result = playCards(state, sessionId, cards);
-    if (result.error) return socket.emit('error', { message: result.error });
+    if (result.error) { console.warn('[play-cards] error:', result.error); return socket.emit('error', { message: result.error }); }
     gameStates.set(session.roomId, result.state);
     broadcastGameUpdate(session.roomId, result.state, result.events);
   });
