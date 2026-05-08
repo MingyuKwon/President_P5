@@ -177,12 +177,7 @@ function renderTable(cards) {
   });
 }
 
-const myAreaEl = document.getElementById('my-area');
-const vignetteEl = document.getElementById('vignette');
-
 function setMyTurn(isMyTurn) {
-  myAreaEl.classList.toggle('my-turn', isMyTurn);
-  vignetteEl.classList.toggle('active', isMyTurn);
   document.querySelectorAll('.hand-card').forEach(el => {
     el.classList.toggle('my-turn-card', isMyTurn);
   });
