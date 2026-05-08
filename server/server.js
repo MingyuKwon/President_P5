@@ -10,6 +10,7 @@ const server = http.createServer(app);
 const io = new Server(server);
 
 app.use(express.static(path.join(__dirname, '../client')));
+app.use('/Resource', express.static(path.join(__dirname, '../Resource')));
 
 const gameStates = new Map();   // roomId → gameState
 const sessionMap = new Map();   // sessionId → { socketId, roomId }
