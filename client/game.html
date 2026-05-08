@@ -93,10 +93,12 @@
       transition:opacity .15s, transform .1s; }
     #action-btns button:not(#btn-autopass):disabled img { opacity:0.35; }
     #action-btns button:not(#btn-autopass):not(:disabled):hover img { transform:scale(1.05); }
-    #autopass-row { width:100%; display:flex; justify-content:center; margin-top:8px; }
-    #btn-autopass { padding:8px 24px; border-radius:8px; font-size:0.85rem; font-weight:bold; cursor:pointer; border:2px solid rgba(255,255,255,.5); background:rgba(255,255,255,.12); color:#ddd; transition:all .15s; letter-spacing:.03em; box-shadow:0 2px 8px rgba(0,0,0,.5); }
-    #btn-autopass.on { border-color:#4caf50; background:rgba(76,175,80,.28); color:#4caf50; box-shadow:0 0 12px rgba(76,175,80,.45); }
+    #autopass-row { width:100%; display:flex; justify-content:center; gap:10px; margin-top:8px; }
+    #btn-autopass { padding:5px 14px; border-radius:6px; font-size:0.72rem; font-weight:bold; cursor:pointer; border:1.5px solid rgba(255,255,255,.45); background:rgba(255,255,255,.1); color:#ccc; transition:all .15s; box-shadow:0 2px 6px rgba(0,0,0,.45); }
+    #btn-autopass.on { border-color:#4caf50; background:rgba(76,175,80,.25); color:#4caf50; box-shadow:0 0 10px rgba(76,175,80,.4); }
     #btn-autopass:hover { transform:scale(1.05); filter:brightness(1.2); }
+    #btn-auto { padding:5px 14px; border-radius:6px; font-size:0.72rem; font-weight:bold; cursor:pointer; border:1.5px solid rgba(255,200,80,.5); background:rgba(255,200,80,.12); color:#ffc850; transition:all .15s; box-shadow:0 2px 6px rgba(0,0,0,.45); }
+    #btn-auto:hover { transform:scale(1.05); filter:brightness(1.2); }
     /* 이미지 없을 때 폴백 텍스트 (기본 숨김, onerror 시 표시) */
     #action-btns button span { display:none; padding:10px 28px;
       border-radius:6px; font-size:1rem; color:#fff; }
@@ -127,6 +129,7 @@
           </button>
           <div id="autopass-row">
             <button id="btn-autopass" class="off">자동 패스 OFF</button>
+            <button id="btn-auto">자동</button>
           </div>
         </div>
       </div>
