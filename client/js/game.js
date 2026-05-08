@@ -281,7 +281,7 @@ function renderHand() {
     div.innerHTML = `<img src="${cardImg(card)}" alt="${card}">`;
     div.onclick = () => toggleCard(card);
 
-    const angleDeg = n <= 1 ? 0 : ((n - 1) / 2 - i) / (n - 1) * totalAngle;
+    const angleDeg = n <= 1 ? 0 : (i - (n - 1) / 2) / (n - 1) * totalAngle;
     div.style.setProperty('--rot', `${angleDeg}deg`);
 
     handEl.appendChild(div);
