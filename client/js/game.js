@@ -147,7 +147,8 @@ function renderHand() {
     handEl.appendChild(div);
     console.log(`[renderHand] 카드[${i}] ${card} 애니메이션 시작 (delay: ${(i * 0.04).toFixed(2)}s)`);
     gsap.from(div, {
-      y: 60, opacity: 0, duration: 0.3, delay: i * 0.04,
+      y: 60, opacity: 0, duration: 0.6, delay: i * 0.05,
+      ease: 'power2.out',
       onStart: () => console.log(`[gsap] 카드[${i}] ${card} 애니메이션 onStart`),
       onComplete: () => console.log(`[gsap] 카드[${i}] ${card} 애니메이션 완료`),
     });
