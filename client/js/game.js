@@ -102,7 +102,7 @@ let timerInterval = null;
 
 function clearTimerUI() {
   if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
-  timerEl.style.display = 'none';
+  timerEl.style.visibility = 'hidden';
   timerEl.classList.remove('urgent');
 }
 
@@ -112,7 +112,7 @@ function startTimerUI(playerId, duration) {
   let remaining = duration;
 
   function update() {
-    timerEl.style.display = '';
+    timerEl.style.visibility = 'visible';
     timerEl.classList.toggle('urgent', remaining <= 10);
     timerEl.textContent = `${remaining}초`;
   }
