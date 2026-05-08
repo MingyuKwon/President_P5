@@ -317,10 +317,9 @@ function renderCardOrder() {
 
   const last = order.length - 1;
   const ranks = order.map((rank, i) => {
-    // 그라데이션: 약(#666) → 강(#fff)
-    const b = Math.round(102 + 153 * (i / last));
-    const color = rank === activeRank ? '#e94560' : `rgb(${b},${b},${b})`;
-    const weight = rank === activeRank ? 'bold' : '500';
+    const isActive = rank === activeRank;
+    const color = isActive ? '#e94560' : '#ccc';
+    const weight = isActive ? 'bold' : '400';
     const sep = i < last ? '<span class="order-sep">→</span>' : '';
     return `<span class="order-rank" style="color:${color};font-weight:${weight}">${rank}</span>${sep}`;
   }).join('');
