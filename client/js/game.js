@@ -89,17 +89,42 @@ players.forEach(p => { if (p.rank) playerRanks[p.id] = p.rank; });
 let currentTableCards = [];
 let currentRevolution = false;
 
-const seatsEl     = document.getElementById('player-seats');
-const tableEl     = document.getElementById('table');
-const handEl      = document.getElementById('hand');
-const myAreaEl    = document.getElementById('my-area');
-const mySeatEl    = document.getElementById('my-seat');
-const btnPlay     = document.getElementById('btn-play');
-const btnPass     = document.getElementById('btn-pass');
-const orderBarEl  = document.getElementById('card-order-bar');
-const timerEl     = document.getElementById('turn-timer');
+const seatsEl        = document.getElementById('player-seats');
+const tableEl        = document.getElementById('table');
+const handEl         = document.getElementById('hand');
+const myAreaEl       = document.getElementById('my-area');
+const mySeatEl       = document.getElementById('my-seat');
+const btnPlay        = document.getElementById('btn-play');
+const btnPass        = document.getElementById('btn-pass');
+const orderBarEl     = document.getElementById('card-order-bar');
+const timerEl        = document.getElementById('turn-timer');
+const btnAutoPass    = document.getElementById('btn-autopass');
 
-let timerInterval = null;
+let timerInterval    = null;
+let autoPass         = false;
+let autoPassTimer    = null;
+
+function clearAutoPassTimer() {
+  if (autoPassTimer) { clearTimeout(autoPassTimer); autoPassTimer = null; }
+}
+
+function tryAutoPass() {
+  if (!autoPass || currentPlayerId !== myId) return;
+  const selectable = computeSelectableSet(myHand, selectedCards, currentTableCards, currentRevolution);
+  if (selectable.size > 0) return;
+  clearAutoPassTimer();
+  autoPassTimer = setTimeout(() => {
+    if (autoPass && currentPlayerId === myId) socket.emit('pass', { sessionId: myId });
+  }, 1000);
+}
+
+btnAutoPass.onclick = () => {
+  autoPass = !autoPass;
+  btnAutoPass.textContent = autoPass ? '자동 패스 ON' : '자동 패스 OFF';
+  btnAutoPass.className = autoPass ? 'on' : 'off';
+  if (!autoPass) clearAutoPassTimer();
+  else tryAutoPass();
+};
 
 function clearTimerUI() {
   if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
@@ -165,10 +190,11 @@ socket.on('state-updated', ({ tableCards, tablePile, currentPlayerId: cpId, revo
   players = ps;
   currentTableCards = tableCards || [];
   currentRevolution = revolution;
-  if (wasMyTurn && cpId !== myId) selectedCards = [];
+  if (wasMyTurn && cpId !== myId) { selectedCards = []; clearAutoPassTimer(); }
   renderSeats();
   renderHand();
   renderCardOrder();
+  if (!wasMyTurn && cpId === myId) tryAutoPass();
 });
 
 socket.on('card-played', ({ cards }) => {
@@ -187,6 +213,7 @@ socket.on('turn-timer', ({ playerId, duration }) => {
 
 socket.on('round-end', ({ reason }) => {
   clearTimerUI();
+  clearAutoPassTimer();
   if (reason === '8-clear') animateMessage('8-Clear!');
   else if (reason === 'spade-reversal') animateMessage('♠ Reversal!');
   gsap.to('#table .table-group', {
