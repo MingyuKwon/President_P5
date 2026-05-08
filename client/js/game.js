@@ -108,14 +108,13 @@ function clearTimerUI() {
 
 function startTimerUI(playerId, duration) {
   clearTimerUI();
+  if (playerId !== myId) return;
   let remaining = duration;
-  const p = players.find(p => p.id === playerId);
-  const name = p ? p.nickname : '';
 
   function update() {
     timerEl.style.display = '';
     timerEl.classList.toggle('urgent', remaining <= 10);
-    timerEl.textContent = `${name} ${remaining}초`;
+    timerEl.textContent = `${remaining}초`;
   }
   update();
   timerInterval = setInterval(() => {
