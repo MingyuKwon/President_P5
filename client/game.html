@@ -93,11 +93,10 @@
       transition:opacity .15s, transform .1s; }
     #action-btns button:disabled img { opacity:0.35; }
     #action-btns button:not(:disabled):hover img { transform:scale(1.05); }
-    #timer-hint { width:100%; text-align:center; color:#fff; font-size:0.75rem; opacity:0.8; margin:0; }
-    #autopass-row { width:100%; display:flex; justify-content:center; margin-top:6px; }
-    #btn-autopass { padding:4px 16px; border-radius:12px; font-size:0.75rem; cursor:pointer; border:1.5px solid rgba(255,255,255,.4); background:rgba(255,255,255,.08); color:#aaa; transition:all .15s; }
-    #btn-autopass.on { border-color:#4caf50; background:rgba(76,175,80,.2); color:#4caf50; }
-    #btn-autopass:hover { opacity:0.8; }
+    #autopass-row { width:100%; display:flex; justify-content:center; margin-top:8px; }
+    #btn-autopass { padding:7px 22px; border-radius:8px; font-size:0.85rem; font-weight:bold; cursor:pointer; border:2px solid rgba(255,255,255,.35); background:rgba(255,255,255,.1); color:#ccc; transition:all .15s; letter-spacing:.03em; box-shadow:0 2px 6px rgba(0,0,0,.4); }
+    #btn-autopass.on { border-color:#4caf50; background:rgba(76,175,80,.25); color:#4caf50; box-shadow:0 0 10px rgba(76,175,80,.4); }
+    #btn-autopass:hover { transform:scale(1.04); filter:brightness(1.15); }
     /* 이미지 없을 때 폴백 텍스트 (기본 숨김, onerror 시 표시) */
     #action-btns button span { display:none; padding:10px 28px;
       border-radius:6px; font-size:1rem; color:#fff; }
@@ -126,7 +125,6 @@
                  onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block'">
             <span>패스</span>
           </button>
-          <p id="timer-hint">시간 제한이 되면 자동으로 패스됩니다</p>
           <div id="autopass-row">
             <button id="btn-autopass" class="off">자동 패스 OFF</button>
           </div>
