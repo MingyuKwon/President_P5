@@ -46,7 +46,8 @@
 
     #revolution-badge { display:none; position:absolute; top:8px; right:16px;
       background:#e94560; padding:4px 12px; border-radius:10px; font-size:0.85rem; font-weight:bold; }
-    #btn-exit { padding:4px 12px;
+    #btn-exit { position:absolute; bottom:12px; right:14px;
+      padding:4px 12px;
       background:rgba(0,0,0,.4); border:1px solid rgba(255,255,255,.2); border-radius:8px;
       font-size:0.78rem; color:#aaa; cursor:pointer; }
     #btn-exit:hover { background:rgba(255,255,255,.1); color:#fff; }
@@ -106,7 +107,6 @@
         <span id="my-name"></span>
         <img id="my-rank" src="" alt="">
         <span id="my-card-count"></span>
-        <button id="btn-exit">나가기</button>
       </div>
       <div id="hand"></div>
       <div id="action-btns">
@@ -121,6 +121,7 @@
           <span>패스</span>
         </button>
       </div>
+      <button id="btn-exit">나가기</button>
     </div>
   </div>
 
