@@ -87,12 +87,12 @@
     .hand-card img { width:100%; height:100%; object-fit:cover; pointer-events:none; }
     #action-btns { display:flex; flex-wrap:wrap; gap:32px; justify-content:center; }
     /* 버튼 이미지 — /Resource/UI/btn_play.png, btn_pass.png 제공 시 자동 적용 */
-    #action-btns button:not(#btn-autopass) { padding:0; background:none; border:none; cursor:pointer; }
-    #action-btns button:not(#btn-autopass):disabled { cursor:default; }
-    #action-btns button:not(#btn-autopass) img { display:block; height:48px; width:auto;
+    #action-btns button:not(#btn-autopass):not(#btn-auto) { padding:0; background:none; border:none; cursor:pointer; }
+    #action-btns button:not(#btn-autopass):not(#btn-auto):disabled { cursor:default; }
+    #action-btns button:not(#btn-autopass):not(#btn-auto) img { display:block; height:48px; width:auto;
       transition:opacity .15s, transform .1s; }
-    #action-btns button:not(#btn-autopass):disabled img { opacity:0.35; }
-    #action-btns button:not(#btn-autopass):not(:disabled):hover img { transform:scale(1.05); }
+    #action-btns button:not(#btn-autopass):not(#btn-auto):disabled img { opacity:0.35; }
+    #action-btns button:not(#btn-autopass):not(#btn-auto):not(:disabled):hover img { transform:scale(1.05); }
     #autopass-row { width:100%; display:flex; justify-content:center; gap:50px; margin-top:8px; }
     #btn-autopass, #btn-auto { padding:5px 14px; border-radius:6px; font-size:0.72rem; font-weight:bold; cursor:pointer; transition:all .12s; }
     #btn-autopass { border:1.5px solid rgba(255,255,255,.3); background:rgba(255,255,255,.07); color:#888; box-shadow:0 3px 0 rgba(0,0,0,.5), 0 2px 6px rgba(0,0,0,.4); transform:translateY(0); }
