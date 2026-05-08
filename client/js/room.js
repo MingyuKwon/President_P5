@@ -39,11 +39,12 @@ socket.on('room-joined', (data) => {
 
 socket.on('room-updated', ({ players }) => renderPlayers(players));
 
-socket.on('game-started', ({ hand, turnOrder, currentPlayerId, gameNumber }) => {
+socket.on('game-started', ({ hand, turnOrder, currentPlayerId, gameNumber, players }) => {
   sessionStorage.setItem('hand', JSON.stringify(hand));
   sessionStorage.setItem('turnOrder', JSON.stringify(turnOrder));
   sessionStorage.setItem('currentPlayerId', currentPlayerId);
   sessionStorage.setItem('gameNumber', gameNumber);
+  sessionStorage.setItem('players', JSON.stringify(players));
   location.href = `game.html?id=${roomId}`;
 });
 

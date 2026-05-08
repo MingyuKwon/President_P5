@@ -20,7 +20,7 @@ function cardImg(card) {
 let myHand = JSON.parse(sessionStorage.getItem('hand') || '[]');
 let selectedCards = [];
 let currentPlayerId = sessionStorage.getItem('currentPlayerId');
-let players = [];
+let players = JSON.parse(sessionStorage.getItem('players') || '[]');
 let turnOrder = JSON.parse(sessionStorage.getItem('turnOrder') || '[]');
 
 const turnListEl = document.getElementById('turn-list');
@@ -196,7 +196,8 @@ function rankLabel(rank) {
   return map[rank] || rank;
 }
 
-if (myHand.length > 0 && players.length === 0) {
+if (myHand.length > 0) {
   renderHand();
+  renderTurnPanel();
   updateStatus(currentPlayerId);
 }
