@@ -8,4 +8,4 @@
 
 ## 구현 계획
 
-구현 계획은 [docs/plan.md](docs/plan.md)를 참조하세요.
+구현 계획은 [docs/plan/overview.md](docs/plan/overview.md)를 참조하세요.

@@ -1,0 +1,22 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)",
+      "Bash(git push *)",
+      "Bash(git branch *)",
+      "Skill(update-config)",
+      "Bash(git commit *)",
+      "Bash(node \"C:\\\\Users\\\\kmgmg2391601\\\\.claude\\\\plugins\\\\cache\\\\claude-plugins-official\\\\session-report\\\\76b35e91d1c9\\\\skills\\\\session-report\\\\analyze-sessions.mjs\" --json --since 7d)",
+      "Bash(echo \"Exit code: $?\")",
+      "Bash(python3 *)",
+      "Bash(magick D:/President_P5/Resource/CardImage/Joker.jpg D:/President_P5/Resource/CardImage/Joker.png)",
+      "Bash(rm D:/President_P5/Resource/CardImage/Joker.jpg)",
+      "Bash(powershell *)"
+    ]
+  },
+  "enabledPlugins": {
+    "session-report@claude-plugins-official": true,
+    "claude-md-management@claude-plugins-official": true
+  }
+}

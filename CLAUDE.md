@@ -86,4 +86,4 @@ Strong success criteria let you loop independently. Weak criteria ("make it work
 ## Project: 대부호 (President Card Game)
 
 게임 규칙 상세: `docs/game-rules.md` 참조  
-구현 계획 및 진행 상황: `docs/plan.md` 참조
+구현 계획 및 진행 상황: `docs/plan/overview.md` 참조 (각 Phase는 `docs/plan/phase1~3.md`)
