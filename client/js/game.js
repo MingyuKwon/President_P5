@@ -146,9 +146,10 @@ function renderTurnPanel() {
 
 function renderHand() {
   handEl.innerHTML = '';
+  const isMyTurn = currentPlayerId === myId;
   myHand.forEach((card) => {
     const div = document.createElement('div');
-    div.className = 'hand-card';
+    div.className = 'hand-card' + (isMyTurn ? ' my-turn-card' : '');
     div.dataset.card = card;
     div.innerHTML = `<img src="${cardImg(card)}" alt="${card}">`;
     div.onclick = () => toggleCard(div, card);
@@ -176,9 +177,22 @@ function renderTable(cards) {
   });
 }
 
+const myAreaEl = document.getElementById('my-area');
+const vignetteEl = document.getElementById('vignette');
+
+function setMyTurn(isMyTurn) {
+  myAreaEl.classList.toggle('my-turn', isMyTurn);
+  vignetteEl.classList.toggle('active', isMyTurn);
+  document.querySelectorAll('.hand-card').forEach(el => {
+    el.classList.toggle('my-turn-card', isMyTurn);
+  });
+}
+
 function updateStatus(cpId) {
   if (!cpId) { statusEl.textContent = ''; return; }
-  if (cpId === myId) {
+  const isMyTurn = cpId === myId;
+  setMyTurn(isMyTurn);
+  if (isMyTurn) {
     statusEl.textContent = '내 턴 — 카드를 선택하세요';
     gsap.fromTo(statusEl, { scale: 1.2, color: '#e94560' }, { scale: 1, color: '#fff', duration: 0.4 });
   } else {
