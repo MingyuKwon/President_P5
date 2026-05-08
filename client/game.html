@@ -47,9 +47,9 @@
 
     #revolution-badge { display:none; position:absolute; top:8px; right:16px;
       background:#e94560; padding:4px 12px; border-radius:10px; font-size:0.85rem; font-weight:bold; }
-    #btn-exit { position:absolute; top:12px; left:12px; padding:6px 14px;
-      background:rgba(0,0,0,.5); border:1px solid rgba(255,255,255,.2); border-radius:8px;
-      font-size:0.82rem; color:#aaa; cursor:pointer; z-index:10; }
+    #btn-exit { padding:4px 12px;
+      background:rgba(0,0,0,.4); border:1px solid rgba(255,255,255,.2); border-radius:8px;
+      font-size:0.78rem; color:#aaa; cursor:pointer; }
     #btn-exit:hover { background:rgba(255,255,255,.1); color:#fff; }
 
     /* 내 손패 */
@@ -92,7 +92,6 @@
 </head>
 <body>
   <div id="game-board">
-    <button id="btn-exit">나가기</button>
     <div id="revolution-badge">혁명!</div>
     <div id="player-seats"></div>
     <div id="table"></div>
@@ -101,6 +100,7 @@
       <div id="my-info">
         <span id="my-name"></span>
         <img id="my-rank" src="" alt="">
+        <button id="btn-exit">나가기</button>
       </div>
       <div id="hand"></div>
       <div id="action-btns">
