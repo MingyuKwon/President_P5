@@ -95,7 +95,6 @@ const handEl      = document.getElementById('hand');
 const myAreaEl    = document.getElementById('my-area');
 const btnPlay     = document.getElementById('btn-play');
 const btnPass     = document.getElementById('btn-pass');
-const revBadge    = document.getElementById('revolution-badge');
 const orderBarEl  = document.getElementById('card-order-bar');
 
 socket.on('connect', () => {
@@ -113,7 +112,6 @@ socket.on('game-started', ({ hand, turnOrder: to, currentPlayerId: cpId, players
   currentRevolution = false;
   playerRanks = {};
   ps.forEach(p => { if (p.rank) playerRanks[p.id] = p.rank; });
-  revBadge.style.display = 'none';
   renderHand();   // 버튼 상태 포함
   renderSeats();
   renderCardOrder();
@@ -127,7 +125,6 @@ socket.on('game-state-sync', ({ hand, tableCards, currentPlayerId: cpId, revolut
   players = ps;
   if (to.length > 0) { turnOrder = to; if (originalOrder.length === 0) originalOrder = [...to]; }
   selectedCards = [];
-  revBadge.style.display = revolution ? 'block' : 'none';
   renderHand();
   renderSeats();
   renderTable(tableCards);
@@ -143,7 +140,6 @@ socket.on('state-updated', ({ tableCards, currentPlayerId: cpId, revolution, pla
   if (wasMyTurn && cpId !== myId) selectedCards = [];
   renderSeats();
   renderTable(tableCards);
-  revBadge.style.display = revolution ? 'block' : 'none';
   renderHand();
   renderCardOrder();
 });
@@ -324,7 +320,10 @@ function renderCardOrder() {
     return `<span class="order-rank" style="color:${color};font-weight:${weight}">${rank}</span>${sep}`;
   }).join('');
 
-  orderBarEl.innerHTML = `<span class="order-label">강약</span>${ranks}`;
+  const revTag = currentRevolution
+    ? '<span class="order-rev">혁명!</span>'
+    : '';
+  orderBarEl.innerHTML = `<span class="order-label">강약</span>${ranks}${revTag}`;
 }
 
 
