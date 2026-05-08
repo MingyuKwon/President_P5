@@ -23,8 +23,8 @@
     .player-seat.me { border-color:rgba(255,255,255,.4); }
     .player-seat.finished { opacity:.4; }
     @keyframes seat-glow {
-      0%, 100% { border-color:#e94560; box-shadow:0 0 10px rgba(233,69,96,.6); }
-      50%       { border-color:#ff7a8a; box-shadow:0 0 24px rgba(233,69,96,.95); }
+      0%, 100% { border-color:#e94560; box-shadow:0 0 10px rgba(233,69,96,.6); background:rgba(233,69,96,.12); }
+      50%       { border-color:#ff7a8a; box-shadow:0 0 24px rgba(233,69,96,.95); background:rgba(233,69,96,.25); }
     }
     .player-seat.active { animation:seat-glow 1.2s ease-in-out infinite; }
     .seat-name  { font-size:0.82rem; color:#fff; font-weight:bold; white-space:nowrap; max-width:100px; overflow:hidden; text-overflow:ellipsis; }
@@ -46,8 +46,8 @@
       background:rgba(0,0,0,.6); border:2px solid rgba(255,255,255,.1);
       transition:border-color .3s; }
     @keyframes my-area-glow {
-      0%, 100% { border-color:#e94560; box-shadow:inset 0 0 20px rgba(233,69,96,.45); }
-      50%       { border-color:#ff7a8a; box-shadow:inset 0 0 36px rgba(233,69,96,.85); }
+      0%, 100% { border-color:#e94560; box-shadow:inset 0 0 20px rgba(233,69,96,.45); background:rgba(233,69,96,.1); }
+      50%       { border-color:#ff7a8a; box-shadow:inset 0 0 36px rgba(233,69,96,.85); background:rgba(233,69,96,.22); }
     }
     #my-area.active { animation:my-area-glow 1.2s ease-in-out infinite; }
     #my-info { display:flex; justify-content:space-between; align-items:center;
