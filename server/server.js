@@ -15,6 +15,64 @@ app.use('/Resource', express.static(path.join(__dirname, '../Resource')));
 const gameStates = new Map();   // roomId → gameState
 const sessionMap = new Map();   // sessionId → { socketId, roomId }
 const socketSession = new Map(); // socketId → sessionId
+const turnTimers = new Map();   // roomId → timeoutId
+
+const TURN_DURATION = 30; // seconds
+
+function clearTurnTimer(roomId) {
+  if (turnTimers.has(roomId)) {
+    clearTimeout(turnTimers.get(roomId));
+    turnTimers.delete(roomId);
+  }
+}
+
+function startTurnTimer(roomId, state) {
+  clearTurnTimer(roomId);
+  const currentPlayerId = state.turnOrder[state.currentIndex] || null;
+  if (!currentPlayerId) return;
+
+  io.to(roomId).emit('turn-timer', { playerId: currentPlayerId, duration: TURN_DURATION });
+
+  turnTimers.set(roomId, setTimeout(() => {
+    turnTimers.delete(roomId);
+    const currentState = gameStates.get(roomId);
+    if (!currentState) return;
+    if ((currentState.turnOrder[currentState.currentIndex] || null) !== currentPlayerId) return;
+
+    const result = pass(currentState, currentPlayerId);
+    if (result.error) return;
+    gameStates.set(roomId, result.state);
+    broadcastGameUpdate(roomId, result.state, result.events);
+    if (!result.events.some(e => e.type === 'game-over')) {
+      startTurnTimer(roomId, result.state);
+    }
+  }, TURN_DURATION * 1000));
+}
+
+function broadcastGameUpdate(roomId, state, events) {
+  const publicState = {
+    tableCards: state.tableCards,
+    tablePile: state.tablePile || [],
+    currentPlayerId: state.turnOrder[state.currentIndex] || null,
+    passCount: state.passCount,
+    revolution: state.revolution,
+    players: Object.values(state.players).map(p => ({
+      id: p.id, nickname: p.nickname, cardCount: p.hand.length, finished: p.finished,
+    })),
+  };
+  io.to(roomId).emit('state-updated', publicState);
+
+  for (const event of events) {
+    if (event.type === 'card-played') {
+      const sess = sessionMap.get(event.playerId);
+      const playerSocket = sess ? io.sockets.sockets.get(sess.socketId) : null;
+      if (playerSocket) {
+        playerSocket.emit('hand-updated', { hand: state.players[event.playerId].hand });
+      }
+    }
+    io.to(roomId).emit(event.type, event);
+  }
+}
 
 io.on('connection', (socket) => {
 
@@ -110,6 +168,7 @@ io.on('connection', (socket) => {
       }
     });
     io.emit('room-list', { rooms: getRoomList() });
+    startTurnTimer(roomId, state);
   });
 
   socket.on('play-cards', ({ cards, sessionId }) => {
@@ -124,6 +183,9 @@ io.on('connection', (socket) => {
     if (result.error) { console.warn('[play-cards] error:', result.error); return socket.emit('error', { message: result.error }); }
     gameStates.set(session.roomId, result.state);
     broadcastGameUpdate(session.roomId, result.state, result.events);
+    if (!result.events.some(e => e.type === 'game-over')) {
+      startTurnTimer(session.roomId, result.state);
+    }
   });
 
   socket.on('pass', ({ sessionId }) => {
@@ -135,6 +197,9 @@ io.on('connection', (socket) => {
     if (result.error) return socket.emit('error', { message: result.error });
     gameStates.set(session.roomId, result.state);
     broadcastGameUpdate(session.roomId, result.state, result.events);
+    if (!result.events.some(e => e.type === 'game-over')) {
+      startTurnTimer(session.roomId, result.state);
+    }
   });
 
   // 페이지 이동 시 소켓만 끊기므로 즉시 방에서 제거하지 않음
@@ -146,6 +211,7 @@ io.on('connection', (socket) => {
     const session = sessionMap.get(sessionId);
     if (!session?.roomId) return;
     const roomId = session.roomId;
+    clearTurnTimer(roomId);
     socket.leave(roomId);
     session.roomId = null;
     const room = leaveRoom(roomId, sessionId);
@@ -155,31 +221,6 @@ io.on('connection', (socket) => {
     io.emit('room-list', { rooms: getRoomList() });
   }
 
-  function broadcastGameUpdate(roomId, state, events) {
-    const room = getRoom(roomId);
-    const publicState = {
-      tableCards: state.tableCards,
-      tablePile: state.tablePile || [],
-      currentPlayerId: state.turnOrder[state.currentIndex] || null,
-      passCount: state.passCount,
-      revolution: state.revolution,
-      players: Object.values(state.players).map(p => ({
-        id: p.id, nickname: p.nickname, cardCount: p.hand.length, finished: p.finished,
-      })),
-    };
-    io.to(roomId).emit('state-updated', publicState);
-
-    for (const event of events) {
-      if (event.type === 'card-played') {
-        const sess = sessionMap.get(event.playerId);
-        const playerSocket = sess ? io.sockets.sockets.get(sess.socketId) : null;
-        if (playerSocket) {
-          playerSocket.emit('hand-updated', { hand: state.players[event.playerId].hand });
-        }
-      }
-      io.to(roomId).emit(event.type, event);
-    }
-  }
 });
 
 function publicPlayers(players) {

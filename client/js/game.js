@@ -96,6 +96,34 @@ const myAreaEl    = document.getElementById('my-area');
 const btnPlay     = document.getElementById('btn-play');
 const btnPass     = document.getElementById('btn-pass');
 const orderBarEl  = document.getElementById('card-order-bar');
+const timerEl     = document.getElementById('turn-timer');
+
+let timerInterval = null;
+
+function clearTimerUI() {
+  if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
+  timerEl.style.display = 'none';
+  timerEl.classList.remove('urgent');
+}
+
+function startTimerUI(playerId, duration) {
+  clearTimerUI();
+  let remaining = duration;
+  const p = players.find(p => p.id === playerId);
+  const name = p ? p.nickname : '';
+
+  function update() {
+    timerEl.style.display = '';
+    timerEl.classList.toggle('urgent', remaining <= 10);
+    timerEl.textContent = `${name} ${remaining}초`;
+  }
+  update();
+  timerInterval = setInterval(() => {
+    remaining--;
+    if (remaining <= 0) { clearTimerUI(); return; }
+    update();
+  }, 1000);
+}
 
 socket.on('connect', () => {
   socket.emit('join-room', { roomId, nickname, sessionId: myId });
@@ -153,7 +181,12 @@ socket.on('hand-updated', ({ hand }) => {
   renderHand();
 });
 
+socket.on('turn-timer', ({ playerId, duration }) => {
+  startTimerUI(playerId, duration);
+});
+
 socket.on('round-end', ({ reason }) => {
+  clearTimerUI();
   if (reason === '8-clear') animateMessage('8-Clear!');
   else if (reason === 'spade-reversal') animateMessage('♠ Reversal!');
   gsap.to('#table .table-group', {
@@ -177,6 +210,7 @@ socket.on('president-penalty', ({ playerId }) => {
 });
 
 socket.on('game-over', ({ ranks }) => {
+  clearTimerUI();
   const lines = Object.entries(ranks).map(([id, rank]) => {
     const p = players.find(p => p.id === id);
     return `${rankLabel(rank)}: ${p ? p.nickname : id}`;
