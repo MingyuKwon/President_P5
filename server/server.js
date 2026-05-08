@@ -21,7 +21,7 @@ const TURN_DURATION = 30; // seconds
 
 function clearTurnTimer(roomId) {
   if (turnTimers.has(roomId)) {
-    clearTimeout(turnTimers.get(roomId));
+    clearTimeout(turnTimers.get(roomId).timeoutId);
     turnTimers.delete(roomId);
   }
 }
@@ -33,7 +33,7 @@ function startTurnTimer(roomId, state) {
 
   io.to(roomId).emit('turn-timer', { playerId: currentPlayerId, duration: TURN_DURATION });
 
-  turnTimers.set(roomId, setTimeout(() => {
+  const timeoutId = setTimeout(() => {
     turnTimers.delete(roomId);
     const currentState = gameStates.get(roomId);
     if (!currentState) return;
@@ -46,7 +46,8 @@ function startTurnTimer(roomId, state) {
     if (!result.events.some(e => e.type === 'game-over')) {
       startTurnTimer(roomId, result.state);
     }
-  }, TURN_DURATION * 1000));
+  }, TURN_DURATION * 1000);
+  turnTimers.set(roomId, { timeoutId, startedAt: Date.now(), playerId: currentPlayerId });
 }
 
 function broadcastGameUpdate(roomId, state, events) {
@@ -125,6 +126,13 @@ io.on('connection', (socket) => {
           })),
           turnOrder: gameState.turnOrder,
         });
+
+        const timerInfo = turnTimers.get(roomId);
+        if (timerInfo) {
+          const elapsed = Math.floor((Date.now() - timerInfo.startedAt) / 1000);
+          const remaining = Math.max(1, TURN_DURATION - elapsed);
+          socket.emit('turn-timer', { playerId: timerInfo.playerId, duration: remaining });
+        }
       }
     }
   });
