@@ -29,6 +29,7 @@ function createGameState(players, gameNumber, prevRanks) {
     currentIndex: 0,
     tableCards: [],
     prevTableCards: [],
+    tablePile: [],
     passCount: 0,
     lastPlayerId: null,
     finishedOrder: [],
@@ -56,6 +57,7 @@ function playCards(state, playerId, cards) {
     players: { ...state.players, [playerId]: { ...player, hand: newHand } },
     prevTableCards: state.tableCards,
     tableCards: cards,
+    tablePile: [...(state.tablePile || []), cards],
     passCount: 0,
     lastPlayerId: playerId,
   };
@@ -183,6 +185,7 @@ function startNewRound(state, reason, lastCardPlayerId, events) {
     ...state,
     tableCards: [],
     prevTableCards: [],
+    tablePile: [],
     passCount: 0,
     lastPlayerId: null,
     currentIndex: newIndex >= 0 ? newIndex : 0,

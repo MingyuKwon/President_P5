@@ -59,6 +59,7 @@ io.on('connection', (socket) => {
         socket.emit('game-state-sync', {
           hand: playerState.hand,
           tableCards: gameState.tableCards,
+          tablePile: gameState.tablePile || [],
           currentPlayerId: gameState.turnOrder[gameState.currentIndex] || null,
           revolution: gameState.revolution,
           players: Object.values(gameState.players).map(p => ({
@@ -158,6 +159,7 @@ io.on('connection', (socket) => {
     const room = getRoom(roomId);
     const publicState = {
       tableCards: state.tableCards,
+      tablePile: state.tablePile || [],
       currentPlayerId: state.turnOrder[state.currentIndex] || null,
       passCount: state.passCount,
       revolution: state.revolution,

@@ -117,7 +117,7 @@ socket.on('game-started', ({ hand, turnOrder: to, currentPlayerId: cpId, players
   renderCardOrder();
 });
 
-socket.on('game-state-sync', ({ hand, tableCards, currentPlayerId: cpId, revolution, players: ps, turnOrder: to }) => {
+socket.on('game-state-sync', ({ hand, tableCards, tablePile, currentPlayerId: cpId, revolution, players: ps, turnOrder: to }) => {
   myHand = sortHand(hand);
   currentPlayerId = cpId;
   currentTableCards = tableCards || [];
@@ -127,11 +127,11 @@ socket.on('game-state-sync', ({ hand, tableCards, currentPlayerId: cpId, revolut
   selectedCards = [];
   renderHand();
   renderSeats();
-  renderTable(tableCards);
+  renderTablePile(tablePile || []);
   renderCardOrder();
 });
 
-socket.on('state-updated', ({ tableCards, currentPlayerId: cpId, revolution, players: ps }) => {
+socket.on('state-updated', ({ tableCards, tablePile, currentPlayerId: cpId, revolution, players: ps }) => {
   const wasMyTurn = currentPlayerId === myId;
   currentPlayerId = cpId;
   players = ps;
@@ -139,9 +139,12 @@ socket.on('state-updated', ({ tableCards, currentPlayerId: cpId, revolution, pla
   currentRevolution = revolution;
   if (wasMyTurn && cpId !== myId) selectedCards = [];
   renderSeats();
-  renderTable(tableCards);
   renderHand();
   renderCardOrder();
+});
+
+socket.on('card-played', ({ cards }) => {
+  addCardGroupToTable(cards);
 });
 
 socket.on('hand-updated', ({ hand }) => {
@@ -153,7 +156,7 @@ socket.on('hand-updated', ({ hand }) => {
 socket.on('round-end', ({ reason }) => {
   if (reason === '8-clear') animateMessage('8-Clear!');
   else if (reason === 'spade-reversal') animateMessage('♠ Reversal!');
-  gsap.to('#table .table-card', {
+  gsap.to('#table .table-group', {
     opacity: 0, y: -20, duration: 0.4, stagger: 0.05,
     onComplete: () => { tableEl.innerHTML = ''; },
   });
@@ -289,16 +292,28 @@ function toggleCard(card) {
   renderHand();
 }
 
-function renderTable(cards) {
-  if (!cards || cards.length === 0) return;
-  tableEl.innerHTML = '';
-  cards.forEach((card, i) => {
+function addCardGroupToTable(cards, animate = true) {
+  const group = document.createElement('div');
+  group.className = 'table-group';
+  const ox = (Math.random() - 0.5) * 40;
+  const oy = (Math.random() - 0.5) * 30;
+  const rot = (Math.random() - 0.5) * 12;
+  const w = cards.length * 70 + (cards.length - 1) * 4;
+  group.style.transform = `translate(calc(-50% + ${ox}px), calc(-50% + ${oy}px)) rotate(${rot}deg)`;
+  group.style.marginLeft = `-${w / 2}px`;
+  cards.forEach(card => {
     const div = document.createElement('div');
     div.className = 'table-card';
     div.innerHTML = `<img src="${cardImg(card)}" alt="${card}">`;
-    tableEl.appendChild(div);
-    gsap.from(div, { scale: 0.5, opacity: 0, duration: 0.25, delay: i * 0.06 });
+    group.appendChild(div);
   });
+  tableEl.appendChild(group);
+  if (animate) gsap.from(group, { scale: 0.6, opacity: 0, duration: 0.25 });
+}
+
+function renderTablePile(pile) {
+  tableEl.innerHTML = '';
+  pile.forEach(cards => addCardGroupToTable(cards, false));
 }
 
 function renderCardOrder() {
