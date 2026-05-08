@@ -136,22 +136,14 @@ function renderTurnPanel() {
 }
 
 function renderHand() {
-  console.log('[renderHand] 호출됨, 카드 수:', myHand.length);
   handEl.innerHTML = '';
-  myHand.forEach((card, i) => {
+  myHand.forEach((card) => {
     const div = document.createElement('div');
     div.className = 'hand-card';
     div.dataset.card = card;
     div.innerHTML = `<img src="${cardImg(card)}" alt="${card}">`;
     div.onclick = () => toggleCard(div, card);
     handEl.appendChild(div);
-    console.log(`[renderHand] 카드[${i}] ${card} 애니메이션 시작 (delay: ${(i * 0.04).toFixed(2)}s)`);
-    gsap.from(div, {
-      y: 60, opacity: 0, duration: 0.6, delay: i * 0.05,
-      ease: 'power2.out',
-      onStart: () => console.log(`[gsap] 카드[${i}] ${card} 애니메이션 onStart`),
-      onComplete: () => console.log(`[gsap] 카드[${i}] ${card} 애니메이션 완료`),
-    });
   });
 }
 
