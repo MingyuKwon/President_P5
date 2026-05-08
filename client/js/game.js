@@ -120,8 +120,7 @@ function tryAutoPass() {
 
 btnAutoPass.onclick = () => {
   autoPass = !autoPass;
-  btnAutoPass.textContent = autoPass ? '자동 패스 ON' : '자동 패스 OFF';
-  btnAutoPass.className = autoPass ? 'on' : 'off';
+  btnAutoPass.classList.toggle('on', autoPass);
   if (!autoPass) clearAutoPassTimer();
   else tryAutoPass();
 };
