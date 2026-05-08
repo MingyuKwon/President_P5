@@ -38,16 +38,12 @@ players.forEach(p => { if (p.rank) playerRanks[p.id] = p.rank; });
 const seatsEl  = document.getElementById('player-seats');
 const tableEl  = document.getElementById('table');
 const handEl   = document.getElementById('hand');
-const myAreaEl    = document.getElementById('my-area');
-const myNameEl    = document.getElementById('my-name');
-const myRankEl    = document.getElementById('my-rank');
-const myCardCount = document.getElementById('my-card-count');
+const myAreaEl = document.getElementById('my-area');
 const btnPlay  = document.getElementById('btn-play');
 const btnPass  = document.getElementById('btn-pass');
 const revBadge = document.getElementById('revolution-badge');
 
 socket.on('connect', () => {
-  myNameEl.textContent = nickname;
   socket.emit('join-room', { roomId, nickname, sessionId: myId });
 });
 
@@ -98,7 +94,6 @@ socket.on('player-finished', ({ playerId, rank }) => {
   const p = players.find(p => p.id === playerId);
   animateMessage(`${p ? p.nickname : playerId} — ${rankLabel(rank)}`);
   playerRanks[playerId] = rank;
-  if (playerId === myId) { myRankEl.src = rankImg(rank); myRankEl.alt = rankLabel(rank); }
   renderSeats();
 });
 
@@ -145,7 +140,6 @@ function renderSeats() {
   const myIdx = order.indexOf(myId);
 
   order.forEach((playerId, i) => {
-    if (playerId === myId) return;
     const p = players.find(p => p.id === playerId);
     if (!p) return;
 
@@ -182,7 +176,6 @@ function renderSeats() {
 
 function renderHand() {
   handEl.innerHTML = '';
-  myCardCount.textContent = myHand.length + '장';
   myHand.forEach((card) => {
     const div = document.createElement('div');
     div.className = 'hand-card';
@@ -235,10 +228,6 @@ function rankImg(rank) {
   return `/Resource/UI/rank_${rank}.png`;
 }
 
-myNameEl.textContent = nickname;
-myRankEl.src = rankImg(playerRanks[myId] || '');
-myRankEl.alt = rankLabel(playerRanks[myId] || '');
-myCardCount.textContent = myHand.length + '장';
 myAreaEl.classList.toggle('active', currentPlayerId === myId);
 
 if (myHand.length > 0) {
