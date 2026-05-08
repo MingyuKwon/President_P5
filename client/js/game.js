@@ -265,10 +265,14 @@ function renderHand() {
   const selectable = computeSelectableSet(myHand, selectedCards, currentTableCards, currentRevolution);
   const tempSel = [...selectedCards];
   handEl.innerHTML = '';
-  myHand.forEach((card) => {
+  const n = myHand.length;
+  const FAN_RADIUS = 800, FAN_FOCAL = 700, CARD_W = 96, CARD_H = 137;
+  const totalAngle = n <= 1 ? 0 : Math.min(60, (n - 1) * 5);
+
+  myHand.forEach((card, i) => {
     const isSelected = (() => {
-      const i = tempSel.indexOf(card);
-      if (i !== -1) { tempSel.splice(i, 1); return true; }
+      const idx = tempSel.indexOf(card);
+      if (idx !== -1) { tempSel.splice(idx, 1); return true; }
       return false;
     })();
     const isDimmed = !isSelected && !selectable.has(card);
@@ -277,6 +281,16 @@ function renderHand() {
     div.dataset.card = card;
     div.innerHTML = `<img src="${cardImg(card)}" alt="${card}">`;
     div.onclick = () => toggleCard(card);
+
+    const angleDeg = n <= 1 ? 0 : (i - (n - 1) / 2) / (n - 1) * totalAngle;
+    const angleRad = angleDeg * Math.PI / 180;
+    const cx = Math.sin(angleRad) * FAN_RADIUS;
+    const cy = Math.cos(angleRad) * FAN_RADIUS;
+    div.style.left = `calc(50% + ${cx - CARD_W / 2}px)`;
+    div.style.setProperty('--cb', `${cy - FAN_FOCAL - CARD_H / 2}px`);
+    div.style.setProperty('--zi', i + 1);
+    div.style.transform = `rotate(${angleDeg}deg)`;
+
     handEl.appendChild(div);
   });
   myAreaEl.classList.toggle('active', isMyTurn);
