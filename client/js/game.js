@@ -38,7 +38,6 @@ players.forEach(p => { if (p.rank) playerRanks[p.id] = rankLabel(p.rank); });
 const seatsEl  = document.getElementById('player-seats');
 const tableEl  = document.getElementById('table');
 const handEl   = document.getElementById('hand');
-const statusEl = document.getElementById('status-bar');
 const btnPlay  = document.getElementById('btn-play');
 const btnPass  = document.getElementById('btn-pass');
 const revBadge = document.getElementById('revolution-badge');
@@ -58,7 +57,6 @@ socket.on('game-started', ({ hand, turnOrder: to, currentPlayerId: cpId, players
   ps.forEach(p => { if (p.rank) playerRanks[p.id] = rankLabel(p.rank); });
   renderHand();
   renderSeats();
-  updateStatus(cpId);
 });
 
 socket.on('state-updated', ({ tableCards, currentPlayerId: cpId, revolution, players: ps }) => {
@@ -66,7 +64,6 @@ socket.on('state-updated', ({ tableCards, currentPlayerId: cpId, revolution, pla
   players = ps;
   renderSeats();
   renderTable(tableCards);
-  updateStatus(cpId);
   revBadge.style.display = revolution ? 'block' : 'none';
   const isMyTurn = cpId === myId;
   btnPass.disabled = !isMyTurn;
@@ -199,16 +196,6 @@ function renderTable(cards) {
   });
 }
 
-function updateStatus(cpId) {
-  if (!cpId) { statusEl.textContent = ''; return; }
-  if (cpId === myId) {
-    statusEl.textContent = '내 턴 — 카드를 선택하세요';
-    gsap.fromTo(statusEl, { scale: 1.2, color: '#e94560' }, { scale: 1, color: '#fff', duration: 0.4 });
-  } else {
-    const p = players.find(p => p.id === cpId);
-    statusEl.textContent = p ? `${p.nickname}의 턴` : '';
-  }
-}
 
 function animateMessage(text, color = '#fff') {
   const el = document.createElement('div');
@@ -230,5 +217,4 @@ function rankLabel(rank) {
 if (myHand.length > 0) {
   renderHand();
   renderSeats();
-  updateStatus(currentPlayerId);
 }
