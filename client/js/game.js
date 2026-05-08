@@ -277,7 +277,7 @@ function renderHand() {
     handEl.appendChild(div);
   });
   myAreaEl.classList.toggle('active', isMyTurn);
-  btnPass.disabled = !isMyTurn;
+  btnPass.disabled = !isMyTurn || currentTableCards.length === 0;
   btnPlay.disabled = !isMyTurn || selectedCards.length === 0;
 }
 

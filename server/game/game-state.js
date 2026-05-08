@@ -91,6 +91,8 @@ function playCards(state, playerId, cards) {
 function pass(state, playerId) {
   if (state.turnOrder[state.currentIndex] !== playerId)
     return { error: 'not-your-turn' };
+  if (state.tableCards.length === 0)
+    return { error: 'cannot-pass-as-leader' };
 
   let next = { ...state, passCount: state.passCount + 1 };
   const events = [{ type: 'passed', playerId }];

@@ -23,6 +23,7 @@
 | ✅ | `game.js:computeSelectableSet` | 선(테이블 빈 상태)에서 카드 선택 후에도 다른 숫자 카드가 dimmed 안 됨 | `tableEmpty && selected.length > 0` 분기 추가 — 같은 숫자+조커만 반환 |
 | ✅ | `server.js:join-room`, `game.js` | 카드 내기 버튼이 눌리지 않음 — 게임 중 reconnect 시 `currentPlayerId`가 sessionStorage의 첫 플레이어 ID에서 업데이트 안 됨 | 서버: `join-room` 시 게임 진행 중이면 `game-state-sync` 이벤트로 현재 상태 전송. 클라이언트: `game-state-sync` 핸들러 추가, `state-updated` 시 내 턴 종료 시 선택 초기화 |
 | ✅ | `game.js:renderHand`, `toggleCard`, `hand-updated` | 카드 내기 버튼이 여전히 눌리지 않음 — `hand-updated` 핸들러가 `renderHand()` 이후에 `btnPlay.disabled = true`를 덮어씌워 버튼이 항상 비활성화됨 | 버튼 상태(`btnPlay.disabled`, `btnPass.disabled`, `myAreaEl.active`)를 `renderHand()` 안에서만 설정하도록 중앙화. 나머지 핸들러와 `toggleCard`에서 중복 할당 제거 |
+| ✅ | `turn.js:checkRoundEnd`, `game-state.js:pass`, `game.js:renderHand` | 선(빈 테이블) 상황에서 패스 클릭 시 서버 TypeError 크래시 + 패스 불가 규칙 미적용 | `checkRoundEnd`에 빈 tableCards 조기 반환 추가. `pass`에서 `tableCards.length === 0`이면 `cannot-pass-as-leader` 에러 반환. 클라이언트 패스 버튼을 선 상황에서 disabled 처리 |
 
 ## 해결 완료
 

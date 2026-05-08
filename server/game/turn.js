@@ -3,6 +3,8 @@ function getNum(card) {
 }
 
 function checkRoundEnd({ tableCards, passCount, activePlayers, prevTableCards = [] }) {
+  if (!tableCards || tableCards.length === 0) return { ended: false };
+
   const last = tableCards[tableCards.length - 1];
   const num  = getNum(last);
 
