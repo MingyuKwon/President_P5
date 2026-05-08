@@ -281,6 +281,8 @@ socket.on('round-end', ({ reason }) => {
     opacity: 0, y: -20, duration: 0.4, stagger: 0.05,
     onComplete: () => { tableEl.innerHTML = ''; },
   });
+  // state-updated가 round-end보다 먼저 도착하므로, 내 차례면 재트리거
+  if (currentPlayerId === myId) { tryAutoPass(); tryAutoPlay(); }
 });
 
 socket.on('revolution', ({ active }) => animateMessage(active ? '혁명 발동!' : '반혁명!'));
