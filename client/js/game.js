@@ -380,10 +380,10 @@ if (myHand.length > 0) {
 renderCardOrder();
 
 function scaleGameBoard() {
-  const scale = Math.min(window.innerWidth / 1200, window.innerHeight / 900);
+  const scale = Math.min(window.innerWidth / 1350, window.innerHeight / 900);
   const board = document.getElementById('game-board');
   board.style.transform = `scale(${scale})`;
-  board.style.left = `${(window.innerWidth - 1200 * scale) / 2}px`;
+  board.style.left = `${(window.innerWidth - 1350 * scale) / 2}px`;
   board.style.top  = `${(window.innerHeight - 900 * scale) / 2}px`;
 }
 window.addEventListener('resize', scaleGameBoard);
