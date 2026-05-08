@@ -73,8 +73,8 @@
 
     /* 내 손패 */
     #bottom-ui { position:absolute; bottom:0; left:0; right:0; display:flex; flex-direction:column; }
-    #controls-row { display:flex; flex-direction:row; align-items:center; justify-content:center; gap:40px; }
-    #my-seat { flex-shrink:0; pointer-events:auto; margin-right:100px; }
+    #controls-row { position:relative; display:flex; justify-content:center; align-items:center; }
+    #my-seat { position:absolute; right:calc(50% + 60px); pointer-events:auto; }
     #my-area { position:relative; width:100%; padding:16px; }
     #hand { display:flex; flex-wrap:nowrap; justify-content:center; min-height:180px; align-items:flex-end; }
     .hand-card { width:106px; height:151px; border-radius:8px; overflow:hidden; position:relative;
