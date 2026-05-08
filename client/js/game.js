@@ -26,6 +26,51 @@ function sortHand(hand) {
   return [...hand].sort((a, b) => cardRank(a) - cardRank(b));
 }
 
+const REV_ORDER = ['2','A','K','Q','J','10','9','8','7','6','5','4','3','Joker'];
+function playRank(card, revolution) {
+  const num = card === 'Joker' ? 'Joker' : card.slice(0, -1);
+  return (revolution ? REV_ORDER : CARD_ORDER).indexOf(num);
+}
+function playValue(cards, revolution) {
+  const nonJoker = cards.filter(c => c !== 'Joker');
+  return playRank(nonJoker.length ? nonJoker[0] : 'Joker', revolution);
+}
+function canBeat(cards, tableCards, revolution) {
+  return cards.length === tableCards.length && playValue(cards, revolution) > playValue(tableCards, revolution);
+}
+function subtractCards(arr, toRemove) {
+  const r = [...arr];
+  for (const c of toRemove) { const i = r.indexOf(c); if (i !== -1) r.splice(i, 1); }
+  return r;
+}
+function computeSelectableSet(hand, selected, tableCards, revolution) {
+  if (currentPlayerId !== myId) return new Set();
+  if (!tableCards || tableCards.length === 0) return new Set(hand);
+  const N = tableCards.length;
+  if (selected.length >= N) return new Set();
+  const selNum = selected.filter(c => c !== 'Joker').map(c => c.slice(0, -1))[0] || null;
+  const remaining = subtractCards(hand, selected);
+  const result = new Set();
+  for (const card of new Set(remaining)) {
+    if (card !== 'Joker' && selNum !== null && card.slice(0, -1) !== selNum) continue;
+    const testSel = [...selected, card];
+    const testNum = testSel.filter(c => c !== 'Joker').map(c => c.slice(0, -1))[0] || null;
+    if (testSel.length === N) {
+      if (canBeat(testSel, tableCards, revolution)) result.add(card);
+    } else {
+      const pool = subtractCards(remaining, [card]);
+      const eligible = pool.filter(c => c === 'Joker' || (testNum && c.slice(0, -1) === testNum) || !testNum);
+      if (eligible.length >= N - testSel.length) {
+        const sorted = [...eligible].sort((a, b) =>
+          (b === 'Joker' ? 1 : 0) - (a === 'Joker' ? 1 : 0) || playRank(b, revolution) - playRank(a, revolution)
+        );
+        if (canBeat([...testSel, ...sorted.slice(0, N - testSel.length)], tableCards, revolution)) result.add(card);
+      }
+    }
+  }
+  return result;
+}
+
 let myHand = sortHand(JSON.parse(sessionStorage.getItem('hand') || '[]'));
 let selectedCards = [];
 let currentPlayerId = sessionStorage.getItem('currentPlayerId');
@@ -34,6 +79,8 @@ let turnOrder = JSON.parse(sessionStorage.getItem('turnOrder') || '[]');
 let originalOrder = [...turnOrder];
 let playerRanks = {};
 players.forEach(p => { if (p.rank) playerRanks[p.id] = p.rank; });
+let currentTableCards = [];
+let currentRevolution = false;
 
 const seatsEl  = document.getElementById('player-seats');
 const tableEl  = document.getElementById('table');
@@ -54,6 +101,8 @@ socket.on('game-started', ({ hand, turnOrder: to, currentPlayerId: cpId, players
   originalOrder = [...to];
   players = ps;
   selectedCards = [];
+  currentTableCards = [];
+  currentRevolution = false;
   playerRanks = {};
   ps.forEach(p => { if (p.rank) playerRanks[p.id] = p.rank; });
   renderHand();
@@ -63,6 +112,8 @@ socket.on('game-started', ({ hand, turnOrder: to, currentPlayerId: cpId, players
 socket.on('state-updated', ({ tableCards, currentPlayerId: cpId, revolution, players: ps }) => {
   currentPlayerId = cpId;
   players = ps;
+  currentTableCards = tableCards || [];
+  currentRevolution = revolution;
   renderSeats();
   renderTable(tableCards);
   revBadge.style.display = revolution ? 'block' : 'none';
@@ -70,6 +121,7 @@ socket.on('state-updated', ({ tableCards, currentPlayerId: cpId, revolution, pla
   myAreaEl.classList.toggle('active', isMyTurn);
   btnPass.disabled = !isMyTurn;
   btnPlay.disabled = !isMyTurn || selectedCards.length === 0;
+  renderHand();
 });
 
 socket.on('hand-updated', ({ hand }) => {
@@ -185,22 +237,31 @@ function renderSeats() {
 }
 
 function renderHand() {
+  const selectable = computeSelectableSet(myHand, selectedCards, currentTableCards, currentRevolution);
+  const tempSel = [...selectedCards];
   handEl.innerHTML = '';
   myHand.forEach((card) => {
+    const isSelected = (() => {
+      const i = tempSel.indexOf(card);
+      if (i !== -1) { tempSel.splice(i, 1); return true; }
+      return false;
+    })();
+    const isDimmed = !isSelected && !selectable.has(card);
     const div = document.createElement('div');
-    div.className = 'hand-card';
+    div.className = ['hand-card', isSelected && 'selected', isDimmed && 'dimmed'].filter(Boolean).join(' ');
     div.dataset.card = card;
     div.innerHTML = `<img src="${cardImg(card)}" alt="${card}">`;
-    div.onclick = () => toggleCard(div, card);
+    div.onclick = () => toggleCard(card);
     handEl.appendChild(div);
   });
 }
 
-function toggleCard(el, card) {
+function toggleCard(card) {
   if (currentPlayerId !== myId) return;
   const idx = selectedCards.indexOf(card);
-  if (idx === -1) { selectedCards.push(card); el.classList.add('selected'); }
-  else { selectedCards.splice(idx, 1); el.classList.remove('selected'); }
+  if (idx === -1) selectedCards.push(card);
+  else selectedCards.splice(idx, 1);
+  renderHand();
   btnPlay.disabled = currentPlayerId !== myId || selectedCards.length === 0;
 }
 
