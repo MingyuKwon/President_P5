@@ -163,9 +163,11 @@ function renderSeats() {
     `;
 
     if (isMe) {
-      // 화면 중앙 기준 왼쪽 200px
-      div.style.left = 'calc(50% - 200px)';
-      div.style.top  = '78%';
+      // 화면 중앙 기준 왼쪽 600px, 손패 영역 위 300px
+      div.style.left      = 'calc(50% - 600px)';
+      div.style.top       = 'auto';
+      div.style.bottom    = '300px';
+      div.style.transform = 'translate(-50%, 0)';
     } else {
       // 나를 아래(90°)에 고정, 나머지를 시계 방향으로 배분
       const offset = (i - myIdx + total) % total;
