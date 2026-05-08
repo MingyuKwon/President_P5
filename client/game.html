@@ -73,6 +73,8 @@
 
     /* 내 손패 */
     #bottom-ui { position:absolute; bottom:0; left:0; right:0; display:flex; flex-direction:column; }
+    #controls-row { display:flex; flex-direction:row; align-items:center; justify-content:center; gap:40px; }
+    #my-seat { flex-shrink:0; pointer-events:auto; }
     #my-area { position:relative; width:100%; padding:16px; }
     #hand { display:flex; flex-wrap:nowrap; justify-content:center; min-height:180px; align-items:flex-end; }
     .hand-card { width:106px; height:151px; border-radius:8px; overflow:hidden; position:relative;
@@ -83,7 +85,7 @@
     .hand-card.selected { transform:translateY(calc(var(--drop,0px) + 25px - 20px)) rotate(var(--rot,0deg)); border-color:#e94560; z-index:5; }
     .hand-card.dimmed { filter:brightness(0.35); pointer-events:none; }
     .hand-card img { width:100%; height:100%; object-fit:cover; pointer-events:none; }
-    #action-btns { display:flex; gap:32px; justify-content:center; padding-bottom:50px; }
+    #action-btns { display:flex; gap:32px; justify-content:center; }
     /* 버튼 이미지 — /Resource/UI/btn_play.png, btn_pass.png 제공 시 자동 적용 */
     #action-btns button { padding:0; background:none; border:none; cursor:pointer; }
     #action-btns button:disabled { cursor:default; }
@@ -106,20 +108,25 @@
     <div id="player-seats"></div>
     <div id="table"></div>
     <div id="bottom-ui">
-      <div id="action-btns">
-        <button id="btn-play" disabled>
-          <img src="/Resource/UI/btn_play.png" alt="카드 내기"
-               onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block'">
-          <span>카드 내기</span>
-        </button>
-        <div id="turn-timer" style="visibility:hidden"></div>
-        <button id="btn-pass" disabled>
-          <img src="/Resource/UI/btn_pass.png" alt="패스"
-               onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block'">
-          <span>패스</span>
-        </button>
+      <div id="controls-row">
+        <div id="my-seat"></div>
+        <div>
+          <div id="action-btns">
+            <button id="btn-play" disabled>
+              <img src="/Resource/UI/btn_play.png" alt="카드 내기"
+                   onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block'">
+              <span>카드 내기</span>
+            </button>
+            <div id="turn-timer" style="visibility:hidden"></div>
+            <button id="btn-pass" disabled>
+              <img src="/Resource/UI/btn_pass.png" alt="패스"
+                   onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block'">
+              <span>패스</span>
+            </button>
+          </div>
+          <p id="timer-hint">시간 제한이 되면 자동으로 패스됩니다</p>
+        </div>
       </div>
-      <p id="timer-hint">시간 제한이 되면 자동으로 패스됩니다</p>
       <div id="my-area">
         <div id="hand"></div>
         <button id="btn-exit">나가기</button>
