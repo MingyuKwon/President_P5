@@ -133,6 +133,7 @@ function renderSeats() {
   const myIdx = order.indexOf(myId);
 
   order.forEach((playerId, i) => {
+    if (playerId === myId) return;
     const p = players.find(p => p.id === playerId);
     if (!p) return;
 
