@@ -83,6 +83,9 @@ io.on('connection', (socket) => {
           turnOrder: state.turnOrder,
           currentPlayerId: state.turnOrder[state.currentIndex],
           gameNumber,
+          players: Object.values(state.players).map(q => ({
+            id: q.id, nickname: q.nickname, cardCount: q.hand.length, finished: q.finished,
+          })),
         });
       }
     });

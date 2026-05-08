@@ -21,8 +21,9 @@ let myHand = JSON.parse(sessionStorage.getItem('hand') || '[]');
 let selectedCards = [];
 let currentPlayerId = sessionStorage.getItem('currentPlayerId');
 let players = [];
+let turnOrder = JSON.parse(sessionStorage.getItem('turnOrder') || '[]');
 
-const opponentsEl = document.getElementById('opponents');
+const turnListEl = document.getElementById('turn-list');
 const tableEl = document.getElementById('table');
 const handEl = document.getElementById('hand');
 const statusEl = document.getElementById('status-bar');
@@ -37,18 +38,21 @@ socket.on('connect', () => {
   socket.emit('join-room', { roomId, nickname, sessionId: myId });
 });
 
-socket.on('game-started', ({ hand, turnOrder, currentPlayerId: cpId }) => {
+socket.on('game-started', ({ hand, turnOrder: to, currentPlayerId: cpId, players: ps }) => {
   myHand = hand;
   currentPlayerId = cpId;
+  turnOrder = to;
+  players = ps;
   selectedCards = [];
   renderHand();
+  renderTurnPanel();
   updateStatus(cpId);
 });
 
 socket.on('state-updated', ({ tableCards, currentPlayerId: cpId, revolution, players: ps }) => {
   currentPlayerId = cpId;
   players = ps;
-  renderOpponents();
+  renderTurnPanel();
   renderTable(tableCards);
   updateStatus(cpId);
   revBadge.style.display = revolution ? 'block' : 'none';
@@ -98,13 +102,38 @@ socket.on('game-over', ({ ranks }) => {
   }, 800);
 });
 
-socket.on('error', ({ message }) => animateMessage('낼 수 없는 카드입니다', '#e94560'));
+socket.on('error', () => animateMessage('낼 수 없는 카드입니다', '#e94560'));
 
 btnPlay.onclick = () => {
   if (selectedCards.length === 0) return;
   socket.emit('play-cards', { cards: [...selectedCards], sessionId: myId });
 };
 btnPass.onclick = () => socket.emit('pass', { sessionId: myId });
+
+function renderTurnPanel() {
+  // turnOrder 기준으로 정렬, 완료된 플레이어는 뒤로
+  const ordered = turnOrder.map(id => players.find(p => p.id === id)).filter(Boolean);
+  const finished = players.filter(p => p.finished && !turnOrder.includes(p.id));
+
+  turnListEl.innerHTML = [...ordered, ...finished].map((p, i) => {
+    const isActive = p.id === currentPlayerId;
+    const isMe = p.id === myId;
+    const classes = [
+      isActive ? 'active' : '',
+      p.finished ? 'finished' : '',
+      isMe ? 'me' : '',
+    ].filter(Boolean).join(' ');
+
+    return `
+      <div class="turn-row ${classes}">
+        <span class="turn-num">${p.finished ? '✓' : i + 1}</span>
+        <span class="turn-name">${p.nickname}${isMe ? ' (나)' : ''}</span>
+        <span class="turn-cards">${p.finished ? '' : p.cardCount + '장'}</span>
+        ${isActive ? '<span class="turn-arrow">◀</span>' : ''}
+      </div>
+    `;
+  }).join('');
+}
 
 function renderHand() {
   handEl.innerHTML = '';
@@ -139,15 +168,6 @@ function renderTable(cards) {
   });
 }
 
-function renderOpponents() {
-  opponentsEl.innerHTML = players.filter(p => p.id !== myId).map(p => `
-    <div class="opponent ${p.finished ? 'finished' : ''} ${p.id === currentPlayerId ? 'active' : ''}">
-      <div class="card-count">${p.finished ? '✓' : p.cardCount}</div>
-      <div style="font-size:0.85rem">${p.nickname}</div>
-    </div>
-  `).join('');
-}
-
 function updateStatus(cpId) {
   if (!cpId) { statusEl.textContent = ''; return; }
   if (cpId === myId) {
@@ -176,4 +196,7 @@ function rankLabel(rank) {
   return map[rank] || rank;
 }
 
-if (myHand.length > 0) { renderHand(); updateStatus(currentPlayerId); }
+if (myHand.length > 0 && players.length === 0) {
+  renderHand();
+  updateStatus(currentPlayerId);
+}
