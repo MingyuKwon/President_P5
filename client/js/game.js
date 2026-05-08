@@ -316,7 +316,8 @@ function renderCardOrder() {
     const isActive = rank === activeRank;
     const color = isActive ? '#e94560' : '#ccc';
     const weight = isActive ? 'bold' : '400';
-    return `<span class="order-rank" style="color:${color};font-weight:${weight}">${rank}</span>`;
+    const sep = i < last ? '<span class="order-sep">›</span>' : '';
+    return `<span class="order-rank" style="color:${color};font-weight:${weight}">${rank}</span>${sep}`;
   }).join('');
 
   const revTag = currentRevolution
