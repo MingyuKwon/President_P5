@@ -165,7 +165,7 @@ function renderSeats() {
 
     if (isMe) {
       // 손패 영역 왼쪽 위에 고정
-      div.style.cssText = 'position:absolute; left:12px; bottom:calc(100% + 4px); transform:none;';
+      div.style.cssText = 'position:absolute; left:28px; bottom:calc(100% + 20px); transform:none;';
       myAreaEl.appendChild(div);
     } else {
       // 나를 아래(90°)에 고정, 나머지를 시계 방향으로 배분
