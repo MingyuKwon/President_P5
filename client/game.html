@@ -79,10 +79,10 @@
     #hand { display:flex; flex-wrap:nowrap; justify-content:center; min-height:180px; align-items:flex-end; }
     .hand-card { width:106px; height:151px; border-radius:8px; overflow:hidden; position:relative;
       cursor:pointer; transition:transform .15s, box-shadow .15s; border:3px solid transparent;
-      box-shadow:0 2px 8px rgba(0,0,0,.4); transform:translateY(var(--drop,0px)) rotate(var(--rot,0deg)); }
+      box-shadow:0 2px 8px rgba(0,0,0,.4); transform:translateY(calc(var(--drop,0px) + 25px)) rotate(var(--rot,0deg)); }
     .hand-card + .hand-card { margin-left:-32px; }
-    .hand-card:hover { transform:translateY(calc(var(--drop,0px) - 12px)) rotate(var(--rot,0deg)); z-index:10; }
-    .hand-card.selected { transform:translateY(calc(var(--drop,0px) - 20px)) rotate(var(--rot,0deg)); border-color:#e94560; z-index:5; }
+    .hand-card:hover { transform:translateY(calc(var(--drop,0px) + 25px - 12px)) rotate(var(--rot,0deg)); z-index:10; }
+    .hand-card.selected { transform:translateY(calc(var(--drop,0px) + 25px - 20px)) rotate(var(--rot,0deg)); border-color:#e94560; z-index:5; }
     .hand-card.dimmed { filter:brightness(0.35); }
     .hand-card img { width:100%; height:100%; object-fit:cover; pointer-events:none; }
     #action-btns { display:flex; gap:10px; justify-content:center; padding-bottom:50px; }
