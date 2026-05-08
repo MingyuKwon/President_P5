@@ -31,19 +31,18 @@ let selectedCards = [];
 let currentPlayerId = sessionStorage.getItem('currentPlayerId');
 let players = JSON.parse(sessionStorage.getItem('players') || '[]');
 let turnOrder = JSON.parse(sessionStorage.getItem('turnOrder') || '[]');
+let originalOrder = [...turnOrder];
+let playerRanks = {};
 
-const turnListEl = document.getElementById('turn-list');
-const tableEl = document.getElementById('table');
-const handEl = document.getElementById('hand');
+const seatsEl  = document.getElementById('player-seats');
+const tableEl  = document.getElementById('table');
+const handEl   = document.getElementById('hand');
 const statusEl = document.getElementById('status-bar');
-const btnPlay = document.getElementById('btn-play');
-const btnPass = document.getElementById('btn-pass');
+const btnPlay  = document.getElementById('btn-play');
+const btnPass  = document.getElementById('btn-pass');
 const revBadge = document.getElementById('revolution-badge');
-const myNicknameEl = document.getElementById('my-nickname');
-const myRankEl = document.getElementById('my-rank');
 
 socket.on('connect', () => {
-  myNicknameEl.textContent = nickname;
   socket.emit('join-room', { roomId, nickname, sessionId: myId });
 });
 
@@ -51,17 +50,19 @@ socket.on('game-started', ({ hand, turnOrder: to, currentPlayerId: cpId, players
   myHand = sortHand(hand);
   currentPlayerId = cpId;
   turnOrder = to;
+  originalOrder = [...to];
   players = ps;
   selectedCards = [];
+  playerRanks = {};
   renderHand();
-  renderTurnPanel();
+  renderSeats();
   updateStatus(cpId);
 });
 
 socket.on('state-updated', ({ tableCards, currentPlayerId: cpId, revolution, players: ps }) => {
   currentPlayerId = cpId;
   players = ps;
-  renderTurnPanel();
+  renderSeats();
   renderTable(tableCards);
   updateStatus(cpId);
   revBadge.style.display = revolution ? 'block' : 'none';
@@ -91,7 +92,8 @@ socket.on('revolution', ({ active }) => animateMessage(active ? '혁명 발동!'
 socket.on('player-finished', ({ playerId, rank }) => {
   const p = players.find(p => p.id === playerId);
   animateMessage(`${p ? p.nickname : playerId} — ${rankLabel(rank)}`);
-  if (playerId === myId) myRankEl.textContent = rankLabel(rank);
+  playerRanks[playerId] = rankLabel(rank);
+  renderSeats();
 });
 
 socket.on('president-penalty', ({ playerId }) => {
@@ -119,29 +121,48 @@ btnPlay.onclick = () => {
 };
 btnPass.onclick = () => socket.emit('pass', { sessionId: myId });
 
-function renderTurnPanel() {
-  // turnOrder 기준으로 정렬, 완료된 플레이어는 뒤로
-  const ordered = turnOrder.map(id => players.find(p => p.id === id)).filter(Boolean);
-  const finished = players.filter(p => p.finished && !turnOrder.includes(p.id));
+// 플레이어 시트 — 원형 배치
+// 원점: 화면 중앙(cx, cy), 타원 반지름(rx, ry), 모두 뷰포트 % 기준
+const CX = 50, CY = 38, RX = 36, RY = 26;
 
-  turnListEl.innerHTML = [...ordered, ...finished].map((p, i) => {
-    const isActive = p.id === currentPlayerId;
-    const isMe = p.id === myId;
-    const classes = [
-      isActive ? 'active' : '',
+function renderSeats() {
+  seatsEl.innerHTML = '';
+  const order = originalOrder.length > 0 ? originalOrder : turnOrder;
+  const total = order.length;
+  if (total === 0) return;
+
+  const myIdx = order.indexOf(myId);
+
+  order.forEach((playerId, i) => {
+    const p = players.find(p => p.id === playerId);
+    if (!p) return;
+
+    // 나를 아래(90°)에 고정, 나머지를 시계 방향으로 배분
+    const offset = (i - myIdx + total) % total;
+    const deg = 90 + offset * (360 / total);
+    const rad = deg * Math.PI / 180;
+    const left = CX + RX * Math.cos(rad);
+    const top  = CY + RY * Math.sin(rad);
+
+    const isMe     = playerId === myId;
+    const isActive = playerId === currentPlayerId;
+    const rank     = playerRanks[playerId] || '';
+
+    const div = document.createElement('div');
+    div.className = ['player-seat',
+      isMe     ? 'me'       : '',
+      isActive ? 'active'   : '',
       p.finished ? 'finished' : '',
-      isMe ? 'me' : '',
     ].filter(Boolean).join(' ');
-
-    return `
-      <div class="turn-row ${classes}">
-        <span class="turn-num">${p.finished ? '✓' : i + 1}</span>
-        <span class="turn-name">${p.nickname}${isMe ? ' (나)' : ''}</span>
-        <span class="turn-cards">${p.finished ? '' : p.cardCount + '장'}</span>
-        ${isActive ? '<span class="turn-arrow">◀</span>' : ''}
-      </div>
+    div.style.left = `${left}%`;
+    div.style.top  = `${top}%`;
+    div.innerHTML = `
+      <div class="seat-name">${p.nickname}${isMe ? ' (나)' : ''}</div>
+      <div class="seat-cards">${p.finished ? '완료' : p.cardCount + '장'}</div>
+      ${rank ? `<div class="seat-rank">${rank}</div>` : ''}
     `;
-  }).join('');
+    seatsEl.appendChild(div);
+  });
 }
 
 function renderHand() {
@@ -178,8 +199,7 @@ function renderTable(cards) {
 
 function updateStatus(cpId) {
   if (!cpId) { statusEl.textContent = ''; return; }
-  const isMyTurn = cpId === myId;
-  if (isMyTurn) {
+  if (cpId === myId) {
     statusEl.textContent = '내 턴 — 카드를 선택하세요';
     gsap.fromTo(statusEl, { scale: 1.2, color: '#e94560' }, { scale: 1, color: '#fff', duration: 0.4 });
   } else {
@@ -207,6 +227,6 @@ function rankLabel(rank) {
 
 if (myHand.length > 0) {
   renderHand();
-  renderTurnPanel();
+  renderSeats();
   updateStatus(currentPlayerId);
 }
