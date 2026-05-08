@@ -20,6 +20,7 @@
 | 상태 | 위치 | 문제 | 비고 |
 |------|------|------|------|
 | ✅ | `game.js`, `game.html` | 낼 수 없는 카드가 시각적으로 구분되지 않음 | `computeSelectableSet` 추가, 낼 수 없는 카드에 `dimmed` 클래스(opacity 0.35) 적용 |
+| ✅ | `game.js:computeSelectableSet` | 선(테이블 빈 상태)에서 카드 선택 후에도 다른 숫자 카드가 dimmed 안 됨 | `tableEmpty && selected.length > 0` 분기 추가 — 같은 숫자+조커만 반환 |
 
 ## 해결 완료
 

@@ -45,7 +45,14 @@ function subtractCards(arr, toRemove) {
 }
 function computeSelectableSet(hand, selected, tableCards, revolution) {
   if (currentPlayerId !== myId) return new Set();
-  if (!tableCards || tableCards.length === 0) return new Set(hand);
+  const tableEmpty = !tableCards || tableCards.length === 0;
+  if (tableEmpty && selected.length === 0) return new Set(hand);
+  if (tableEmpty) {
+    const selNum = selected.filter(c => c !== 'Joker').map(c => c.slice(0, -1))[0] || null;
+    const remaining = subtractCards(hand, selected);
+    if (!selNum) return new Set(remaining);
+    return new Set(remaining.filter(c => c === 'Joker' || c.slice(0, -1) === selNum));
+  }
   const N = tableCards.length;
   if (selected.length >= N) return new Set();
   const selNum = selected.filter(c => c !== 'Joker').map(c => c.slice(0, -1))[0] || null;
