@@ -265,10 +265,13 @@ function renderHand() {
   const selectable = computeSelectableSet(myHand, selectedCards, currentTableCards, currentRevolution);
   const tempSel = [...selectedCards];
   handEl.innerHTML = '';
-  myHand.forEach((card) => {
+  const n = myHand.length;
+  const totalAngle = Math.min(12, n - 1);
+
+  myHand.forEach((card, i) => {
     const isSelected = (() => {
-      const i = tempSel.indexOf(card);
-      if (i !== -1) { tempSel.splice(i, 1); return true; }
+      const idx = tempSel.indexOf(card);
+      if (idx !== -1) { tempSel.splice(idx, 1); return true; }
       return false;
     })();
     const isDimmed = !isSelected && !selectable.has(card);
@@ -277,6 +280,10 @@ function renderHand() {
     div.dataset.card = card;
     div.innerHTML = `<img src="${cardImg(card)}" alt="${card}">`;
     div.onclick = () => toggleCard(card);
+
+    const angleDeg = n <= 1 ? 0 : ((n - 1) / 2 - i) / (n - 1) * totalAngle;
+    div.style.setProperty('--rot', `${angleDeg}deg`);
+
     handEl.appendChild(div);
   });
   myAreaEl.classList.toggle('active', isMyTurn);
