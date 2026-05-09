@@ -318,7 +318,6 @@ function showGameOverPanel(ranks) {
     const name = p ? p.nickname : id;
     return `
       <div class="go-player-card">
-        <img class="go-card-dark" src="/Resource/UI/result/result-panel-dark.png" alt="">
         <img class="go-card-reward-bg" src="/Resource/UI/background/CardGame-rankReward-bg2.png" alt="">
         <img class="go-card-bg" src="/Resource/UI/result/result-bg-red.png" alt="">
         <img class="go-card-badge" src="/Resource/UI/rank-badge/${rank}.png" alt="${rankLabel(rank)}">
