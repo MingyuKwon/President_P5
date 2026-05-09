@@ -43,9 +43,9 @@ function myStrategy(ctx) {
 
   // 선이 아닐 때: 테이블 장수에 맞춰 낼 수 있는 가장 약한 조합
 
-  // 조커에 스페이드 3으로 역전
-  if (tableCards.length === 1 && tableCards[0] === 'Joker' && hand.includes('3S')) {
-    return ['3S'];
+  // 조커가 테이블에 있을 때: 3S만 역전 가능, 그 외엔 무조건 패스
+  if (tableCards.length === 1 && tableCards[0] === 'Joker') {
+    return hand.includes('3S') ? ['3S'] : null;
   }
 
   const N = needCount;
@@ -66,8 +66,8 @@ function myStrategy(ctx) {
     }
   }
 
-  // 3. 조커 단독 (1장 낼 때)
-  if (hasJoker && N === 1) return ['Joker'];
+  // 3. 조커 단독 (1장 낼 때) — 테이블도 조커면 낼 수 없으므로 canBeat 확인
+  if (hasJoker && N === 1 && canBeat(['Joker'], tableCards)) return ['Joker'];
 
   return null; // 패스
 }
