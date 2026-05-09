@@ -274,7 +274,6 @@ socket.on('game-state-sync', ({ hand, tableCards, tablePile, currentPlayerId: cp
   currentTableCards = tableCards || [];
   currentRevolution = revolution;
   players = ps;
-  playerRanks = {};
   ps.forEach(p => { if (p.rank) playerRanks[p.id] = p.rank; });
   if (to.length > 0) { turnOrder = to; if (originalOrder.length === 0) originalOrder = [...to]; }
   selectedCards = [];
