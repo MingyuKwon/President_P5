@@ -179,8 +179,10 @@ io.on('connection', (socket) => {
 
     // 게임 진행 중이면 현재 상태 동기화
     const gameState = gameStates.get(roomId);
+    console.log('[join-room] sessionId:', sessionId, '| status:', result.status, '| gameState exists:', !!gameState, '| phase:', gameState?.phase);
     if (gameState && result.status === 'playing') {
       const playerState = gameState.players[sessionId];
+      console.log('[join-room] playerState exists:', !!playerState, '| taxStates has room:', taxStates.has(roomId));
       if (playerState) {
         const tax = taxStates.get(roomId);
         let taxInfo = null;
@@ -194,7 +196,9 @@ io.on('connection', (socket) => {
             taxReturnCount: alreadyDone ? 0 : (role === 'president' ? 2 : role === 'vice-president' && tax.needsVP ? 1 : 0),
             taxSubmitted: alreadyDone,
           };
+          console.log('[join-room] tax sync — role:', role, '| alreadyDone:', alreadyDone, '| taxInfo:', JSON.stringify(taxInfo));
         }
+        console.log('[join-room] emitting game-state-sync — phase:', gameState.phase, '| taxInfo:', taxInfo ? JSON.stringify(taxInfo) : null);
         socket.emit('game-state-sync', {
           hand: playerState.hand,
           tableCards: gameState.tableCards,

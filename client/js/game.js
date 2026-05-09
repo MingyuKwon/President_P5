@@ -266,6 +266,7 @@ socket.on('game-started', ({ hand, turnOrder: to, currentPlayerId: cpId, players
 });
 
 socket.on('game-state-sync', ({ hand, tableCards, tablePile, currentPlayerId: cpId, revolution, players: ps, turnOrder: to, phase, readyPlayers, scores, isHost: h, taxInfo }) => {
+  console.log('[game-state-sync] phase:', phase, '| taxInfo:', taxInfo, '| hand.length:', hand?.length);
   if (h !== undefined) isHost = h;
   myHand = sortHand(hand);
   currentPlayerId = cpId;
@@ -276,6 +277,7 @@ socket.on('game-state-sync', ({ hand, tableCards, tablePile, currentPlayerId: cp
   selectedCards = [];
 
   if (phase === 'tax' && taxInfo) {
+    console.log('[game-state-sync] → tax branch. taxReturnCount:', taxInfo.taxReturnCount, '| taxSubmitted:', taxInfo.taxSubmitted);
     taxPhase = taxInfo;
     taxSubmitted = taxInfo.taxSubmitted || false;
     enterTaxPhase(taxInfo);
@@ -420,6 +422,7 @@ const taxBannerEl = document.getElementById('tax-banner');
 const ROLE_LABEL = { president: '대부호', 'vice-president': '부호', citizen: '평민', 'vice-scum': '빈민', scum: '대빈민' };
 
 function enterTaxPhase(taxInfo) {
+  console.log('[enterTaxPhase]', JSON.stringify(taxInfo), '| taxSubmitted will be:', taxInfo.taxSubmitted || false);
   const { role, taxGiven, taxReceived, taxReturnCount } = taxInfo;
   taxSubmitted = false;
   gameBoardEl.classList.add('tax-mode');
