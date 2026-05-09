@@ -8,6 +8,7 @@
   function next() {
     if (queue.length === 0) {
       playing = false;
+      if (typeof window.onCutsceneQueueEmpty === 'function') window.onCutsceneQueueEmpty();
       if (drainCallback) { const cb = drainCallback; drainCallback = null; cb(); }
       return;
     }
@@ -69,6 +70,8 @@
         .to(content,  { opacity: 0, scale: 1.06, duration: FADE_OUT, ease: 'power2.in' }, '<');
     });
   }
+
+  window.isCutscenePlaying = function () { return playing; };
 
   window.enqueueCutscene = function (config) {
     queue.push(config);
