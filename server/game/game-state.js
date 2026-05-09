@@ -35,6 +35,7 @@ function createGameState(players, gameNumber, prevRanks) {
     finishedOrder: [],
     ranks: prevRanks,
     presidentId,
+    presidentPenalty: false,
   };
 }
 
@@ -134,6 +135,7 @@ function handlePlayerFinished(state, playerId, events) {
         players: { ...next.players, [next.presidentId]: { ...president, finished: true } },
         turnOrder: newTurnOrder,
         currentIndex: newTurnOrder.length > 0 ? next.currentIndex % newTurnOrder.length : 0,
+        presidentPenalty: true,
       };
       events.push({ type: 'president-penalty', playerId: next.presidentId });
     }
@@ -156,12 +158,17 @@ function handlePlayerFinished(state, playerId, events) {
       events.push({ type: 'player-finished', playerId: lastId, rank: 'scum' });
     }
     next = { ...next, phase: 'gameover' };
-    const ranks = assignRanks(next.finishedOrder);
-    if (next.presidentId && events.some(e => e.type === 'president-penalty')) {
+    // 몰락한 대부호를 finishedOrder 마지막에 추가해 전체 인원 기준으로 순위 계산
+    let finalFinishedOrder = next.finishedOrder;
+    if (next.presidentPenalty && !finalFinishedOrder.includes(next.presidentId)) {
+      finalFinishedOrder = [...finalFinishedOrder, next.presidentId];
+    }
+    const ranks = assignRanks(finalFinishedOrder);
+    if (next.presidentPenalty) {
       ranks[next.presidentId] = 'scum';
     }
     events.push({ type: 'game-over', ranks });
-    next = { ...next, ranks };
+    next = { ...next, ranks, finishedOrder: finalFinishedOrder };
   }
 
   return next;
