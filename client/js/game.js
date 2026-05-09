@@ -405,6 +405,7 @@ const savedRanks = sessionStorage.getItem('gameOverRanks');
 if (savedRanks) showGameOverPanel(JSON.parse(savedRanks));
 
 socket.on('room-closed', () => {
+  sessionStorage.removeItem('gameOverRanks');
   alert('방장이 방을 나갔습니다. 로비로 이동합니다.');
   location.href = '/';
 });
