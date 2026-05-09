@@ -331,7 +331,6 @@ io.on('connection', (socket) => {
     const expectedCount = isPresident ? 2 : 1;
     if (!Array.isArray(cards) || cards.length !== expectedCount) { console.log('[tax-return] REJECT — wrong card count, expected:', expectedCount, 'got:', cards?.length); return; }
     console.log('[tax-return] ACCEPTED — calling processTaxReturn');
-    clearTaxTimer(session.roomId);
     processTaxReturn(session.roomId, sessionId, cards);
   });
 
