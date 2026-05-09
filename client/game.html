@@ -77,10 +77,9 @@
       text-shadow:0 1px 4px rgba(0,0,0,.9); }
     #turn-timer.urgent .timer-text { color:#e94560; }
     #btn-exit { position:absolute; top:0; right:14px; transform:translateY(calc(-100% - 8px));
-      padding:4px 14px;
-      background:rgba(0,0,0,.5); border:1.5px solid rgba(255,255,255,.7); border-radius:8px;
-      font-size:0.78rem; color:#fff; cursor:pointer; }
-    #btn-exit:hover { background:rgba(255,255,255,.15); border-color:#fff; }
+      padding:0; background:none; border:none; cursor:pointer; }
+    #btn-exit img { display:block; height:40px; width:auto; transition:opacity .15s, transform .1s; }
+    #btn-exit:hover img { transform:scale(1.05); opacity:0.85; }
 
     /* 내 손패 */
     #bottom-ui { position:absolute; bottom:-5px; left:0; right:0; display:flex; flex-direction:column; }
@@ -214,7 +213,7 @@
       <div id="my-area">
         <div id="auto-indicator">⚡ 자동 진행 중</div>
         <div id="hand"></div>
-        <button id="btn-exit">나가기</button>
+        <button id="btn-exit"><img src="/Resource/UI/ControlPanel/Exit.png" alt="나가기"></button>
       </div>
     </div>
   </div>
