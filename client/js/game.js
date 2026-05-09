@@ -388,9 +388,9 @@ socket.on('round-end', ({ reason }) => {
   clearTimerUI();
   clearAutoPassTimer();
   clearAutoPlayTimer();
-  if (reason === '8-clear') enqueueCutscene({ image: null, text: '8 Clear!' });
-  else if (reason === 'spade-reversal') enqueueCutscene({ image: null, text: '♠ Reversal!' });
-  else if (reason === 'all-pass') enqueueCutscene({ image: null, text: '전원 패스' });
+  if (reason === '8-clear') enqueueCutscene({ image: '/Resource/UI/game-state/Eight_RoundEnd.png', text: '8 Clear!' });
+  else if (reason === 'spade-reversal') enqueueCutscene({ image: '/Resource/UI/game-state/S3_RoundEnd.png', text: '♠ Reversal!' });
+  else if (reason === 'all-pass') enqueueCutscene({ image: '/Resource/UI/game-state/AllPass_RoundENd.png', text: '전원 패스' });
   gsap.to('#table .table-group', {
     opacity: 0, y: -20, duration: 0.4, stagger: 0.05,
     onComplete: () => { tableEl.innerHTML = ''; },
@@ -399,10 +399,10 @@ socket.on('round-end', ({ reason }) => {
   if (currentPlayerId === myId) { tryAutoPass(); tryAutoPlay(); }
 });
 
-socket.on('revolution', ({ active }) => enqueueCutscene({ image: null, text: active ? '혁명 발동!' : '반혁명!' }));
+socket.on('revolution', ({ active }) => enqueueCutscene({ image: '/Resource/UI/game-state/Revolution.png', text: active ? '혁명 발동!' : '반혁명!' }));
 
 socket.on('player-finished', ({ playerId, rank }) => {
-  enqueueCutscene({ image: null, text: rankLabel(rank) });
+  enqueueCutscene({ image: '/Resource/UI/game-state/allout.png', text: rankLabel(rank) });
 });
 
 socket.on('player-bot', ({ playerId }) => {
@@ -419,7 +419,7 @@ socket.on('room-updated', ({ players: newPlayers }) => {
 });
 
 socket.on('president-penalty', ({ playerId }) => {
-  enqueueCutscene({ image: null, text: '대부호 방어 실패!', textColor: '#e94560' });
+  enqueueCutscene({ image: '/Resource/UI/game-state/fall.png', text: '대부호 방어 실패!', textColor: '#e94560' });
   fallenPresidentId = playerId;
   renderSeats();
 });
