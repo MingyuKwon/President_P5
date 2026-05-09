@@ -512,7 +512,7 @@ function showTaxExchangeImage() {
   });
   const img = document.createElement('img');
   img.src = '/Resource/UI/game-state/ExchangeCard.png';
-  Object.assign(img.style, { maxWidth: '38vw', maxHeight: '38vh', objectFit: 'contain' });
+  Object.assign(img.style, { width: '38vw', height: '38vh', objectFit: 'contain' });
   taxExchangeEl.appendChild(img);
   document.body.appendChild(taxExchangeEl);
 
