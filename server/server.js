@@ -17,6 +17,18 @@ const sessionMap = new Map();   // sessionId → { socketId, roomId }
 const socketSession = new Map(); // socketId → sessionId
 const turnTimers = new Map();   // roomId → timeoutId
 const readySets = new Map();    // roomId → Set<sessionId>
+const roomScores = new Map();   // roomId → { sessionId → score }
+
+const RANK_SCORES = { president: 30, 'vice-president': 20, citizen: 10, 'vice-scum': 0, scum: -10 };
+
+function updateScores(roomId, ranks) {
+  if (!roomScores.has(roomId)) roomScores.set(roomId, {});
+  const scores = roomScores.get(roomId);
+  for (const [playerId, rank] of Object.entries(ranks)) {
+    scores[playerId] = (scores[playerId] || 0) + (RANK_SCORES[rank] ?? 0);
+  }
+  return { ...scores };
+}
 
 const TURN_DURATION = 20; // seconds
 
@@ -72,7 +84,12 @@ function broadcastGameUpdate(roomId, state, events) {
         playerSocket.emit('hand-updated', { hand: state.players[event.playerId].hand });
       }
     }
-    io.to(roomId).emit(event.type, event);
+    if (event.type === 'game-over') {
+      const scores = updateScores(roomId, event.ranks);
+      io.to(roomId).emit('game-over', { ...event, scores });
+    } else {
+      io.to(roomId).emit(event.type, event);
+    }
   }
 }
 
@@ -128,6 +145,7 @@ io.on('connection', (socket) => {
           turnOrder: gameState.turnOrder,
           phase: gameState.phase,
           readyPlayers: [...(readySets.get(roomId) || [])],
+          scores: roomScores.get(roomId) || {},
           isHost,
         });
 
@@ -227,6 +245,7 @@ io.on('connection', (socket) => {
       // 방장 퇴장 → 방 강제 해산
       io.to(roomId).emit('room-closed', { reason: 'host-left' });
       const playerIds = closeRoom(roomId);
+      roomScores.delete(roomId);
       for (const pid of playerIds) {
         const sess = sessionMap.get(pid);
         if (sess) sess.roomId = null;

@@ -226,6 +226,7 @@ socket.on('room-joined', ({ isHost: h }) => {
 socket.on('game-started', ({ hand, turnOrder: to, currentPlayerId: cpId, players: ps }) => {
   clearTimeout(gameOverTimer);
   sessionStorage.removeItem('gameOverRanks');
+  sessionStorage.removeItem('gameOverScores');
   document.getElementById('game-over-overlay').classList.remove('open');
   if (countdownInterval) { clearInterval(countdownInterval); countdownInterval = null; }
   setReadyBtn(false);
@@ -250,7 +251,7 @@ socket.on('game-started', ({ hand, turnOrder: to, currentPlayerId: cpId, players
   if (currentPlayerId === myId) { tryAutoPlay(); tryAutoPass(); }
 });
 
-socket.on('game-state-sync', ({ hand, tableCards, tablePile, currentPlayerId: cpId, revolution, players: ps, turnOrder: to, phase, readyPlayers, isHost: h }) => {
+socket.on('game-state-sync', ({ hand, tableCards, tablePile, currentPlayerId: cpId, revolution, players: ps, turnOrder: to, phase, readyPlayers, scores, isHost: h }) => {
   if (h !== undefined) isHost = h;
   myHand = sortHand(hand);
   currentPlayerId = cpId;
@@ -265,6 +266,7 @@ socket.on('game-state-sync', ({ hand, tableCards, tablePile, currentPlayerId: cp
   renderCardOrder();
 
   if (phase === 'gameover' && readyPlayers) {
+    if (scores) sessionStorage.setItem('gameOverScores', JSON.stringify(scores));
     readyPlayers.forEach(pid => {
       const card = document.querySelector(`.go-player-card[data-player-id="${pid}"]`);
       if (card) card.querySelector('.go-card-ready').style.display = 'block';
@@ -328,7 +330,7 @@ socket.on('president-penalty', ({ playerId }) => {
   renderSeats();
 });
 
-function showGameOverPanel(ranks) {
+function showGameOverPanel(ranks, scores = {}) {
   const RANK_ORDER = ['president', 'vice-president', 'citizen', 'vice-scum', 'scum'];
   const sorted = Object.entries(ranks).sort(
     (a, b) => RANK_ORDER.indexOf(a[1]) - RANK_ORDER.indexOf(b[1])
@@ -345,6 +347,7 @@ function showGameOverPanel(ranks) {
         <img class="go-card-badge" src="/Resource/UI/rank-badge/${rank}.png" alt="${rankLabel(rank)}">
         <div class="go-card-content">
           <div class="go-card-name">${name}</div>
+          <div class="go-card-score">${scores[id] !== undefined ? scores[id] : 0}점</div>
         </div>
         <img class="go-card-ready" src="/Resource/UI/result/Ready.png" alt="">
       </div>`;
@@ -359,10 +362,11 @@ function showGameOverPanel(ranks) {
 }
 
 let gameOverTimer = null;
-socket.on('game-over', ({ ranks }) => {
+socket.on('game-over', ({ ranks, scores }) => {
   clearTimerUI();
   sessionStorage.setItem('gameOverRanks', JSON.stringify(ranks));
-  gameOverTimer = setTimeout(() => showGameOverPanel(ranks), 800);
+  sessionStorage.setItem('gameOverScores', JSON.stringify(scores || {}));
+  gameOverTimer = setTimeout(() => showGameOverPanel(ranks, scores), 800);
 });
 
 
@@ -402,10 +406,14 @@ socket.on('all-ready', () => {
 
 // 새로고침 후 결과창 복원
 const savedRanks = sessionStorage.getItem('gameOverRanks');
-if (savedRanks) showGameOverPanel(JSON.parse(savedRanks));
+if (savedRanks) {
+  const savedScores = sessionStorage.getItem('gameOverScores');
+  showGameOverPanel(JSON.parse(savedRanks), savedScores ? JSON.parse(savedScores) : {});
+}
 
 socket.on('room-closed', () => {
   sessionStorage.removeItem('gameOverRanks');
+  sessionStorage.removeItem('gameOverScores');
   alert('방장이 방을 나갔습니다. 로비로 이동합니다.');
   location.href = '/';
 });
@@ -426,6 +434,7 @@ btnPass.onclick = () => socket.emit('pass', { sessionId: myId });
 document.getElementById('btn-exit').onclick = () => {
   if (!confirm('게임을 나가시겠습니까?')) return;
   sessionStorage.removeItem('gameOverRanks');
+  sessionStorage.removeItem('gameOverScores');
   socket.emit('leave-room', { sessionId: myId });
   location.href = '/';
 };
