@@ -202,7 +202,7 @@ function startTimerUI(playerId, duration) {
   function update() {
     timerEl.style.visibility = 'visible';
     timerEl.classList.toggle('urgent', remaining <= 10);
-    timerEl.querySelector('.timer-text').textContent = `${remaining}초`;
+    timerEl.querySelector('.timer-text').textContent = remaining;
   }
   update();
   timerInterval = setInterval(() => {
