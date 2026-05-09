@@ -397,8 +397,10 @@ function renderSeats() {
     ].filter(Boolean).join(' ');
     const charRank = rank || 'citizen';
     div.innerHTML = `
-      <img class="seat-char-shadow" src="/Resource/UI/character/${charRank}-shadow.png" alt="">
-      <img class="seat-char-face" src="/Resource/UI/character/${charRank}-face.png" alt="">
+      <div class="seat-char">
+        <img class="seat-char-shadow" src="/Resource/UI/character/${charRank}-shadow.png" alt="">
+        <img class="seat-char-face" src="/Resource/UI/character/${charRank}-face.png" alt="">
+      </div>
       <div class="seat-content">
         <div class="seat-name">${p.nickname}</div>
         <div class="seat-cards">${p.finished ? '완료' : p.cardCount + '장'}</div>
