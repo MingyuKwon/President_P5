@@ -733,7 +733,9 @@ function renderSeats() {
 function renderHand() {
   const isTaxSelecting = taxPhase && taxPhase.taxReturnCount > 0 && !taxSubmitted;
   const isMyTurn = currentPlayerId === myId;
-  const selectable = isTaxSelecting ? new Set(myHand) : computeSelectableSet(myHand, selectedCards, currentTableCards, currentRevolution);
+  const selectable = isTaxSelecting
+    ? (selectedCards.length >= taxPhase.taxReturnCount ? new Set(selectedCards) : new Set(myHand))
+    : computeSelectableSet(myHand, selectedCards, currentTableCards, currentRevolution);
   const tempSel = [...selectedCards];
   handEl.innerHTML = '';
   const n = myHand.length;
