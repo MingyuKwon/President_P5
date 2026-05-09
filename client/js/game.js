@@ -90,6 +90,7 @@ let playerRanks = {};
 players.forEach(p => { if (p.rank) playerRanks[p.id] = p.rank; });
 let currentTableCards = [];
 let currentRevolution = false;
+let fallenPresidentId = null;
 
 const seatsEl        = document.getElementById('player-seats');
 const tableEl        = document.getElementById('table');
@@ -228,6 +229,7 @@ socket.on('game-started', ({ hand, turnOrder: to, currentPlayerId: cpId, players
   selectedCards = [];
   currentTableCards = [];
   currentRevolution = false;
+  fallenPresidentId = null;
   playerRanks = {};
   ps.forEach(p => { if (p.rank) playerRanks[p.id] = p.rank; });
   renderHand();   // 버튼 상태 포함
@@ -300,6 +302,8 @@ socket.on('player-finished', ({ playerId, rank }) => {
 socket.on('president-penalty', ({ playerId }) => {
   const p = players.find(p => p.id === playerId);
   animateMessage(`${p ? p.nickname : playerId} 대부호 방어 실패!`, '#e94560');
+  fallenPresidentId = playerId;
+  renderSeats();
 });
 
 function showGameOverPanel(ranks) {
@@ -397,10 +401,16 @@ function renderSeats() {
     const shadowSrc = isActive
       ? `/Resource/UI/character/${charRank}-shadow-red.png`
       : `/Resource/UI/character/${charRank}-shadow.png`;
+    const overlayImg = playerId === fallenPresidentId
+      ? '/Resource/UI/game-state/cardGame-state-fall-i18n #406.png'
+      : p.finished
+        ? '/Resource/UI/game-state/cardGame-state-allout-i18n #414.png'
+        : '';
     div.innerHTML = `
       <div class="seat-char">
         <img class="seat-char-shadow" src="${shadowSrc}" alt="">
         <img class="seat-char-face" src="/Resource/UI/character/${charRank}-face.png" alt="">
+        ${overlayImg ? `<img class="seat-overlay" src="${overlayImg}" alt="">` : ''}
       </div>
       <div class="seat-content">
         <div class="seat-name">${p.nickname}</div>
