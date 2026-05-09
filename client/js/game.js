@@ -255,6 +255,7 @@ socket.on('room-joined', ({ isHost: h }) => {
 });
 
 socket.on('game-started', ({ hand, turnOrder: to, currentPlayerId: cpId, players: ps, phase, taxInfo }) => {
+  clearCutsceneQueue();
   clearTimeout(gameOverTimer);
   sessionStorage.removeItem('gameOverRanks');
   sessionStorage.removeItem('gameOverScores');
@@ -278,23 +279,25 @@ socket.on('game-started', ({ hand, turnOrder: to, currentPlayerId: cpId, players
   ps.forEach(p => { if (p.rank) playerRanks[p.id] = p.rank; });
   tableEl.innerHTML = '';
 
-  if (phase === 'tax' && taxInfo) {
-    console.log('[game-started] TAX phase | taxInfo:', JSON.stringify(taxInfo), '| myId:', myId, '| playerRanks:', JSON.stringify(playerRanks));
-    taxPhase = taxInfo;
-    taxSubmitted = false; // 새 판 시작이므로 항상 초기화
-    enterTaxPhase(taxInfo);
-    // 세금 시작 시 받은 카드 애니메이션 (hand-updated가 아닌 game-started로 전달되므로 여기서 처리)
-    if (taxInfo.taxReceived && taxInfo.taxReceived.length > 0) {
-      animateTaxReceive(taxInfo.taxReceived);
+  enqueueCutscene({ image: '/Resource/UI/game-state/GameStart.png' });
+  afterCutsceneQueue(() => {
+    if (phase === 'tax' && taxInfo) {
+      console.log('[game-started] TAX phase | taxInfo:', JSON.stringify(taxInfo), '| myId:', myId, '| playerRanks:', JSON.stringify(playerRanks));
+      taxPhase = taxInfo;
+      taxSubmitted = false;
+      enterTaxPhase(taxInfo);
+      if (taxInfo.taxReceived && taxInfo.taxReceived.length > 0) {
+        animateTaxReceive(taxInfo.taxReceived);
+      }
+    } else {
+      taxPhase = null;
+      exitTaxPhase();
+      renderHand();
+      renderSeats();
+      renderCardOrder();
+      if (currentPlayerId === myId) { tryAutoPlay(); tryAutoPass(); }
     }
-  } else {
-    taxPhase = null;
-    exitTaxPhase();
-    renderHand();
-    renderSeats();
-    renderCardOrder();
-    if (currentPlayerId === myId) { tryAutoPlay(); tryAutoPass(); }
-  }
+  });
 });
 
 socket.on('game-state-sync', ({ hand, tableCards, tablePile, currentPlayerId: cpId, revolution, players: ps, turnOrder: to, phase, readyPlayers, scores, isHost: h, taxInfo }) => {

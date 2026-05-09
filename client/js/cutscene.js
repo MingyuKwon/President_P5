@@ -79,4 +79,9 @@
     if (!playing && queue.length === 0) callback();
     else drainCallback = callback;
   };
+
+  window.clearCutsceneQueue = function () {
+    queue.length = 0;
+    drainCallback = null;
+  };
 })();
