@@ -76,9 +76,9 @@
     #turn-timer .timer-text { position:absolute; font-size:1.15rem; font-weight:bold; color:#fff;
       text-shadow:0 1px 4px rgba(0,0,0,.9); }
     #turn-timer.urgent .timer-text { color:#e94560; }
-    #btn-exit { position:absolute; top:0; right:14px; transform:translateY(calc(-100% - 8px));
-      padding:0; background:none; border:none; cursor:pointer; }
-    #btn-exit img { display:block; height:40px; width:auto; transition:opacity .15s, transform .1s; }
+    #btn-exit { position:absolute; bottom:50px; right:50px;
+      padding:0; background:none; border:none; cursor:pointer; z-index:10; }
+    #btn-exit img { display:block; height:52px; width:auto; transition:opacity .15s, transform .1s; }
     #btn-exit:hover img { transform:scale(1.05); opacity:0.85; }
 
     /* 내 손패 */
@@ -176,6 +176,7 @@
 </head>
 <body>
   <div id="game-board">
+    <button id="btn-exit"><img src="/Resource/UI/ControlPanel/Exit.png" alt="나가기"></button>
     <div id="game-over-overlay">
       <div id="game-over-content">
         <div id="game-over-ranks"></div>
@@ -213,7 +214,6 @@
       <div id="my-area">
         <div id="auto-indicator">⚡ 자동 진행 중</div>
         <div id="hand"></div>
-        <button id="btn-exit"><img src="/Resource/UI/ControlPanel/Exit.png" alt="나가기"></button>
       </div>
     </div>
   </div>
