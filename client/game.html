@@ -168,11 +168,17 @@
       text-align:center; word-break:break-all; line-height:1.2; margin-top:10px; }
     .go-card-score { font-size:0.78rem; font-weight:bold; color:#e94560; text-align:center; }
     #ready-section { position:relative; z-index:10; display:flex; flex-direction:column; align-items:center; gap:10px; transform:translateY(200px); }
+    @keyframes ready-pop {
+      0%   { transform:translateX(-50%) scale(0.5); }
+      60%  { transform:translateX(-50%) scale(1.2); }
+      100% { transform:translateX(-50%) scale(1); }
+    }
     .go-card-ready, .go-card-exit {
       position:absolute; top:-130px; left:50%;
       transform:translateX(-50%);
       width:90%; height:auto; z-index:6; pointer-events:none; display:none;
     }
+    .go-card-ready.pop { animation:ready-pop .35s cubic-bezier(.22,.68,0,1.2) both; }
     .go-card-exit { filter:hue-rotate(180deg); }
     #btn-ready { padding:0; background:none; border:none; cursor:pointer; }
     #btn-ready img { display:block; height:68px; width:auto; transition:transform .1s; }

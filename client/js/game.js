@@ -273,7 +273,7 @@ socket.on('game-state-sync', ({ hand, tableCards, tablePile, currentPlayerId: cp
     if (scores) sessionStorage.setItem('gameOverScores', JSON.stringify(scores));
     readyPlayers.forEach(pid => {
       const card = document.querySelector(`.go-player-card[data-player-id="${pid}"]`);
-      if (card) card.querySelector('.go-card-ready').style.display = 'block';
+      if (card) showReadyOverlay(card.querySelector('.go-card-ready'));
     });
     if (readyPlayers.includes(myId)) setReadyBtn(true);
   }
@@ -388,6 +388,13 @@ socket.on('game-over', ({ ranks, scores }) => {
 });
 
 
+function showReadyOverlay(el) {
+  el.classList.remove('pop');
+  void el.offsetWidth; // reflow to restart animation
+  el.style.display = 'block';
+  el.classList.add('pop');
+}
+
 function markPlayerLeft(playerId) {
   leftPlayers.add(playerId);
   const card = document.querySelector(`.go-player-card[data-player-id="${playerId}"]`);
@@ -413,7 +420,7 @@ socket.on('ready-updated', ({ readyPlayers }) => {
   console.log('[ready-updated] readyPlayers:', readyPlayers, '| myId:', myId);
   readyPlayers.forEach(pid => {
     const card = document.querySelector(`.go-player-card[data-player-id="${pid}"]`);
-    if (card) card.querySelector('.go-card-ready').style.display = 'block';
+    if (card) showReadyOverlay(card.querySelector('.go-card-ready'));
   });
   if (readyPlayers.includes(myId)) setReadyBtn(true);
 });
