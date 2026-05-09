@@ -402,9 +402,9 @@ function renderSeats() {
       ? `/Resource/UI/character/${charRank}-shadow-red.png`
       : `/Resource/UI/character/${charRank}-shadow.png`;
     const overlayImg = playerId === fallenPresidentId
-      ? '/Resource/UI/game-state/cardGame-state-fall-i18n %23406.png'
+      ? '/Resource/UI/game-state/fall.png'
       : p.finished
-        ? '/Resource/UI/game-state/cardGame-state-allout-i18n %23414.png'
+        ? '/Resource/UI/game-state/allout.png'
         : '';
     div.innerHTML = `
       <div class="seat-char">

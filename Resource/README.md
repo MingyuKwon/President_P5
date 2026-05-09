@@ -12,38 +12,39 @@
 ---
 
 ## UI/
-게임 UI에 사용하는 이미지. 파일이 없으면 코드의 onerror/폴백 텍스트로 대체됨.
 
-### UI 루트 (직접 참조)
+### UI/ControlPanel/
+조작 패널 버튼 및 타이머 이미지.
+
 | 파일 | 설명 | 참조 위치 |
 |---|---|---|
-| `btn_play.png` | "카드 내기" 버튼 이미지 | `game.html` |
-| `btn_pass.png` | "패스" 버튼 이미지 | `game.html` |
-| `seat_frame.png` | 플레이어 시트 프레임 배경 이미지 | `game.js` `renderSeats()` |
-| `rank_president.png` | 대부호 등급 뱃지 | `game.js` `rankImg()` |
-| `rank_vice-president.png` | 부호 등급 뱃지 | `game.js` `rankImg()` |
-| `rank_citizen.png` | 평민 등급 뱃지 | `game.js` `rankImg()` |
-| `rank_vice-scum.png` | 빈민 등급 뱃지 | `game.js` `rankImg()` |
-| `rank_scum.png` | 대빈민 등급 뱃지 | `game.js` `rankImg()` |
+| `CardSelect.png` | "카드 내기" 버튼 이미지 | `game.html` `#btn-play` |
+| `Pass.png` | "패스" 버튼 이미지 | `game.html` `#btn-pass` |
+| `Time.png` | 턴 타이머 배경 이미지 (숫자는 위에 오버레이) | `game.html` `#turn-timer` |
 
 ### UI/character/
-등수별 캐릭터 이미지. `*-shadow.png`(검은 실루엣)를 하단에, `*-face.png`(컬러 얼굴)를 상단에 겹쳐서 표시하는 레이어 구조.
+등수별 캐릭터 이미지. `*-shadow.png`(검은 실루엣)를 하단에, `*-face.png`(컬러 얼굴)를 상단에 겹쳐서 표시하는 레이어 구조. 현재 턴인 플레이어는 `-shadow.png` 대신 `-shadow-red.png` 사용.
 
 | 파일 | 등수 | 설명 |
 |---|---|---|
 | `president-face.png` | 대부호 | 금색 왕관 남자 얼굴 |
-| `president-shadow.png` | 대부호 | 금색 왕관 실루엣 |
+| `president-shadow.png` | 대부호 | 검은 실루엣 |
+| `president-shadow-red.png` | 대부호 | 빨간 실루엣 (현재 턴) |
 | `vice-president-face.png` | 부호 | 초록 모자 남자 얼굴 |
-| `vice-president-shadow.png` | 부호 | 초록 모자 실루엣 |
+| `vice-president-shadow.png` | 부호 | 검은 실루엣 |
+| `vice-president-shadow-red.png` | 부호 | 빨간 실루엣 (현재 턴) |
 | `citizen-face.png` | 평민 | 파란색 단발 여자 얼굴 |
-| `citizen-shadow.png` | 평민 | 파란색 단발 실루엣 |
+| `citizen-shadow.png` | 평민 | 검은 실루엣 |
+| `citizen-shadow-red.png` | 평민 | 빨간 실루엣 (현재 턴) |
 | `vice-scum-face.png` | 빈민 | 보라색 해골 남자 얼굴 |
-| `vice-scum-shadow.png` | 빈민 | 보라색 해골 실루엣 |
+| `vice-scum-shadow.png` | 빈민 | 검은 실루엣 |
+| `vice-scum-shadow-red.png` | 빈민 | 빨간 실루엣 (현재 턴) |
 | `scum-face.png` | 대빈민 | 회색 해골+폭탄 얼굴 |
-| `scum-shadow.png` | 대빈민 | 회색 해골+폭탄 실루엣 |
+| `scum-shadow.png` | 대빈민 | 검은 실루엣 |
+| `scum-shadow-red.png` | 대빈민 | 빨간 실루엣 (현재 턴) |
 
 ### UI/rank-badge/
-등수별 원형 뱃지 아이콘.
+등수별 원형 뱃지 아이콘. 결과창(`showGameOverPanel`)에서 사용.
 
 | 파일 | 등수 | 설명 |
 |---|---|---|
@@ -54,39 +55,30 @@
 | `scum.png` | 대빈민 | 해골 뱃지 |
 
 ### UI/game-state/
-게임 중 화면에 애니메이션으로 표시하는 상태 텍스트 이미지.
-일부는 여러 조각(end, end2, end3)으로 나뉘어 순차 애니메이션용으로 사용.
+게임 중 화면에 표시하는 상태 이미지.
 
-| 파일 | 표시 내용 |
-|---|---|
-| `cardGame-state-start-i18n #427.png` | "게임시작 / GAME START" |
-| `cardGame-state-gameover-i18n #400.png` | "게임종료 / GAME SET" |
-| `cardGame-state-allpass-i18n #342.png` | "전원패스 / ALL MEMBERS PASS" |
-| `cardGame-state-allout-i18n #414.png` | "냈다 / DONE!" — 카드를 다 낸 플레이어의 시트 위에 오버레이로 표시 |
-| `cardGame-state-end-i18n #336.png` | "8리셋 / 현재 턴 강제 종료" (전체) |
-| `cardGame-state-end2-i18n #365.png` | "8리" (조각 1) |
-| `cardGame-state-end3-i18n #355.png` | "셋 / 현재 턴 강제 종료" (조각 2) |
-| `cardGame-state-wonderEnd-i18n #401.png` | "X리셋 / 카드 유형 무시 및 현재 턴 강제 종료" (전체) |
-| `cardGame-state-wonderEnd2-i18n #368.png` | "X리" (조각 1) |
-| `cardGame-state-wonderEnd3-i18n #425.png` | "셋 / 카드 유형 무시 및 현재 턴 강제 종료" (조각 2) |
-| `cardGame-state-wonderEnd4-i18n #430.png` | "X" (조각) |
-| `cardGame-state-wonderEnd5-i18n #413.png` | "리" (조각) |
-| `cardGame-state-wonderEnd6-i18n #354.png` | "셋" (조각) |
-| `cardGame-state-wonderEnd7-i18n #395.png` | "카드 유형 무시..." (조각) |
-| `cardGame-state-3max-i18n #428.png` | "스페이드3 / 조커를 받아칠 수 있는 유일한 카드" |
-| `cardGame-state-exchange-i18n #370.png` | "카드교환중..." |
-| `cardGame-state-fall-i18n #406.png` | "몰락! / 대부호는 1위를 하지 못하면 대빈민으로 전락" — 몰락한 대부호의 시트 위에 오버레이로 표시 |
+| 파일 | 표시 내용 | 참조 위치 |
+|---|---|---|
+| `GameStart.png` | 게임 시작 | — |
+| `GameEnd.png` | 게임 종료 | — |
+| `AllPass_RoundENd.png` | 전원 패스 | — |
+| `Eight_RoundEnd.png` | 8리셋 | — |
+| `S3_RoundEnd.png` | 스페이드3 역전 | — |
+| `Revolution.png` | 혁명 | — |
+| `ExchangeCard.png` | 카드 교환 중 | — |
+| `allout.png` | 카드를 다 낸 플레이어의 시트 위에 오버레이 | `game.js` `renderSeats()` |
+| `fall.png` | 대부호 방어 실패 플레이어의 시트 위에 오버레이 | `game.js` `renderSeats()` |
 
 ### UI/result/
-게임 결과창 레이어 구조. 빨간 배경을 뒤에 크게 깔고, 검정 패널을 앞에 올린 뒤 그 안에 결과를 표시.
+게임 결과창 레이어 구조.
 
 | 파일 | 레이어 | 설명 |
 |---|---|---|
-| `result-bg-red.png` | 하단 (배경) | 빨간 사각형 — 결과창 뒷 배경 |
-| `result-panel-dark.png` | 상단 (전경) | 검정 다각형 패널 — 결과 텍스트가 표시되는 영역 |
+| `result-bg-red.png` | 하단 (배경) | 빨간 사각형 |
+| `result-panel-dark.png` | 상단 (전경) | 검정 다각형 패널 |
 
 ### UI/background/
-배경 및 기타 UI 요소.
+배경 및 기타 UI 요소 (현재 게임 화면에서 직접 참조하지 않음).
 
 | 파일 | 설명 |
 |---|---|
