@@ -35,7 +35,7 @@
         const img = document.createElement('img');
         img.src = image;
         Object.assign(img.style, {
-          maxWidth: '49vw', maxHeight: '38.5vh', objectFit: 'contain',
+          width: '49vw', height: '38.5vh', objectFit: 'contain',
         });
         content.appendChild(img);
       }
