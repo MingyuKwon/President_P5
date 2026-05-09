@@ -96,6 +96,7 @@ let fallenPresidentId = null;
 let isHost = false;
 let leftPlayers = new Set();
 let taxPhase = null; // null | { role, taxReturnCount }
+let taxSubmitted = false;
 
 const seatsEl        = document.getElementById('player-seats');
 const tableEl        = document.getElementById('table');
@@ -309,7 +310,8 @@ socket.on('hand-updated', ({ hand }) => {
   myHand = sortHand(hand);
   selectedCards = [];
   renderHand();
-  if (taxPhase && taxPhase.taxReturnCount > 0) renderTaxButtons(taxPhase.taxReturnCount);
+  // 세금 제출 전이고 내가 선택할 차례면 버튼 갱신
+  if (taxPhase && taxPhase.taxReturnCount > 0 && !taxSubmitted) renderTaxButtons(taxPhase.taxReturnCount);
 });
 
 socket.on('turn-timer', ({ playerId, duration }) => {
@@ -403,23 +405,21 @@ const ROLE_LABEL = { president: '대부호', 'vice-president': '부호', citizen
 
 function enterTaxPhase(taxInfo) {
   const { role, taxGiven, taxReceived, taxReturnCount } = taxInfo;
+  taxSubmitted = false;
   gameBoardEl.classList.add('tax-mode');
   taxBannerEl.style.display = 'block';
 
   if (taxReturnCount > 0) {
-    // 대부호 or 부호: 돌려줄 카드 선택
     taxBannerEl.textContent = `세금: 돌려줄 카드 ${taxReturnCount}장을 선택하세요`;
     renderHand();
     renderTaxButtons(taxReturnCount);
   } else if (taxGiven.length > 0) {
-    // 대빈민 or 빈민: 뺏긴 카드 표시
-    taxBannerEl.textContent = `세금 ${taxGiven.length}장 납부됨 (${taxGiven.map(c => c.slice(0,-1)).join(', ')})`;
+    taxBannerEl.textContent = `세금 ${taxGiven.length}장 납부됨 (${taxGiven.map(c => c.slice(0, -1)).join(', ')})`;
     handEl.classList.add('tax-waiting');
     renderHand();
     btnPlay.disabled = true;
     btnPass.disabled = true;
   } else {
-    // 평민: 대기
     taxBannerEl.textContent = '세금 교환 중...';
     handEl.classList.add('tax-waiting');
     renderHand();
@@ -432,33 +432,38 @@ function enterTaxPhase(taxInfo) {
 }
 
 function exitTaxPhase() {
+  taxSubmitted = false;
   gameBoardEl.classList.remove('tax-mode');
   taxBannerEl.style.display = 'none';
   handEl.classList.remove('tax-waiting');
-  // 카드 내기 버튼 원래대로 복구
-  btnPlay.textContent = '';
   btnPlay.innerHTML = '<img src="/Resource/UI/ControlPanel/CardSelect.png" alt="카드 내기"><span>카드 내기</span>';
   btnPlay.onclick = onBtnPlayClick;
   btnPass.style.display = '';
 }
 
 function renderTaxButtons(count) {
-  // 카드 내기 버튼을 세금 내기 버튼으로 교체
+  if (taxSubmitted) return; // 이미 제출한 경우 버튼 상태 변경 안 함
   btnPlay.innerHTML = `<img src="/Resource/UI/ControlPanel/CardSelect.png" alt="세금 내기"><span>세금 내기 (${count}장)</span>`;
   btnPlay.disabled = selectedCards.length !== count;
   btnPlay.onclick = () => {
-    if (selectedCards.length !== count) return;
+    if (selectedCards.length !== count || taxSubmitted) return;
+    taxSubmitted = true;
     socket.emit('tax-return', { sessionId: myId, cards: [...selectedCards] });
     btnPlay.disabled = true;
+    taxBannerEl.textContent = '제출 완료, 세금 교환 대기 중...';
+    handEl.classList.add('tax-waiting'); // 제출 후 손패 dimmed
   };
   btnPass.style.display = 'none';
 }
 
 socket.on('tax-returned', ({ giverId, targetId, cardCount }) => {
-  // hand-updated 이벤트로 손패는 이미 갱신됨
-  // 배너만 업데이트 (대부호가 돌렸으면 다음은 부호 차례)
-  if (taxPhase && taxPhase.taxReturnCount > 0) {
-    btnPlay.disabled = true; // 상대가 돌리는 동안 대기
+  if (!taxPhase) return;
+  if (taxPhase.taxReturnCount > 0 && !taxSubmitted) {
+    // 내 차례가 됐을 때 (부호: 대부호 반환 후) 배너 갱신
+    taxBannerEl.textContent = `세금: 돌려줄 카드 ${taxPhase.taxReturnCount}장을 선택하세요`;
+    handEl.classList.remove('tax-waiting');
+    renderHand();
+    renderTaxButtons(taxPhase.taxReturnCount);
   }
 });
 
@@ -629,7 +634,7 @@ function renderSeats() {
 }
 
 function renderHand() {
-  const isTaxSelecting = taxPhase && taxPhase.taxReturnCount > 0;
+  const isTaxSelecting = taxPhase && taxPhase.taxReturnCount > 0 && !taxSubmitted;
   const isMyTurn = currentPlayerId === myId;
   const selectable = isTaxSelecting ? new Set(myHand) : computeSelectableSet(myHand, selectedCards, currentTableCards, currentRevolution);
   const tempSel = [...selectedCards];
@@ -670,7 +675,7 @@ function renderHand() {
 }
 
 function toggleCard(card) {
-  const isTaxSelecting = taxPhase && taxPhase.taxReturnCount > 0;
+  const isTaxSelecting = taxPhase && taxPhase.taxReturnCount > 0 && !taxSubmitted;
   if (!isTaxSelecting && currentPlayerId !== myId) return;
   const idx = selectedCards.indexOf(card);
   if (idx === -1) selectedCards.push(card);
