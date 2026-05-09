@@ -957,9 +957,9 @@ setTimeout(() => {
   img.src = '/Resource/UI/ControlPanel/PassWord.png';
   Object.assign(img.style, {
     position: 'fixed',
-    left: `${rect.left - 60}px`,
+    left: `${rect.left - 20}px`,
     top: `${rect.top + rect.height / 2 - 20}px`,
-    width: '52px', height: '40px',
+    width: '62px', height: '48px',
     objectFit: 'contain', zIndex: '500', pointerEvents: 'none',
   });
   document.body.appendChild(img);
