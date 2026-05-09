@@ -395,7 +395,7 @@ socket.on('player-passed', ({ playerId }) => {
   const scale = boardRect.width / 1350;
   const seatRect = seatEl.getBoundingClientRect();
   const imgW = 81, imgH = 62;
-  const bx = (seatRect.left - boardRect.left) / scale - imgW - 20;
+  const bx = (seatRect.left - boardRect.left) / scale - imgW - 10;
   const by = (seatRect.top  - boardRect.top)  / scale + seatRect.height / scale / 2 - imgH / 2;
 
   const img = document.createElement('img');
