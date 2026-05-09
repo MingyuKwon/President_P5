@@ -14,31 +14,22 @@
       position:absolute;
       transform:translate(-50%, -50%);
       width:90px;
-      border-radius:12px;
-      border:2px solid transparent;
       text-align:center;
     }
     .seat-char-shadow {
-      display:block; width:100%; height:auto;
-      border-radius:10px; pointer-events:none;
+      display:block; width:100%; height:auto; pointer-events:none;
     }
     .seat-char-face {
       position:absolute; top:0; left:0; width:100%; height:100%;
-      object-fit:cover; border-radius:10px; pointer-events:none;
+      object-fit:cover; pointer-events:none;
     }
     .seat-content {
       position:absolute; bottom:0; left:0; right:0; z-index:2;
-      background:rgba(0,0,0,.75); border-radius:0 0 10px 10px;
       padding:4px 6px;
     }
     .player-seat.finished { opacity:.4; }
-    @keyframes seat-glow {
-      0%, 100% { border-color:#e94560; box-shadow:0 0 10px rgba(233,69,96,.6); }
-      50%       { border-color:#ff7a8a; box-shadow:0 0 24px rgba(233,69,96,.95); }
-    }
-    .player-seat.active { animation:seat-glow 1.2s ease-in-out infinite; }
-    .seat-name  { font-size:0.82rem; color:#fff; font-weight:bold; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-    .seat-cards { font-size:0.72rem; color:#ccc; }
+    .seat-name  { font-size:0.82rem; color:#fff; font-weight:bold; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; text-shadow:0 1px 4px rgba(0,0,0,.9); }
+    .seat-cards { font-size:0.72rem; color:#ccc; text-shadow:0 1px 4px rgba(0,0,0,.9); }
 
     /* 테이블 */
     #table { position:absolute; top:50%; left:50%; transform:translate(-50%, calc(-50% - 50px));
