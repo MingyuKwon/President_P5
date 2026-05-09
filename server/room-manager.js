@@ -52,6 +52,14 @@ function leaveRoom(roomId, sessionId) {
   return room;
 }
 
+function closeRoom(roomId) {
+  const room = rooms.get(roomId);
+  if (!room) return [];
+  const playerIds = room.players.map(p => p.id);
+  rooms.delete(roomId);
+  return playerIds;
+}
+
 function getRoomList() {
   return Array.from(rooms.values()).map(r => ({
     id: r.id, name: r.name, maxPlayers: r.maxPlayers,
@@ -68,4 +76,4 @@ function setRoomStatus(roomId, status) {
   if (room) room.status = status;
 }
 
-module.exports = { createRoom, joinRoom, leaveRoom, getRoomList, getRoom, setRoomStatus, updateSocketId };
+module.exports = { createRoom, joinRoom, leaveRoom, closeRoom, getRoomList, getRoom, setRoomStatus, updateSocketId };

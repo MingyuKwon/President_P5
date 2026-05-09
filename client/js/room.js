@@ -48,6 +48,11 @@ socket.on('game-started', ({ hand, turnOrder, currentPlayerId, gameNumber, playe
   location.href = `game.html?id=${roomId}`;
 });
 
+socket.on('room-closed', () => {
+  alert('방장이 방을 나갔습니다. 로비로 이동합니다.');
+  location.href = '/';
+});
+
 socket.on('error', ({ message }) => alert(`오류: ${message}`));
 
 function renderPlayers(players) {

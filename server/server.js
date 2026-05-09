@@ -2,7 +2,7 @@ const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
 const path = require('path');
-const { createRoom, joinRoom, leaveRoom, getRoomList, getRoom, setRoomStatus, updateSocketId } = require('./room-manager');
+const { createRoom, joinRoom, leaveRoom, closeRoom, getRoomList, getRoom, setRoomStatus, updateSocketId } = require('./room-manager');
 const { createGameState, playCards, pass } = require('./game/game-state');
 
 const app = express();
@@ -219,12 +219,25 @@ io.on('connection', (socket) => {
     const session = sessionMap.get(sessionId);
     if (!session?.roomId) return;
     const roomId = session.roomId;
+    const room = getRoom(roomId);
+
     clearTurnTimer(roomId);
     socket.leave(roomId);
     session.roomId = null;
-    const room = leaveRoom(roomId, sessionId);
-    if (room) {
-      io.to(roomId).emit('room-updated', { players: publicPlayers(room.players) });
+
+    if (room && room.hostId === sessionId && room.players.length > 1) {
+      // 방장 퇴장 → 방 강제 해산
+      io.to(roomId).emit('room-closed', { reason: 'host-left' });
+      const playerIds = closeRoom(roomId);
+      for (const pid of playerIds) {
+        const sess = sessionMap.get(pid);
+        if (sess) sess.roomId = null;
+      }
+    } else {
+      const updated = leaveRoom(roomId, sessionId);
+      if (updated) {
+        io.to(roomId).emit('room-updated', { players: publicPlayers(updated.players) });
+      }
     }
     io.emit('room-list', { rooms: getRoomList() });
   }
