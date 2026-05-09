@@ -388,6 +388,10 @@ socket.on('card-played', ({ cards }) => {
   addCardGroupToTable(cards);
 });
 
+socket.on('player-passed-self-test', ({ playerId }) => {
+  console.log('[player-passed-self-test] 직접 수신 확인 | playerId:', playerId);
+});
+
 socket.on('player-passed', ({ playerId }) => {
   console.log('[player-passed] playerId:', playerId, '| myId:', myId);
   const seatEl = playerId === myId
