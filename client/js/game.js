@@ -391,20 +391,26 @@ socket.on('player-passed', ({ playerId }) => {
     : document.querySelector(`.player-seat[data-player-id="${playerId}"]`);
   if (!seatEl) return;
 
-  const rect = seatEl.getBoundingClientRect();
+  const boardRect = gameBoardEl.getBoundingClientRect();
+  const scale = boardRect.width / 1350;
+  const seatRect = seatEl.getBoundingClientRect();
+  const imgW = 62, imgH = 48;
+  const bx = (seatRect.left - boardRect.left) / scale - imgW - 20;
+  const by = (seatRect.top  - boardRect.top)  / scale + seatRect.height / scale / 2 - imgH / 2;
+
   const img = document.createElement('img');
   img.src = '/Resource/UI/ControlPanel/PassWord.png';
   Object.assign(img.style, {
-    position: 'fixed',
-    left: `${rect.left - 110}px`,
-    top: `${rect.top + rect.height / 2 - 30}px`,
-    width: '62px',
-    height: '48px',
+    position: 'absolute',
+    left: `${bx}px`,
+    top:  `${by}px`,
+    width:  `${imgW}px`,
+    height: `${imgH}px`,
     objectFit: 'contain',
     zIndex: '500',
     pointerEvents: 'none',
   });
-  document.body.appendChild(img);
+  gameBoardEl.appendChild(img);
 
   gsap.timeline({ onComplete: () => img.remove() })
     .fromTo(img, { opacity: 0, scale: 0.6 }, { opacity: 1, scale: 1, duration: 0.08, ease: 'back.out(1.5)' })
