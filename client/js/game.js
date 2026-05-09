@@ -364,7 +364,7 @@ function showGameOverPanel(ranks, scores = {}) {
         <img class="go-card-badge" src="/Resource/UI/rank-badge/${rank}.png" alt="${rankLabel(rank)}">
         <div class="go-card-content">
           <div class="go-card-name">${name}</div>
-          <div class="go-card-score">${(() => { const total = scores[id] ?? 0; const delta = RANK_SCORES[rank] ?? 0; const sign = delta >= 0 ? '+' : ''; return `${total}점 (${sign}${delta})`; })()}</div>
+          <div class="go-card-score">${(() => { const total = scores[id] ?? 0; const delta = RANK_SCORES[rank] ?? 0; const sign = delta >= 0 ? '+' : ''; return `${total}점<br>(${sign}${delta})`; })()}</div>
         </div>
         <img class="go-card-ready" src="/Resource/UI/result/Ready.png" alt="">
         <img class="go-card-exit" src="/Resource/UI/result/ExitRoom.png" alt="" ${leftPlayers.has(id) ? 'style="display:block"' : ''}>
