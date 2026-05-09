@@ -167,7 +167,11 @@
       -webkit-text-stroke:0.5px #e94560;
       text-align:center; word-break:break-all; line-height:1.2; margin-top:10px; }
     #ready-section { position:relative; z-index:10; display:flex; flex-direction:column; align-items:center; gap:10px; }
-    #ready-count { color:#aaa; font-size:0.88rem; }
+    .go-card-ready {
+      position:absolute; top:50%; left:50%;
+      transform:translate(-50%, -50%);
+      width:90%; height:auto; z-index:6; pointer-events:none; display:none;
+    }
     #btn-ready {
       padding:10px 32px; font-size:0.95rem; border-radius:8px;
       cursor:pointer; border:none; font-weight:bold; transition:background .15s;
@@ -196,7 +200,6 @@
       <div id="game-over-content">
         <div id="game-over-ranks"></div>
         <div id="ready-section">
-          <div id="ready-count">0명 준비</div>
           <button id="btn-ready">준비 완료</button>
           <div id="ready-countdown"></div>
         </div>

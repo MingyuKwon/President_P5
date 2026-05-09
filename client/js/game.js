@@ -232,7 +232,6 @@ socket.on('game-started', ({ hand, turnOrder: to, currentPlayerId: cpId, players
   btnReady.classList.remove('ready');
   btnReady.disabled = false;
   btnReady.textContent = '준비 완료';
-  document.getElementById('ready-count').textContent = '0명 준비';
   const cdEl2 = document.getElementById('ready-countdown');
   cdEl2.style.display = 'none';
   cdEl2.textContent = '';
@@ -269,8 +268,10 @@ socket.on('game-state-sync', ({ hand, tableCards, tablePile, currentPlayerId: cp
   renderCardOrder();
 
   if (phase === 'gameover' && readyPlayers) {
-    const total = ps.length;
-    document.getElementById('ready-count').textContent = `${readyPlayers.length} / ${total}명 준비`;
+    readyPlayers.forEach(pid => {
+      const card = document.querySelector(`.go-player-card[data-player-id="${pid}"]`);
+      if (card) card.querySelector('.go-card-ready').style.display = 'block';
+    });
     if (readyPlayers.includes(myId)) {
       const btn = document.getElementById('btn-ready');
       btn.classList.add('ready');
@@ -346,18 +347,18 @@ function showGameOverPanel(ranks) {
     const p = players.find(p => p.id === id);
     const name = p ? p.nickname : id;
     return `
-      <div class="go-player-card">
+      <div class="go-player-card" data-player-id="${id}">
         <img class="go-card-reward-bg" src="/Resource/UI/background/CardGame-rankReward-bg2.png" alt="">
         <img class="go-card-bg" src="/Resource/UI/result/result-bg-red.png" alt="">
         <img class="go-card-badge" src="/Resource/UI/rank-badge/${rank}.png" alt="${rankLabel(rank)}">
         <div class="go-card-content">
           <div class="go-card-name">${name}</div>
         </div>
+        <img class="go-card-ready" src="/Resource/UI/result/Ready.png" alt="">
       </div>`;
   }).join('');
 
   document.getElementById('game-over-overlay').classList.add('open');
-  document.getElementById('ready-count').textContent = '0명 준비';
   const btnReady = document.getElementById('btn-ready');
   btnReady.classList.remove('ready');
   btnReady.disabled = false;
@@ -380,9 +381,12 @@ document.getElementById('btn-ready').onclick = () => {
   socket.emit('player-ready', { sessionId: myId });
 };
 
-socket.on('ready-updated', ({ readyPlayers, total }) => {
-  console.log('[ready-updated] readyPlayers:', readyPlayers, '| total:', total, '| myId:', myId);
-  document.getElementById('ready-count').textContent = `${readyPlayers.length} / ${total}명 준비`;
+socket.on('ready-updated', ({ readyPlayers }) => {
+  console.log('[ready-updated] readyPlayers:', readyPlayers, '| myId:', myId);
+  readyPlayers.forEach(pid => {
+    const card = document.querySelector(`.go-player-card[data-player-id="${pid}"]`);
+    if (card) card.querySelector('.go-card-ready').style.display = 'block';
+  });
   if (readyPlayers.includes(myId)) {
     const btn = document.getElementById('btn-ready');
     btn.classList.add('ready');
