@@ -117,13 +117,12 @@
     #action-btns button:not(#btn-autopass):not(#btn-auto):disabled img { opacity:0.35; }
     #action-btns button:not(#btn-autopass):not(#btn-auto):not(:disabled):hover img { transform:scale(1.05); }
     #autopass-row { width:100%; display:flex; justify-content:center; gap:50px; margin-top:0; }
-    #btn-autopass, #btn-auto { padding:5px 14px; border-radius:6px; font-size:0.72rem; font-weight:bold; cursor:pointer; transition:all .12s; }
-    #btn-autopass { border:1.5px solid rgba(255,255,255,.3); background:rgba(255,255,255,.07); color:#888; box-shadow:0 3px 0 rgba(0,0,0,.5), 0 2px 6px rgba(0,0,0,.4); transform:translateY(0); }
-    #btn-autopass.on { border-color:#4caf50; background:rgba(76,175,80,.3); color:#4caf50; box-shadow:inset 0 2px 4px rgba(0,0,0,.4); transform:translateY(2px); }
-    #btn-autopass:hover { filter:brightness(1.2); }
-    #btn-auto { border:1.5px solid rgba(80,160,255,.8); background:rgba(80,160,255,.1); color:#ccc; box-shadow:0 3px 0 rgba(0,0,0,.5), 0 2px 6px rgba(0,0,0,.4); transform:translateY(0); }
-    #btn-auto.on { border-color:#50a0ff; background:rgba(80,160,255,.3); color:#ccc; box-shadow:inset 0 2px 4px rgba(0,0,0,.4); transform:translateY(2px); }
-    #btn-auto:hover { filter:brightness(1.2); }
+    #btn-autopass, #btn-auto { padding:0; background:none; border:none; cursor:pointer; transition:all .12s; }
+    #btn-autopass img, #btn-auto img { display:block; height:40px; width:auto; opacity:0.45; transition:opacity .12s, transform .12s; }
+    #btn-autopass.on img, #btn-auto.on img { opacity:1; }
+    #btn-autopass:hover img, #btn-auto:hover img { filter:brightness(1.2); }
+    #btn-autopass:hover img { transform:scale(1.05); }
+    #btn-auto:hover img { transform:scale(1.05); }
 
     /* 게임 종료 오버레이 */
     #game-over-overlay {
@@ -206,8 +205,8 @@
             <span>패스</span>
           </button>
           <div id="autopass-row">
-            <button id="btn-autopass">자동 패스</button>
-            <button id="btn-auto">자동</button>
+            <button id="btn-autopass"><img src="/Resource/UI/ControlPanel/AutoPass.png" alt="자동 패스"></button>
+            <button id="btn-auto"><img src="/Resource/UI/ControlPanel/Auto.png" alt="자동"></button>
           </div>
         </div>
       </div>
