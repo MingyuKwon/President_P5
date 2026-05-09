@@ -42,6 +42,12 @@ function myStrategy(ctx) {
   }
 
   // 선이 아닐 때: 테이블 장수에 맞춰 낼 수 있는 가장 약한 조합
+
+  // 조커에 스페이드 3으로 역전
+  if (tableCards.length === 1 && tableCards[0] === 'Joker' && hand.includes('3S')) {
+    return ['3S'];
+  }
+
   const N = needCount;
 
   // 1. N장 동일 숫자로 이기기

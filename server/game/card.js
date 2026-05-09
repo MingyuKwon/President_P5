@@ -19,6 +19,8 @@ function getPlayNumber(cards, revolution = false) {
 
 function isValidPlay(cards, tableCards, revolution = false) {
   if (cards.length !== tableCards.length) return false;
+  // 스페이드 3 역전: 조커 단독에 스페이드 3 단독으로 응수 가능
+  if (cards.length === 1 && cards[0] === '3S' && tableCards[0] === 'Joker') return true;
   return getPlayNumber(cards, revolution) > getPlayNumber(tableCards, revolution);
 }
 

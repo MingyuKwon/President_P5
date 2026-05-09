@@ -36,6 +36,8 @@ function playValue(cards, revolution) {
   return playRank(nonJoker.length ? nonJoker[0] : 'Joker', revolution);
 }
 function canBeat(cards, tableCards, revolution) {
+  // 스페이드 3 역전: 조커 단독에 스페이드 3 단독으로 응수 가능
+  if (cards.length === 1 && cards[0] === '3S' && tableCards.length === 1 && tableCards[0] === 'Joker') return true;
   return cards.length === tableCards.length && playValue(cards, revolution) > playValue(tableCards, revolution);
 }
 function subtractCards(arr, toRemove) {
