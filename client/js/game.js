@@ -243,9 +243,11 @@ socket.on('game-started', ({ hand, turnOrder: to, currentPlayerId: cpId, players
   fallenPresidentId = null;
   playerRanks = {};
   ps.forEach(p => { if (p.rank) playerRanks[p.id] = p.rank; });
-  renderHand();   // 버튼 상태 포함
+  tableEl.innerHTML = '';
+  renderHand();
   renderSeats();
   renderCardOrder();
+  if (currentPlayerId === myId) { tryAutoPlay(); tryAutoPass(); }
 });
 
 socket.on('game-state-sync', ({ hand, tableCards, tablePile, currentPlayerId: cpId, revolution, players: ps, turnOrder: to, phase, readyPlayers, isHost: h }) => {
@@ -371,6 +373,7 @@ socket.on('game-over', ({ ranks }) => {
 
 
 document.getElementById('btn-ready').onclick = () => {
+  console.log('[btn-ready] click — myId:', myId, '| socket.connected:', socket.connected);
   socket.emit('player-ready', { sessionId: myId });
 };
 
@@ -379,6 +382,7 @@ document.getElementById('btn-start-from-result').onclick = () => {
 };
 
 socket.on('ready-updated', ({ readyPlayers, total }) => {
+  console.log('[ready-updated] readyPlayers:', readyPlayers, '| total:', total, '| myId:', myId);
   document.getElementById('ready-count').textContent = `${readyPlayers.length} / ${total}명 준비`;
   if (readyPlayers.includes(myId)) {
     const btn = document.getElementById('btn-ready');
