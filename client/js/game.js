@@ -94,6 +94,7 @@ let currentTableCards = [];
 let currentRevolution = false;
 let fallenPresidentId = null;
 let isHost = false;
+let leftPlayers = new Set();
 
 const seatsEl        = document.getElementById('player-seats');
 const tableEl        = document.getElementById('table');
@@ -244,6 +245,7 @@ socket.on('game-started', ({ hand, turnOrder: to, currentPlayerId: cpId, players
   currentTableCards = [];
   currentRevolution = false;
   fallenPresidentId = null;
+  leftPlayers = new Set();
   playerRanks = {};
   ps.forEach(p => { if (p.rank) playerRanks[p.id] = p.rank; });
   tableEl.innerHTML = '';
@@ -325,6 +327,19 @@ socket.on('player-finished', ({ playerId, rank }) => {
   animateMessage(`${p ? p.nickname : playerId} — ${rankLabel(rank)}`);
 });
 
+socket.on('player-bot', ({ playerId }) => {
+  leftPlayers.add(playerId);
+});
+
+socket.on('room-updated', ({ players: newPlayers }) => {
+  if (!document.getElementById('game-over-overlay').classList.contains('open')) return;
+  const newPlayerIds = new Set(newPlayers.map(p => p.id));
+  document.querySelectorAll('.go-player-card').forEach(card => {
+    const pid = card.dataset.playerId;
+    if (pid && !newPlayerIds.has(pid)) markPlayerLeft(pid);
+  });
+});
+
 socket.on('president-penalty', ({ playerId }) => {
   const p = players.find(p => p.id === playerId);
   animateMessage(`${p ? p.nickname : playerId} 대부호 방어 실패!`, '#e94560');
@@ -352,6 +367,7 @@ function showGameOverPanel(ranks, scores = {}) {
           <div class="go-card-score">${(() => { const total = scores[id] ?? 0; const delta = RANK_SCORES[rank] ?? 0; const sign = delta >= 0 ? '+' : ''; return `${total}점 (${sign}${delta})`; })()}</div>
         </div>
         <img class="go-card-ready" src="/Resource/UI/result/Ready.png" alt="">
+        <img class="go-card-exit" src="/Resource/UI/result/ExitRoom.png" alt="" ${leftPlayers.has(id) ? 'style="display:block"' : ''}>
       </div>`;
   }).join('');
 
@@ -371,6 +387,14 @@ socket.on('game-over', ({ ranks, scores }) => {
   gameOverTimer = setTimeout(() => showGameOverPanel(ranks, scores), 800);
 });
 
+
+function markPlayerLeft(playerId) {
+  leftPlayers.add(playerId);
+  const card = document.querySelector(`.go-player-card[data-player-id="${playerId}"]`);
+  if (!card) return;
+  card.querySelector('.go-card-ready').style.display = 'none';
+  card.querySelector('.go-card-exit').style.display = 'block';
+}
 
 function setReadyBtn(ready) {
   const btn = document.getElementById('btn-ready');
