@@ -89,6 +89,17 @@
     /* 버튼 이미지 — /Resource/UI/btn_play.png, btn_pass.png 제공 시 자동 적용 */
     .auto-mode #hand { pointer-events:none; opacity:0.5; }
     .auto-mode #btn-play, .auto-mode #btn-pass, .auto-mode #btn-autopass { pointer-events:none; opacity:0.3; }
+    #auto-indicator {
+      display:none; position:absolute; top:50%; left:50%;
+      transform:translate(-50%, -50%);
+      background:rgba(0,0,0,.7); border:1.5px solid #50a0ff;
+      border-radius:24px; padding:10px 30px;
+      color:#50a0ff; font-size:1.1rem; font-weight:bold;
+      pointer-events:none; white-space:nowrap; z-index:10;
+      letter-spacing:.05em;
+    }
+    @keyframes auto-pulse { 0%,100%{opacity:1} 50%{opacity:0.45} }
+    .auto-mode #auto-indicator { display:block; animation:auto-pulse 1.4s ease-in-out infinite; }
     #action-btns button:not(#btn-autopass):not(#btn-auto) { padding:0; background:none; border:none; cursor:pointer; }
     #action-btns button:not(#btn-autopass):not(#btn-auto):disabled { cursor:default; }
     #action-btns button:not(#btn-autopass):not(#btn-auto) img { display:block; height:48px; width:auto;
@@ -188,6 +199,7 @@
         </div>
       </div>
       <div id="my-area">
+        <div id="auto-indicator">⚡ 자동 진행 중</div>
         <div id="hand"></div>
         <button id="btn-exit">나가기</button>
       </div>
