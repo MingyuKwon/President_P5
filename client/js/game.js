@@ -108,6 +108,7 @@ const btnAuto        = document.getElementById('btn-auto');
 let timerInterval    = null;
 let autoPass         = false;
 let autoPassTimer    = null;
+let countdownInterval = null;
 
 function clearAutoPassTimer() {
   if (autoPassTimer) { clearTimeout(autoPassTimer); autoPassTimer = null; }
@@ -226,12 +227,15 @@ socket.on('game-started', ({ hand, turnOrder: to, currentPlayerId: cpId, players
   clearTimeout(gameOverTimer);
   sessionStorage.removeItem('gameOverRanks');
   document.getElementById('game-over-overlay').classList.remove('open');
+  if (countdownInterval) { clearInterval(countdownInterval); countdownInterval = null; }
   const btnReady = document.getElementById('btn-ready');
   btnReady.classList.remove('ready');
   btnReady.disabled = false;
   btnReady.textContent = '준비 완료';
-  document.getElementById('btn-start-from-result').style.display = 'none';
   document.getElementById('ready-count').textContent = '0명 준비';
+  const cdEl2 = document.getElementById('ready-countdown');
+  cdEl2.style.display = 'none';
+  cdEl2.textContent = '';
   myHand = sortHand(hand);
   currentPlayerId = cpId;
   turnOrder = to;
@@ -272,9 +276,6 @@ socket.on('game-state-sync', ({ hand, tableCards, tablePile, currentPlayerId: cp
       btn.classList.add('ready');
       btn.disabled = true;
       btn.textContent = '✓ 준비됨';
-    }
-    if (readyPlayers.length >= total && isHost) {
-      document.getElementById('btn-start-from-result').style.display = 'inline-block';
     }
   }
 });
@@ -361,7 +362,9 @@ function showGameOverPanel(ranks) {
   btnReady.classList.remove('ready');
   btnReady.disabled = false;
   btnReady.textContent = '준비 완료';
-  document.getElementById('btn-start-from-result').style.display = 'none';
+  const cdEl = document.getElementById('ready-countdown');
+  cdEl.style.display = 'none';
+  cdEl.textContent = '';
 }
 
 let gameOverTimer = null;
@@ -377,10 +380,6 @@ document.getElementById('btn-ready').onclick = () => {
   socket.emit('player-ready', { sessionId: myId });
 };
 
-document.getElementById('btn-start-from-result').onclick = () => {
-  socket.emit('start-game', { sessionId: myId });
-};
-
 socket.on('ready-updated', ({ readyPlayers, total }) => {
   console.log('[ready-updated] readyPlayers:', readyPlayers, '| total:', total, '| myId:', myId);
   document.getElementById('ready-count').textContent = `${readyPlayers.length} / ${total}명 준비`;
@@ -393,7 +392,15 @@ socket.on('ready-updated', ({ readyPlayers, total }) => {
 });
 
 socket.on('all-ready', () => {
-  if (isHost) document.getElementById('btn-start-from-result').style.display = 'inline-block';
+  const cdEl = document.getElementById('ready-countdown');
+  cdEl.style.display = 'block';
+  let sec = 3;
+  cdEl.textContent = `${sec}초 후 시작!`;
+  countdownInterval = setInterval(() => {
+    sec--;
+    if (sec <= 0) { clearInterval(countdownInterval); countdownInterval = null; return; }
+    cdEl.textContent = `${sec}초 후 시작!`;
+  }, 1000);
 });
 
 // 새로고침 후 결과창 복원

@@ -152,37 +152,7 @@ io.on('connection', (socket) => {
     const room = getRoom(roomId);
     if (!room || room.hostId !== sessionId) return;
     if (room.players.length < 3) return socket.emit('error', { message: 'need-3-players' });
-
-    readySets.delete(roomId);
-
-    const prevState = gameStates.get(roomId);
-    const prevRanks = prevState?.ranks || {};
-    const gameNumber = (prevState?.gameNumber || 0) + 1;
-
-    // game-state용 players 배열 (id = sessionId)
-    const players = room.players.map(p => ({ id: p.id, nickname: p.nickname }));
-    const state = createGameState(players, gameNumber, prevRanks);
-    gameStates.set(roomId, state);
-    setRoomStatus(roomId, 'playing');
-
-    room.players.forEach(p => {
-      const sess = sessionMap.get(p.id);
-      const playerSocket = sess ? io.sockets.sockets.get(sess.socketId) : null;
-      if (playerSocket) {
-        playerSocket.emit('game-started', {
-          hand: state.players[p.id].hand,
-          turnOrder: state.turnOrder,
-          currentPlayerId: state.turnOrder[state.currentIndex],
-          gameNumber,
-          players: Object.values(state.players).map(q => ({
-            id: q.id, nickname: q.nickname, cardCount: q.hand.length, finished: q.finished,
-            rank: state.ranks[q.id] || 'citizen',
-          })),
-        });
-      }
-    });
-    io.emit('room-list', { rooms: getRoomList() });
-    startTurnTimer(roomId, state);
+    doStartGame(roomId);
   });
 
   socket.on('play-cards', ({ cards, sessionId }) => {
@@ -217,10 +187,13 @@ io.on('connection', (socket) => {
   });
 
   socket.on('player-ready', ({ sessionId }) => {
+    console.log('[player-ready] sessionId:', sessionId);
     const session = sessionMap.get(sessionId);
-    if (!session?.roomId) return;
+    console.log('[player-ready] session:', session);
+    if (!session?.roomId) { console.warn('[player-ready] session 없음 또는 roomId 없음'); return; }
     const roomId = session.roomId;
     const room = getRoom(roomId);
+    console.log('[player-ready] roomId:', roomId, '| room:', room ? `players:${room.players.length}` : 'null');
     if (!room) return;
 
     if (!readySets.has(roomId)) readySets.set(roomId, new Set());
@@ -229,7 +202,10 @@ io.on('connection', (socket) => {
     const readyPlayers = [...readySets.get(roomId)];
     const total = room.players.length;
     io.to(roomId).emit('ready-updated', { readyPlayers, total });
-    if (readyPlayers.length >= total) io.to(roomId).emit('all-ready');
+    if (readyPlayers.length >= total) {
+      io.to(roomId).emit('all-ready');
+      setTimeout(() => doStartGame(roomId), 3000);
+    }
   });
 
   // 페이지 이동 시 소켓만 끊기므로 즉시 방에서 제거하지 않음
@@ -265,6 +241,41 @@ io.on('connection', (socket) => {
   }
 
 });
+
+function doStartGame(roomId) {
+  const room = getRoom(roomId);
+  if (!room) return;
+
+  readySets.delete(roomId);
+
+  const prevState = gameStates.get(roomId);
+  const prevRanks = prevState?.ranks || {};
+  const gameNumber = (prevState?.gameNumber || 0) + 1;
+
+  const players = room.players.map(p => ({ id: p.id, nickname: p.nickname }));
+  const state = createGameState(players, gameNumber, prevRanks);
+  gameStates.set(roomId, state);
+  setRoomStatus(roomId, 'playing');
+
+  room.players.forEach(p => {
+    const sess = sessionMap.get(p.id);
+    const playerSocket = sess ? io.sockets.sockets.get(sess.socketId) : null;
+    if (playerSocket) {
+      playerSocket.emit('game-started', {
+        hand: state.players[p.id].hand,
+        turnOrder: state.turnOrder,
+        currentPlayerId: state.turnOrder[state.currentIndex],
+        gameNumber,
+        players: Object.values(state.players).map(q => ({
+          id: q.id, nickname: q.nickname, cardCount: q.hand.length, finished: q.finished,
+          rank: state.ranks[q.id] || 'citizen',
+        })),
+      });
+    }
+  });
+  io.emit('room-list', { rooms: getRoomList() });
+  startTurnTimer(roomId, state);
+}
 
 function publicPlayers(players) {
   return players.map(p => ({ id: p.id, nickname: p.nickname }));
