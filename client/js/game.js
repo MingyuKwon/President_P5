@@ -273,7 +273,7 @@ socket.on('game-state-sync', ({ hand, tableCards, tablePile, currentPlayerId: cp
     if (scores) sessionStorage.setItem('gameOverScores', JSON.stringify(scores));
     readyPlayers.forEach(pid => {
       const card = document.querySelector(`.go-player-card[data-player-id="${pid}"]`);
-      if (card) showReadyOverlay(card.querySelector('.go-card-ready'));
+      if (card) card.querySelector('.go-card-ready').style.display = 'block'; // 복원은 애니메이션 없이
     });
     if (readyPlayers.includes(myId)) setReadyBtn(true);
   }
@@ -420,7 +420,10 @@ socket.on('ready-updated', ({ readyPlayers }) => {
   console.log('[ready-updated] readyPlayers:', readyPlayers, '| myId:', myId);
   readyPlayers.forEach(pid => {
     const card = document.querySelector(`.go-player-card[data-player-id="${pid}"]`);
-    if (card) showReadyOverlay(card.querySelector('.go-card-ready'));
+    if (!card) return;
+    const el = card.querySelector('.go-card-ready');
+    if (el.style.display === 'block') return; // 이미 표시 중 → 애니메이션 재실행 안 함
+    showReadyOverlay(el);
   });
   if (readyPlayers.includes(myId)) setReadyBtn(true);
 });
