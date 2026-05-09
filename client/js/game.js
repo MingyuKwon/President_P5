@@ -387,14 +387,14 @@ socket.on('card-played', ({ cards }) => {
 
 socket.on('player-passed', ({ playerId }) => {
   const seatEl = playerId === myId
-    ? document.getElementById('my-seat')
+    ? document.querySelector('.player-seat.me')
     : document.querySelector(`.player-seat[data-player-id="${playerId}"]`);
   if (!seatEl) return;
 
   const boardRect = gameBoardEl.getBoundingClientRect();
   const scale = boardRect.width / 1350;
   const seatRect = seatEl.getBoundingClientRect();
-  const imgW = 62, imgH = 48;
+  const imgW = 81, imgH = 62;
   const bx = (seatRect.left - boardRect.left) / scale - imgW - 20;
   const by = (seatRect.top  - boardRect.top)  / scale + seatRect.height / scale / 2 - imgH / 2;
 
