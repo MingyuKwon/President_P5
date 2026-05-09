@@ -97,6 +97,8 @@ let isHost = false;
 let leftPlayers = new Set();
 let taxPhase = null; // null | { role, taxReturnCount }
 let taxSubmitted = false;
+let taxExchangeEl = null;
+let taxExchangeAnim = null;
 let taxNewCards = []; // 세금으로 새로 받은 카드 목록 (receive 애니메이션용)
 
 const seatsEl        = document.getElementById('player-seats');
@@ -472,6 +474,33 @@ socket.on('game-over', ({ ranks, scores }) => {
 const taxBannerEl = document.getElementById('tax-banner');
 const ROLE_LABEL = { president: '대부호', 'vice-president': '부호', citizen: '평민', 'vice-scum': '빈민', scum: '대빈민' };
 
+function showTaxExchangeImage() {
+  if (taxExchangeEl) return;
+  taxExchangeEl = document.createElement('div');
+  Object.assign(taxExchangeEl.style, {
+    position: 'fixed', inset: '0', zIndex: '200',
+    display: 'flex', alignItems: 'center', justifyContent: 'center',
+    pointerEvents: 'none',
+  });
+  const img = document.createElement('img');
+  img.src = '/Resource/UI/game-state/ExchangeCard.png';
+  Object.assign(img.style, { maxWidth: '38vw', maxHeight: '38vh', objectFit: 'contain' });
+  taxExchangeEl.appendChild(img);
+  document.body.appendChild(taxExchangeEl);
+
+  taxExchangeAnim = gsap.timeline({ repeat: -1 })
+    .to(img, { scale: 1.13, duration: 0.14, ease: 'power2.out' })
+    .to(img, { scale: 1.0,  duration: 0.14, ease: 'power2.in' })
+    .to(img, { scale: 1.08, duration: 0.14, ease: 'power2.out' })
+    .to(img, { scale: 1.0,  duration: 0.14, ease: 'power2.in' })
+    .to({},  { duration: 0.55 });
+}
+
+function hideTaxExchangeImage() {
+  if (taxExchangeAnim) { taxExchangeAnim.kill(); taxExchangeAnim = null; }
+  if (taxExchangeEl) { taxExchangeEl.remove(); taxExchangeEl = null; }
+}
+
 function animateTaxReceive(cards) {
   const handRect = handEl.getBoundingClientRect();
   const centerX = handRect.left + handRect.width / 2;
@@ -534,11 +563,13 @@ function enterTaxPhase(taxInfo) {
 
   renderSeats();
   renderCardOrder();
+  showTaxExchangeImage();
   tryAutoTax();
 }
 
 function exitTaxPhase() {
   console.log('[exitTaxPhase] called | taxSubmitted was:', taxSubmitted);
+  hideTaxExchangeImage();
   clearAutoTaxTimer();
   taxSubmitted = false;
   gameBoardEl.classList.remove('tax-mode');
