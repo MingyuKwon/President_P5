@@ -97,6 +97,7 @@ let isHost = false;
 let leftPlayers = new Set();
 let taxPhase = null; // null | { role, taxReturnCount }
 let taxSubmitted = false;
+let taxNewCards = []; // 세금으로 새로 받은 카드 목록 (receive 애니메이션용)
 
 const seatsEl        = document.getElementById('player-seats');
 const tableEl        = document.getElementById('table');
@@ -329,6 +330,17 @@ socket.on('card-played', ({ cards }) => {
 
 socket.on('hand-updated', ({ hand }) => {
   console.log('[hand-updated] new hand size:', hand.length, '| taxPhase:', JSON.stringify(taxPhase), '| taxSubmitted:', taxSubmitted);
+  // 세금 페이즈 중 새로 받은 카드 감지 (receive 애니메이션용)
+  if (taxPhase) {
+    const oldHand = [...myHand];
+    const remaining = [...oldHand];
+    taxNewCards = [];
+    for (const card of hand) {
+      const idx = remaining.indexOf(card);
+      if (idx !== -1) remaining.splice(idx, 1);
+      else taxNewCards.push(card);
+    }
+  }
   myHand = sortHand(hand);
   selectedCards = [];
   renderHand();
@@ -487,9 +499,21 @@ function renderTaxButtons(count) {
     taxSubmitted = true;
     const submitted = [...selectedCards];
     console.log('[renderTaxButtons] emitting tax-return | cards:', submitted);
+
+    // 선택된 카드 요소를 클론해서 날리는 send 애니메이션
+    const selectedEls = [...handEl.querySelectorAll('.hand-card.selected')];
+    selectedEls.forEach(el => {
+      const rect = el.getBoundingClientRect();
+      const clone = el.cloneNode(true);
+      clone.style.cssText = `position:fixed; left:${rect.left}px; top:${rect.top}px; width:${rect.width}px; height:${rect.height}px; z-index:500; pointer-events:none; border-radius:8px; overflow:hidden;`;
+      document.body.appendChild(clone);
+      gsap.to(clone, { y: -260, x: (Math.random() - 0.5) * 60, opacity: 0, scale: 0.75, duration: 0.5, ease: 'power2.in', onComplete: () => clone.remove() });
+    });
+
     socket.emit('tax-return', { sessionId: myId, cards: submitted });
-    // 즉시 손패에서 제거 (서버 응답 전 낙관적 UI)
-    myHand = myHand.filter(c => { const i = submitted.indexOf(c); if (i !== -1) { submitted.splice(i, 1); return false; } return true; });
+    // 낙관적 UI: 손패에서 즉시 제거
+    const toRemove = [...submitted];
+    myHand = myHand.filter(c => { const i = toRemove.indexOf(c); if (i !== -1) { toRemove.splice(i, 1); return false; } return true; });
     selectedCards = [];
     btnPlay.disabled = true;
     taxBannerEl.textContent = '제출 완료, 세금 교환 대기 중...';
@@ -704,6 +728,13 @@ function renderHand() {
     div.style.setProperty('--drop', `${drop}px`);
 
     handEl.appendChild(div);
+
+    // 세금으로 새로 받은 카드 receive 애니메이션
+    const newIdx = taxNewCards.indexOf(card);
+    if (newIdx !== -1) {
+      taxNewCards.splice(newIdx, 1);
+      gsap.from(div, { y: -90, opacity: 0, scale: 1.15, duration: 0.45, ease: 'back.out(1.6)', delay: 0.05 });
+    }
   });
 
   if (isTaxSelecting) {
