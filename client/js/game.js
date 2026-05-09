@@ -258,6 +258,10 @@ socket.on('game-started', ({ hand, turnOrder: to, currentPlayerId: cpId, players
     taxPhase = taxInfo;
     taxSubmitted = false; // 새 판 시작이므로 항상 초기화
     enterTaxPhase(taxInfo);
+    // 세금 시작 시 받은 카드 애니메이션 (hand-updated가 아닌 game-started로 전달되므로 여기서 처리)
+    if (taxInfo.taxReceived && taxInfo.taxReceived.length > 0) {
+      animateTaxReceive(taxInfo.taxReceived);
+    }
   } else {
     taxPhase = null;
     exitTaxPhase();
@@ -330,16 +334,16 @@ socket.on('card-played', ({ cards }) => {
 
 socket.on('hand-updated', ({ hand }) => {
   console.log('[hand-updated] new hand size:', hand.length, '| taxPhase:', JSON.stringify(taxPhase), '| taxSubmitted:', taxSubmitted);
-  // 세금 페이즈 중 새로 받은 카드 감지 (receive 애니메이션용)
+  // 세금 페이즈 중 새로 받은 카드 감지 → floating 애니메이션
   if (taxPhase) {
-    const oldHand = [...myHand];
-    const remaining = [...oldHand];
-    taxNewCards = [];
+    const remaining = [...myHand];
+    const newCards = [];
     for (const card of hand) {
       const idx = remaining.indexOf(card);
       if (idx !== -1) remaining.splice(idx, 1);
-      else taxNewCards.push(card);
+      else newCards.push(card);
     }
+    if (newCards.length > 0) animateTaxReceive(newCards);
   }
   myHand = sortHand(hand);
   selectedCards = [];
@@ -439,6 +443,33 @@ socket.on('game-over', ({ ranks, scores }) => {
 
 const taxBannerEl = document.getElementById('tax-banner');
 const ROLE_LABEL = { president: '대부호', 'vice-president': '부호', citizen: '평민', 'vice-scum': '빈민', scum: '대빈민' };
+
+function animateTaxReceive(cards) {
+  const handRect = handEl.getBoundingClientRect();
+  const centerX = handRect.left + handRect.width / 2;
+  const targetY = handRect.top + handRect.height * 0.3;
+
+  cards.forEach((card, i) => {
+    const el = document.createElement('div');
+    const offsetX = (i - (cards.length - 1) / 2) * 44;
+    el.style.cssText = [
+      'position:fixed',
+      `left:${centerX - 50 + offsetX}px`,
+      `top:${handRect.top - 160}px`,
+      'width:100px', 'height:143px',
+      'border-radius:8px', 'overflow:hidden',
+      'z-index:600', 'pointer-events:none',
+      'box-shadow:0 8px 24px rgba(0,0,0,.6)',
+    ].join(';');
+    el.innerHTML = `<img src="${cardImg(card)}" style="width:100%;height:100%;object-fit:cover">`;
+    document.body.appendChild(el);
+
+    const delay = i * 0.1;
+    gsap.to(el, { top: targetY, duration: 0.35, ease: 'power2.in', delay });
+    gsap.to(el, { opacity: 0, scale: 0.7, duration: 0.25, ease: 'power1.in',
+      delay: delay + 0.32, onComplete: () => el.remove() });
+  });
+}
 
 function enterTaxPhase(taxInfo) {
   console.log('[enterTaxPhase]', JSON.stringify(taxInfo), '| taxSubmitted:', taxSubmitted);
@@ -728,13 +759,6 @@ function renderHand() {
     div.style.setProperty('--drop', `${drop}px`);
 
     handEl.appendChild(div);
-
-    // 세금으로 새로 받은 카드 receive 애니메이션
-    const newIdx = taxNewCards.indexOf(card);
-    if (newIdx !== -1) {
-      taxNewCards.splice(newIdx, 1);
-      gsap.from(div, { y: -90, opacity: 0, scale: 1.15, duration: 0.45, ease: 'back.out(1.6)', delay: 0.05 });
-    }
   });
 
   if (isTaxSelecting) {
