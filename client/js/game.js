@@ -301,16 +301,31 @@ socket.on('president-penalty', ({ playerId }) => {
 
 socket.on('game-over', ({ ranks }) => {
   clearTimerUI();
-  const lines = Object.entries(ranks).map(([id, rank]) => {
+
+  const RANK_ORDER = ['president', 'vice-president', 'citizen', 'vice-scum', 'scum'];
+  const sorted = Object.entries(ranks).sort(
+    (a, b) => RANK_ORDER.indexOf(a[1]) - RANK_ORDER.indexOf(b[1])
+  );
+
+  const ranksEl = document.getElementById('game-over-ranks');
+  ranksEl.innerHTML = sorted.map(([id, rank]) => {
     const p = players.find(p => p.id === id);
-    return `${rankLabel(rank)}: ${p ? p.nickname : id}`;
-  }).join('\n');
+    return `
+      <div class="go-rank-row">
+        <div class="go-rank-icon"><img src="${rankImg(rank)}" alt="${rankLabel(rank)}"></div>
+        <div class="go-rank-label">${rankLabel(rank)}</div>
+        <div class="go-rank-name">${p ? p.nickname : id}</div>
+      </div>`;
+  }).join('');
+
   setTimeout(() => {
-    if (confirm(`게임 종료!\n\n${lines}\n\n대기실로 돌아가시겠습니까?`)) {
-      location.href = `room.html?id=${roomId}`;
-    }
+    document.getElementById('game-over-overlay').classList.add('open');
   }, 800);
 });
+
+document.getElementById('btn-to-room').onclick = () => {
+  location.href = `room.html?id=${roomId}`;
+};
 
 socket.on('room-closed', () => {
   alert('방장이 방을 나갔습니다. 로비로 이동합니다.');
