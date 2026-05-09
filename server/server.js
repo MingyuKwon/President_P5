@@ -243,7 +243,9 @@ io.on('connection', (socket) => {
 });
 
 function doStartGame(roomId) {
+  console.log('[doStartGame] roomId:', roomId);
   const room = getRoom(roomId);
+  console.log('[doStartGame] room:', room ? `players:${room.players.length}` : 'null');
   if (!room) return;
 
   readySets.delete(roomId);

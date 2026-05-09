@@ -168,15 +168,19 @@
       text-align:center; word-break:break-all; line-height:1.2; margin-top:10px; }
     #ready-section { position:relative; z-index:10; display:flex; flex-direction:column; align-items:center; gap:10px; transform:translateY(200px); }
     .go-card-ready {
-      position:absolute; top:50%; left:50%;
-      transform:translate(-50%, -50%);
+      position:absolute; top:-145px; left:50%;
+      transform:translateX(-50%);
       width:90%; height:auto; z-index:6; pointer-events:none; display:none;
     }
     #btn-ready { padding:0; background:none; border:none; cursor:pointer; }
     #btn-ready img { display:block; height:68px; width:auto; transition:transform .1s; }
     #btn-ready:hover:not(:disabled) img { transform:scale(1.05); }
     #btn-ready:disabled { cursor:default; }
-    #ready-countdown { color:#e94560; font-size:1.1rem; font-weight:bold; display:none; }
+    #ready-countdown {
+      position:absolute; bottom:20px; left:50%; transform:translateX(-50%);
+      color:#e94560; font-size:1.1rem; font-weight:bold;
+      display:none; white-space:nowrap; pointer-events:none;
+    }
 
     /* 이미지 없을 때 폴백 텍스트 (기본 숨김, onerror 시 표시) */
     #action-btns button span { display:none; padding:10px 28px;
@@ -198,9 +202,9 @@
         <div id="game-over-ranks"></div>
         <div id="ready-section">
           <button id="btn-ready"><img src="/Resource/UI/result/ReadyButtonBefore.png" alt="준비 완료"></button>
-          <div id="ready-countdown"></div>
         </div>
       </div>
+      <div id="ready-countdown"></div>
     </div>
     <div id="card-order-bar"></div>
     <div id="player-seats"></div>
