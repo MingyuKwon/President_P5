@@ -18,6 +18,38 @@ const socketSession = new Map(); // socketId → sessionId
 const turnTimers = new Map();   // roomId → timeoutId
 const readySets = new Map();    // roomId → Set<sessionId>
 const roomScores = new Map();   // roomId → { sessionId → score }
+const botPlayers = new Map();   // roomId → Set<sessionId>
+
+const BOT_CARD_ORDER = ['3','4','5','6','7','8','9','10','J','Q','K','A','2','Joker'];
+const BOT_REV_ORDER  = ['2','A','K','Q','J','10','9','8','7','6','5','4','3','Joker'];
+
+function botCardRank(card, revolution) {
+  const num = card === 'Joker' ? 'Joker' : card.slice(0, -1);
+  return (revolution ? BOT_REV_ORDER : BOT_CARD_ORDER).indexOf(num);
+}
+
+function playBotTurn(roomId, botId) {
+  const state = gameStates.get(roomId);
+  if (!state || state.turnOrder[state.currentIndex] !== botId) return;
+
+  let result;
+  if (state.tableCards.length === 0) {
+    const weakest = state.players[botId].hand.reduce((a, b) =>
+      botCardRank(a, state.revolution) <= botCardRank(b, state.revolution) ? a : b
+    );
+    result = playCards(state, botId, [weakest]);
+    if (result.error) result = pass(state, botId);
+  } else {
+    result = pass(state, botId);
+  }
+
+  if (result.error) return;
+  gameStates.set(roomId, result.state);
+  broadcastGameUpdate(roomId, result.state, result.events);
+  if (!result.events.some(e => e.type === 'game-over')) {
+    startTurnTimer(roomId, result.state);
+  }
+}
 
 const RANK_SCORES = { president: 30, 'vice-president': 20, citizen: 10, 'vice-scum': 0, scum: -10 };
 
@@ -43,6 +75,16 @@ function startTurnTimer(roomId, state) {
   clearTurnTimer(roomId);
   const currentPlayerId = state.turnOrder[state.currentIndex] || null;
   if (!currentPlayerId) return;
+
+  // 봇 플레이어: 1.5초 후 자동 처리
+  if (botPlayers.get(roomId)?.has(currentPlayerId)) {
+    const timeoutId = setTimeout(() => {
+      turnTimers.delete(roomId);
+      playBotTurn(roomId, currentPlayerId);
+    }, 1500);
+    turnTimers.set(roomId, { timeoutId, startedAt: Date.now(), playerId: currentPlayerId });
+    return;
+  }
 
   io.to(roomId).emit('turn-timer', { playerId: currentPlayerId, duration: TURN_DURATION });
 
@@ -237,23 +279,39 @@ io.on('connection', (socket) => {
     const roomId = session.roomId;
     const room = getRoom(roomId);
 
-    clearTurnTimer(roomId);
     socket.leave(roomId);
     session.roomId = null;
 
     if (room && room.hostId === sessionId && room.players.length > 1) {
       // 방장 퇴장 → 방 강제 해산
+      clearTurnTimer(roomId);
       io.to(roomId).emit('room-closed', { reason: 'host-left' });
       const playerIds = closeRoom(roomId);
       roomScores.delete(roomId);
+      botPlayers.delete(roomId);
       for (const pid of playerIds) {
         const sess = sessionMap.get(pid);
         if (sess) sess.roomId = null;
       }
     } else {
-      const updated = leaveRoom(roomId, sessionId);
-      if (updated) {
-        io.to(roomId).emit('room-updated', { players: publicPlayers(updated.players) });
+      const gameState = gameStates.get(roomId);
+      if (gameState && gameState.phase === 'playing') {
+        // 게임 중 퇴장 → 봇으로 전환
+        if (!botPlayers.has(roomId)) botPlayers.set(roomId, new Set());
+        botPlayers.get(roomId).add(sessionId);
+        io.to(roomId).emit('player-bot', { playerId: sessionId });
+        leaveRoom(roomId, sessionId);
+        const updatedRoom = getRoom(roomId);
+        if (updatedRoom) io.to(roomId).emit('room-updated', { players: publicPlayers(updatedRoom.players) });
+        // 떠난 플레이어가 현재 차례면 봇 턴 즉시 시작
+        if (gameState.turnOrder[gameState.currentIndex] === sessionId) {
+          clearTurnTimer(roomId);
+          startTurnTimer(roomId, gameState);
+        }
+      } else {
+        clearTurnTimer(roomId);
+        const updated = leaveRoom(roomId, sessionId);
+        if (updated) io.to(roomId).emit('room-updated', { players: publicPlayers(updated.players) });
       }
     }
     io.emit('room-list', { rooms: getRoomList() });
@@ -267,18 +325,33 @@ function doStartGame(roomId) {
   console.log('[doStartGame] room:', room ? `players:${room.players.length}` : 'null');
   if (!room) return;
 
+  // 소켓 연결이 없는 플레이어 제거
+  [...room.players].forEach(p => {
+    const sess = sessionMap.get(p.id);
+    if (!sess?.socketId || !io.sockets.sockets.has(sess.socketId)) {
+      leaveRoom(roomId, p.id);
+      if (sess) sess.roomId = null;
+    }
+  });
+  botPlayers.delete(roomId);
   readySets.delete(roomId);
+
+  const currentRoom = getRoom(roomId);
+  if (!currentRoom || currentRoom.players.length < 3) {
+    io.to(roomId).emit('error', { message: 'need-3-players' });
+    return;
+  }
 
   const prevState = gameStates.get(roomId);
   const prevRanks = prevState?.ranks || {};
   const gameNumber = (prevState?.gameNumber || 0) + 1;
 
-  const players = room.players.map(p => ({ id: p.id, nickname: p.nickname }));
+  const players = currentRoom.players.map(p => ({ id: p.id, nickname: p.nickname }));
   const state = createGameState(players, gameNumber, prevRanks);
   gameStates.set(roomId, state);
   setRoomStatus(roomId, 'playing');
 
-  room.players.forEach(p => {
+  currentRoom.players.forEach(p => {
     const sess = sessionMap.get(p.id);
     const playerSocket = sess ? io.sockets.sockets.get(sess.socketId) : null;
     if (playerSocket) {
