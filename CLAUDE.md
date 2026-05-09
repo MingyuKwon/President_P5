@@ -97,4 +97,5 @@ Strong success criteria let you loop independently. Weak criteria ("make it work
 
 게임 규칙 상세: `docs/game-rules.md` 참조  
 공통 용어 정의: `docs/glossary.md` 참조  
-구현 계획 및 진행 상황: `docs/plan/overview.md` 참조 (각 Phase는 `docs/plan/phase1~3.md`)
+구현 계획 및 진행 상황: `docs/plan/overview.md` 참조 (각 Phase는 `docs/plan/phase1~3.md`)  
+리소스 구성 및 사용처: `Resource/README.md` 참조
