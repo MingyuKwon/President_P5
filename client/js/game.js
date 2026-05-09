@@ -372,7 +372,7 @@ document.getElementById('btn-exit').onclick = () => {
 
 // 플레이어 시트 — 원형 배치
 // 원점: 화면 중앙(cx, cy), 타원 반지름(rx, ry), 모두 뷰포트 % 기준
-const CX = 50, CY = 38, RX = 36, RY = 26;
+const CX = 50, CY = 38, RX = 29, RY = 21;
 
 function renderSeats() {
   seatsEl.innerHTML = '';
