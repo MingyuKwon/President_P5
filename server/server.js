@@ -322,6 +322,22 @@ io.on('connection', (socket) => {
 
 });
 
+function remapRanks(prevRanks, playerIds) {
+  const RANK_ORDER = ['president', 'vice-president', 'citizen', 'vice-scum', 'scum'];
+  const RANK_MAP = {
+    3: ['president', 'citizen', 'scum'],
+    4: ['president', 'vice-president', 'vice-scum', 'scum'],
+  };
+  const n = playerIds.length;
+  const newList = RANK_MAP[n] || ['president', 'vice-president', ...Array(n - 4).fill('citizen'), 'vice-scum', 'scum'];
+  const sorted = [...playerIds].sort((a, b) =>
+    RANK_ORDER.indexOf(prevRanks[a] ?? 'citizen') - RANK_ORDER.indexOf(prevRanks[b] ?? 'citizen')
+  );
+  const result = {};
+  sorted.forEach((id, i) => { result[id] = newList[i]; });
+  return result;
+}
+
 function doStartGame(roomId) {
   console.log('[doStartGame] roomId:', roomId);
   const room = getRoom(roomId);
@@ -346,7 +362,10 @@ function doStartGame(roomId) {
   }
 
   const prevState = gameStates.get(roomId);
-  const prevRanks = prevState?.ranks || {};
+  const rawPrevRanks = prevState?.ranks || {};
+  const prevRanks = Object.keys(rawPrevRanks).length > 0
+    ? remapRanks(rawPrevRanks, currentRoom.players.map(p => p.id))
+    : {};
   const gameNumber = (prevState?.gameNumber || 0) + 1;
 
   const players = currentRoom.players.map(p => ({ id: p.id, nickname: p.nickname }));
