@@ -499,17 +499,12 @@ function renderTaxButtons(count) {
   btnPass.style.display = 'none';
 }
 
-socket.on('tax-returned', ({ giverId, targetId, cardCount }) => {
-  console.log('[tax-returned] giverId:', giverId, '| targetId:', targetId, '| cardCount:', cardCount, '| myId:', myId, '| taxPhase:', JSON.stringify(taxPhase), '| taxSubmitted:', taxSubmitted);
+socket.on('tax-returned', ({ giverId, cardCount }) => {
+  console.log('[tax-returned] giverId:', giverId, '| cardCount:', cardCount, '| myId:', myId, '| taxPhase:', JSON.stringify(taxPhase), '| taxSubmitted:', taxSubmitted);
   if (!taxPhase) { console.log('[tax-returned] taxPhase is null — ignoring'); return; }
-  if (taxPhase.taxReturnCount > 0 && !taxSubmitted) {
-    console.log('[tax-returned] my turn to return — updating UI | taxReturnCount:', taxPhase.taxReturnCount);
-    taxBannerEl.textContent = `세금: 돌려줄 카드 ${taxPhase.taxReturnCount}장을 선택하세요`;
-    handEl.classList.remove('tax-waiting');
-    renderHand();
-    renderTaxButtons(taxPhase.taxReturnCount);
-  } else {
-    console.log('[tax-returned] not my return turn (taxReturnCount:', taxPhase.taxReturnCount, ', taxSubmitted:', taxSubmitted, ') — no UI change');
+  // 대부호·부호 동시 진행이므로 별도 UI 전환 없음. 배너만 업데이트.
+  if (taxSubmitted) {
+    taxBannerEl.textContent = '제출 완료, 세금 교환 대기 중...';
   }
 });
 
