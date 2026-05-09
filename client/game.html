@@ -117,13 +117,9 @@
     #action-btns button:not(#btn-autopass):not(#btn-auto):disabled img { opacity:0.35; }
     #action-btns button:not(#btn-autopass):not(#btn-auto):not(:disabled):hover img { transform:scale(1.05); }
     #autopass-row { position:absolute; bottom:95px; right:10px; display:flex; flex-direction:column; align-items:flex-end; gap:14px; z-index:20; }
-    #btn-autopass, #btn-auto { padding:0; background:none; border:none; cursor:pointer; position:relative; }
-    #btn-autopass img, #btn-auto img { display:block; height:52px; width:auto; transition:transform .12s; }
-    #btn-autopass::after, #btn-auto::after {
-      content:''; position:absolute; inset:0; border-radius:6px;
-      background:rgba(220,40,40,0); transition:background .15s; pointer-events:none;
-    }
-    #btn-autopass.on::after, #btn-auto.on::after { background:rgba(220,40,40,0.5); }
+    #btn-autopass, #btn-auto { padding:0; background:none; border:none; cursor:pointer; }
+    #btn-autopass img, #btn-auto img { display:block; height:52px; width:auto; transition:transform .12s, filter .15s; }
+    #btn-autopass.on img, #btn-auto.on img { filter: sepia(1) saturate(6) hue-rotate(310deg); }
     #btn-autopass:hover img, #btn-auto:hover img { transform:scale(1.05); }
 
     /* 게임 종료 오버레이 */
