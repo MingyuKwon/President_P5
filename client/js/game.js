@@ -935,7 +935,7 @@ function rankLabel(rank) {
 }
 function rankImg(rank) {
   if (!rank) return '';
-  return `/Resource/UI/rank_${rank}.png`;
+  return `/Resource/UI/rank-badge/${rank}.png`;
 }
 
 myAreaEl.classList.toggle('active', currentPlayerId === myId);
