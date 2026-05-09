@@ -116,7 +116,7 @@
       transition:opacity .15s, transform .1s; }
     #action-btns button:not(#btn-autopass):not(#btn-auto):disabled img { opacity:0.35; }
     #action-btns button:not(#btn-autopass):not(#btn-auto):not(:disabled):hover img { transform:scale(1.05); }
-    #autopass-row { width:100%; display:flex; justify-content:center; gap:50px; margin-top:0; }
+    #autopass-row { position:absolute; bottom:80px; right:10px; display:flex; flex-direction:column; align-items:flex-end; gap:12px; }
     #btn-autopass, #btn-auto { padding:0; background:none; border:none; cursor:pointer; transition:all .12s; }
     #btn-autopass img, #btn-auto img { display:block; height:40px; width:auto; opacity:0.45; transition:opacity .12s, transform .12s; }
     #btn-autopass.on img, #btn-auto.on img { opacity:1; }
@@ -176,6 +176,10 @@
 <body>
   <div id="game-board">
     <button id="btn-exit"><img src="/Resource/UI/ControlPanel/Exit.png" alt="나가기"></button>
+    <div id="autopass-row">
+      <button id="btn-autopass"><img src="/Resource/UI/ControlPanel/AutoPass.png" alt="자동 패스"></button>
+      <button id="btn-auto"><img src="/Resource/UI/ControlPanel/Auto.png" alt="자동"></button>
+    </div>
     <div id="game-over-overlay">
       <div id="game-over-content">
         <div id="game-over-ranks"></div>
@@ -204,10 +208,6 @@
                  onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block'">
             <span>패스</span>
           </button>
-          <div id="autopass-row">
-            <button id="btn-autopass"><img src="/Resource/UI/ControlPanel/AutoPass.png" alt="자동 패스"></button>
-            <button id="btn-auto"><img src="/Resource/UI/ControlPanel/Auto.png" alt="자동"></button>
-          </div>
         </div>
       </div>
       <div id="my-area">
