@@ -95,6 +95,7 @@ let currentRevolution = false;
 let fallenPresidentId = null;
 let isHost = false;
 let leftPlayers = new Set();
+let taxPhase = null; // null | { role, taxReturnCount }
 
 const seatsEl        = document.getElementById('player-seats');
 const tableEl        = document.getElementById('table');
@@ -226,7 +227,7 @@ socket.on('room-joined', ({ isHost: h }) => {
   isHost = h;
 });
 
-socket.on('game-started', ({ hand, turnOrder: to, currentPlayerId: cpId, players: ps }) => {
+socket.on('game-started', ({ hand, turnOrder: to, currentPlayerId: cpId, players: ps, phase, taxInfo }) => {
   clearTimeout(gameOverTimer);
   sessionStorage.removeItem('gameOverRanks');
   sessionStorage.removeItem('gameOverScores');
@@ -249,10 +250,18 @@ socket.on('game-started', ({ hand, turnOrder: to, currentPlayerId: cpId, players
   playerRanks = {};
   ps.forEach(p => { if (p.rank) playerRanks[p.id] = p.rank; });
   tableEl.innerHTML = '';
-  renderHand();
-  renderSeats();
-  renderCardOrder();
-  if (currentPlayerId === myId) { tryAutoPlay(); tryAutoPass(); }
+
+  if (phase === 'tax' && taxInfo) {
+    taxPhase = taxInfo;
+    enterTaxPhase(taxInfo);
+  } else {
+    taxPhase = null;
+    exitTaxPhase();
+    renderHand();
+    renderSeats();
+    renderCardOrder();
+    if (currentPlayerId === myId) { tryAutoPlay(); tryAutoPass(); }
+  }
 });
 
 socket.on('game-state-sync', ({ hand, tableCards, tablePile, currentPlayerId: cpId, revolution, players: ps, turnOrder: to, phase, readyPlayers, scores, isHost: h }) => {
@@ -300,6 +309,7 @@ socket.on('hand-updated', ({ hand }) => {
   myHand = sortHand(hand);
   selectedCards = [];
   renderHand();
+  if (taxPhase && taxPhase.taxReturnCount > 0) renderTaxButtons(taxPhase.taxReturnCount);
 });
 
 socket.on('turn-timer', ({ playerId, duration }) => {
@@ -388,6 +398,86 @@ socket.on('game-over', ({ ranks, scores }) => {
 });
 
 
+const taxBannerEl = document.getElementById('tax-banner');
+const ROLE_LABEL = { president: '대부호', 'vice-president': '부호', citizen: '평민', 'vice-scum': '빈민', scum: '대빈민' };
+
+function enterTaxPhase(taxInfo) {
+  const { role, taxGiven, taxReceived, taxReturnCount } = taxInfo;
+  gameBoardEl.classList.add('tax-mode');
+  taxBannerEl.style.display = 'block';
+
+  if (taxReturnCount > 0) {
+    // 대부호 or 부호: 돌려줄 카드 선택
+    taxBannerEl.textContent = `세금: 돌려줄 카드 ${taxReturnCount}장을 선택하세요`;
+    renderHand();
+    renderTaxButtons(taxReturnCount);
+  } else if (taxGiven.length > 0) {
+    // 대빈민 or 빈민: 뺏긴 카드 표시
+    taxBannerEl.textContent = `세금 ${taxGiven.length}장 납부됨 (${taxGiven.map(c => c.slice(0,-1)).join(', ')})`;
+    handEl.classList.add('tax-waiting');
+    renderHand();
+    btnPlay.disabled = true;
+    btnPass.disabled = true;
+  } else {
+    // 평민: 대기
+    taxBannerEl.textContent = '세금 교환 중...';
+    handEl.classList.add('tax-waiting');
+    renderHand();
+    btnPlay.disabled = true;
+    btnPass.disabled = true;
+  }
+
+  renderSeats();
+  renderCardOrder();
+}
+
+function exitTaxPhase() {
+  gameBoardEl.classList.remove('tax-mode');
+  taxBannerEl.style.display = 'none';
+  handEl.classList.remove('tax-waiting');
+  // 카드 내기 버튼 원래대로 복구
+  btnPlay.textContent = '';
+  btnPlay.innerHTML = '<img src="/Resource/UI/ControlPanel/CardSelect.png" alt="카드 내기"><span>카드 내기</span>';
+  btnPlay.onclick = onBtnPlayClick;
+  btnPass.style.display = '';
+}
+
+function renderTaxButtons(count) {
+  // 카드 내기 버튼을 세금 내기 버튼으로 교체
+  btnPlay.innerHTML = `<img src="/Resource/UI/ControlPanel/CardSelect.png" alt="세금 내기"><span>세금 내기 (${count}장)</span>`;
+  btnPlay.disabled = selectedCards.length !== count;
+  btnPlay.onclick = () => {
+    if (selectedCards.length !== count) return;
+    socket.emit('tax-return', { sessionId: myId, cards: [...selectedCards] });
+    btnPlay.disabled = true;
+  };
+  btnPass.style.display = 'none';
+}
+
+socket.on('tax-returned', ({ giverId, targetId, cardCount }) => {
+  // hand-updated 이벤트로 손패는 이미 갱신됨
+  // 배너만 업데이트 (대부호가 돌렸으면 다음은 부호 차례)
+  if (taxPhase && taxPhase.taxReturnCount > 0) {
+    btnPlay.disabled = true; // 상대가 돌리는 동안 대기
+  }
+});
+
+socket.on('tax-phase-end', ({ currentPlayerId: cpId }) => {
+  taxPhase = null;
+  currentPlayerId = cpId;
+  exitTaxPhase();
+  selectedCards = [];
+  renderHand();
+  renderSeats();
+  renderCardOrder();
+  if (currentPlayerId === myId) { tryAutoPlay(); tryAutoPass(); }
+});
+
+function onBtnPlayClick() {
+  if (!selectedCards.length) return;
+  socket.emit('play-cards', { cards: selectedCards, sessionId: myId });
+}
+
 function showReadyOverlay(el) {
   el.classList.remove('pop');
   void el.offsetWidth; // reflow to restart animation
@@ -461,11 +551,12 @@ socket.on('error', ({ message }) => {
   }
 });
 
-btnPlay.onclick = () => {
+function onBtnPlayClick() {
   console.log('[play] click — selectedCards:', [...selectedCards], '| myId:', myId, '| currentPlayerId:', currentPlayerId, '| disabled:', btnPlay.disabled);
   if (selectedCards.length === 0) { console.warn('[play] selectedCards 비어있음, 전송 취소'); return; }
   socket.emit('play-cards', { cards: [...selectedCards], sessionId: myId });
-};
+}
+btnPlay.onclick = onBtnPlayClick;
 btnPass.onclick = () => socket.emit('pass', { sessionId: myId });
 document.getElementById('btn-exit').onclick = () => {
   if (!confirm('게임을 나가시겠습니까?')) return;
@@ -538,8 +629,9 @@ function renderSeats() {
 }
 
 function renderHand() {
+  const isTaxSelecting = taxPhase && taxPhase.taxReturnCount > 0;
   const isMyTurn = currentPlayerId === myId;
-  const selectable = computeSelectableSet(myHand, selectedCards, currentTableCards, currentRevolution);
+  const selectable = isTaxSelecting ? new Set(myHand) : computeSelectableSet(myHand, selectedCards, currentTableCards, currentRevolution);
   const tempSel = [...selectedCards];
   handEl.innerHTML = '';
   const n = myHand.length;
@@ -566,13 +658,20 @@ function renderHand() {
 
     handEl.appendChild(div);
   });
-  myAreaEl.classList.toggle('active', isMyTurn);
-  btnPass.disabled = !isMyTurn;
-  btnPlay.disabled = !isMyTurn || selectedCards.length === 0;
+
+  if (isTaxSelecting) {
+    myAreaEl.classList.add('active');
+    btnPlay.disabled = selectedCards.length !== taxPhase.taxReturnCount;
+  } else {
+    myAreaEl.classList.toggle('active', isMyTurn);
+    btnPass.disabled = !isMyTurn;
+    btnPlay.disabled = !isMyTurn || selectedCards.length === 0;
+  }
 }
 
 function toggleCard(card) {
-  if (currentPlayerId !== myId) return;
+  const isTaxSelecting = taxPhase && taxPhase.taxReturnCount > 0;
+  if (!isTaxSelecting && currentPlayerId !== myId) return;
   const idx = selectedCards.indexOf(card);
   if (idx === -1) selectedCards.push(card);
   else selectedCards.splice(idx, 1);
