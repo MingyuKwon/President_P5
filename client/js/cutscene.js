@@ -58,7 +58,7 @@
       overlay.appendChild(content);
       document.body.appendChild(overlay);
 
-      const FADE_IN  = 0.15;
+      const FADE_IN  = 0.35;
       const FADE_OUT = 0.15;
       const hold = Math.max(0.05, duration - FADE_IN - FADE_OUT);
 
