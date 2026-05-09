@@ -29,21 +29,39 @@ function myStrategy(ctx) {
     .filter(([rank]) => rank !== 'Joker')
     .sort((a, b) => playRank(a[1][0]) - playRank(b[1][0]));
 
+  const hasJoker = !!groups['Joker'];
+
   if (isLead) {
     // 선: 가장 약한 숫자의 카드를 최대한 많이 낸다
     for (const [, cards] of ranked) {
       if (cards.length > 0) return cards;
     }
+    // 조커만 남았을 때 단독 출력
+    if (hasJoker) return ['Joker'];
     return null;
   }
 
   // 선이 아닐 때: 테이블 장수에 맞춰 낼 수 있는 가장 약한 조합
   const N = needCount;
+
+  // 1. N장 동일 숫자로 이기기
   for (const [, cards] of ranked) {
     if (cards.length < N) continue;
     const candidate = cards.slice(0, N);
     if (canBeat(candidate, tableCards)) return candidate;
   }
+
+  // 2. (N-1)장 + 조커 조합으로 이기기
+  if (hasJoker && N > 1) {
+    for (const [, cards] of ranked) {
+      if (cards.length < N - 1) continue;
+      const candidate = [...cards.slice(0, N - 1), 'Joker'];
+      if (canBeat(candidate, tableCards)) return candidate;
+    }
+  }
+
+  // 3. 조커 단독 (1장 낼 때)
+  if (hasJoker && N === 1) return ['Joker'];
 
   return null; // 패스
 }
