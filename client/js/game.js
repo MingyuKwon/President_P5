@@ -389,20 +389,23 @@ socket.on('card-played', ({ cards }) => {
 });
 
 socket.on('player-passed', ({ playerId }) => {
+  console.log('[player-passed] playerId:', playerId, '| myId:', myId);
   const seatEl = playerId === myId
     ? document.getElementById('my-seat')
     : document.querySelector(`.player-seat[data-player-id="${playerId}"]`);
+  console.log('[player-passed] seatEl:', seatEl);
   if (!seatEl) return;
 
   const rect = seatEl.getBoundingClientRect();
+  console.log('[player-passed] rect:', rect);
   const img = document.createElement('img');
   img.src = '/Resource/UI/ControlPanel/PassWord.png';
   Object.assign(img.style, {
     position: 'fixed',
-    left: `${rect.left - 60}px`,
-    top: `${rect.top + rect.height / 2 - 20}px`,
-    width: '52px',
-    height: '40px',
+    left: `${rect.left - 110}px`,
+    top: `${rect.top + rect.height / 2 - 30}px`,
+    width: '62px',
+    height: '48px',
     objectFit: 'contain',
     zIndex: '500',
     pointerEvents: 'none',
