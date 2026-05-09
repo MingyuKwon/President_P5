@@ -66,9 +66,9 @@
       42%     { transform:scale(1.02); }
       70%     { transform:scale(1); }
     }
-    #revolution-indicator { display:none; position:absolute; top:-10px; left:calc(50% + 250px);
-      transform:translateY(-50%) translateY(50%); pointer-events:none; z-index:10; }
-    #revolution-indicator img { height:160px; width:auto;
+    #revolution-indicator { display:none; position:absolute; left:300px; bottom:100%;
+      transform:translateX(-50%); pointer-events:none; z-index:10; }
+    #revolution-indicator img { height:90px; width:auto;
       animation:rev-heartbeat 1.2s ease-in-out infinite; }
     #turn-timer { position:relative; display:inline-flex; align-items:center; justify-content:center;
       pointer-events:none; align-self:center; }
@@ -184,12 +184,12 @@
       </div>
     </div>
     <div id="card-order-bar"></div>
-    <div id="revolution-indicator"><img src="/Resource/UI/game-state/Revolution.png" alt="혁명"></div>
     <div id="player-seats"></div>
     <div id="table"></div>
     <div id="bottom-ui">
       <div id="controls-row">
         <div id="my-seat"></div>
+        <div id="revolution-indicator"><img src="/Resource/UI/game-state/Revolution.png" alt="혁명"></div>
         <div id="action-btns">
           <button id="btn-play" disabled>
             <img src="/Resource/UI/ControlPanel/CardSelect.png" alt="카드 내기"
