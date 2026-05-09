@@ -296,7 +296,6 @@ socket.on('game-started', ({ hand, turnOrder: to, currentPlayerId: cpId, players
   enqueueCutscene({ image: '/Resource/UI/game-state/GameStart.png' });
   afterCutsceneQueue(() => {
     if (phase === 'tax' && taxInfo) {
-      console.log('[game-started] TAX phase | taxInfo:', JSON.stringify(taxInfo), '| myId:', myId, '| playerRanks:', JSON.stringify(playerRanks));
       taxPhase = taxInfo;
       taxSubmitted = false;
       enterTaxPhase(taxInfo);
@@ -315,7 +314,6 @@ socket.on('game-started', ({ hand, turnOrder: to, currentPlayerId: cpId, players
 });
 
 socket.on('game-state-sync', ({ hand, tableCards, tablePile, currentPlayerId: cpId, revolution, players: ps, turnOrder: to, phase, readyPlayers, scores, isHost: h, taxInfo, autoSettings }) => {
-  console.log('[game-state-sync] phase:', phase, '| taxInfo:', taxInfo, '| hand.length:', hand?.length);
   if (h !== undefined) isHost = h;
   applyAutoSettings(autoSettings);
   myHand = sortHand(hand);
@@ -328,7 +326,6 @@ socket.on('game-state-sync', ({ hand, tableCards, tablePile, currentPlayerId: cp
   selectedCards = [];
 
   if (phase === 'tax' && taxInfo) {
-    console.log('[game-state-sync] → tax branch. taxReturnCount:', taxInfo.taxReturnCount, '| taxSubmitted:', taxInfo.taxSubmitted);
     taxPhase = taxInfo;
     taxSubmitted = taxInfo.taxSubmitted || false;
     enterTaxPhase(taxInfo);
@@ -388,20 +385,13 @@ socket.on('card-played', ({ cards }) => {
   addCardGroupToTable(cards);
 });
 
-socket.on('player-passed-self-test', ({ playerId }) => {
-  console.log('[player-passed-self-test] 직접 수신 확인 | playerId:', playerId);
-});
-
 socket.on('player-passed', ({ playerId }) => {
-  console.log('[player-passed] playerId:', playerId, '| myId:', myId);
   const seatEl = playerId === myId
     ? document.getElementById('my-seat')
     : document.querySelector(`.player-seat[data-player-id="${playerId}"]`);
-  console.log('[player-passed] seatEl:', seatEl);
   if (!seatEl) return;
 
   const rect = seatEl.getBoundingClientRect();
-  console.log('[player-passed] rect:', rect);
   const img = document.createElement('img');
   img.src = '/Resource/UI/ControlPanel/PassWord.png';
   Object.assign(img.style, {
@@ -427,7 +417,6 @@ socket.on('player-passed', ({ playerId }) => {
 });
 
 socket.on('hand-updated', ({ hand }) => {
-  console.log('[hand-updated] new hand size:', hand.length, '| taxPhase:', JSON.stringify(taxPhase), '| taxSubmitted:', taxSubmitted);
   // 세금 페이즈 중 새로 받은 카드 감지 → floating 애니메이션
   if (taxPhase) {
     const remaining = [...myHand];
@@ -444,7 +433,6 @@ socket.on('hand-updated', ({ hand }) => {
   renderHand();
   // 세금 제출 전이고 내가 선택할 차례면 버튼 갱신
   if (taxPhase && taxPhase.taxReturnCount > 0 && !taxSubmitted) {
-    console.log('[hand-updated] re-rendering tax buttons');
     renderTaxButtons(taxPhase.taxReturnCount);
   }
 });
@@ -595,7 +583,6 @@ function animateTaxReceive(cards) {
 }
 
 function enterTaxPhase(taxInfo) {
-  console.log('[enterTaxPhase]', JSON.stringify(taxInfo), '| taxSubmitted:', taxSubmitted);
   const { role, taxGiven, taxReceived, taxReturnCount } = taxInfo;
   // taxSubmitted은 호출자가 설정 — 여기서 초기화하지 않음
   gameBoardEl.classList.add('tax-mode');
@@ -634,7 +621,6 @@ function enterTaxPhase(taxInfo) {
 }
 
 function exitTaxPhase() {
-  console.log('[exitTaxPhase] called | taxSubmitted was:', taxSubmitted);
   hideTaxExchangeImage();
   clearAutoTaxTimer();
   taxSubmitted = false;
@@ -647,16 +633,13 @@ function exitTaxPhase() {
 }
 
 function renderTaxButtons(count) {
-  console.log('[renderTaxButtons] count:', count, '| taxSubmitted:', taxSubmitted, '| selectedCards:', selectedCards.length);
-  if (taxSubmitted) { console.log('[renderTaxButtons] already submitted — skip'); return; }
+  if (taxSubmitted) return;
   btnPlay.innerHTML = `<img src="/Resource/UI/ControlPanel/CardSelect.png" alt="세금 내기"><span>세금 내기 (${count}장)</span>`;
   btnPlay.disabled = selectedCards.length !== count;
   btnPlay.onclick = () => {
-    console.log('[renderTaxButtons] submit clicked | selectedCards:', selectedCards, '| taxSubmitted:', taxSubmitted);
-    if (selectedCards.length !== count || taxSubmitted) { console.log('[renderTaxButtons] submit BLOCKED'); return; }
+    if (selectedCards.length !== count || taxSubmitted) return;
     taxSubmitted = true;
     const submitted = [...selectedCards];
-    console.log('[renderTaxButtons] emitting tax-return | cards:', submitted);
 
     // 선택된 카드 요소를 클론해서 날리는 send 애니메이션
     const selectedEls = [...handEl.querySelectorAll('.hand-card.selected')];
@@ -682,8 +665,7 @@ function renderTaxButtons(count) {
 }
 
 socket.on('tax-returned', ({ giverId, cardCount }) => {
-  console.log('[tax-returned] giverId:', giverId, '| cardCount:', cardCount, '| myId:', myId, '| taxPhase:', JSON.stringify(taxPhase), '| taxSubmitted:', taxSubmitted);
-  if (!taxPhase) { console.log('[tax-returned] taxPhase is null — ignoring'); return; }
+  if (!taxPhase) return;
   // 대부호·부호 동시 진행이므로 별도 UI 전환 없음. 배너만 업데이트.
   if (taxSubmitted) {
     taxBannerEl.textContent = '제출 완료, 세금 교환 대기 중...';
@@ -691,7 +673,6 @@ socket.on('tax-returned', ({ giverId, cardCount }) => {
 });
 
 socket.on('tax-phase-end', ({ currentPlayerId: cpId }) => {
-  console.log('[tax-phase-end] received | cpId:', cpId, '| myId:', myId, '| taxPhase:', JSON.stringify(taxPhase));
   taxPhase = null;
   currentPlayerId = cpId;
   exitTaxPhase();
@@ -731,12 +712,10 @@ function setReadyBtn(ready) {
 }
 
 document.getElementById('btn-ready').onclick = () => {
-  console.log('[btn-ready] click — myId:', myId, '| socket.connected:', socket.connected);
   socket.emit('player-ready', { sessionId: myId });
 };
 
 socket.on('ready-updated', ({ readyPlayers }) => {
-  console.log('[ready-updated] readyPlayers:', readyPlayers, '| myId:', myId);
   readyPlayers.forEach(pid => {
     const card = document.querySelector(`.go-player-card[data-player-id="${pid}"]`);
     if (!card) return;
@@ -774,17 +753,11 @@ socket.on('room-closed', () => {
 });
 
 socket.on('error', ({ message }) => {
-  console.log('[error] server error:', message);
   if (message === 'invalid-play' || message === 'card-not-in-hand') {
     animateMessage('낼 수 없는 카드입니다', '#e94560');
   }
 });
 
-function onBtnPlayClick() {
-  console.log('[play] click — selectedCards:', [...selectedCards], '| myId:', myId, '| currentPlayerId:', currentPlayerId, '| disabled:', btnPlay.disabled);
-  if (selectedCards.length === 0) { console.warn('[play] selectedCards 비어있음, 전송 취소'); return; }
-  socket.emit('play-cards', { cards: [...selectedCards], sessionId: myId });
-}
 btnPlay.onclick = onBtnPlayClick;
 btnPass.onclick = () => socket.emit('pass', { sessionId: myId });
 document.getElementById('btn-exit').onclick = () => {
@@ -822,6 +795,7 @@ function renderSeats() {
       isActive ? 'active'   : '',
       p.finished ? 'finished' : '',
     ].filter(Boolean).join(' ');
+    div.dataset.playerId = playerId;
     const charRank = rank || 'citizen';
     const shadowSrc = isActive
       ? `/Resource/UI/character/${charRank}-shadow-red.png`

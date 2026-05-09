@@ -288,18 +288,13 @@ io.on('connection', (socket) => {
 
   socket.on('pass', ({ sessionId }) => {
     const session = sessionMap.get(sessionId);
-    console.log('[pass] sessionId:', sessionId, '| session:', session);
     if (!session) return;
     const state = gameStates.get(session.roomId);
-    console.log('[pass] roomId:', session.roomId, '| state exists:', !!state);
     if (!state) return;
     const result = pass(state, sessionId);
-    console.log('[pass] result.error:', result.error);
     if (result.error) return socket.emit('error', { message: result.error });
     gameStates.set(session.roomId, result.state);
-    console.log('[pass] emitting player-passed to room:', session.roomId, '| socket.id:', socket.id);
     io.to(session.roomId).emit('player-passed', { playerId: sessionId });
-    socket.emit('player-passed-self-test', { playerId: sessionId }); // 직접 emit 테스트
     broadcastGameUpdate(session.roomId, result.state, result.events);
     if (!result.events.some(e => e.type === 'game-over')) {
       startTurnTimer(session.roomId, result.state);
