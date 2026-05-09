@@ -396,9 +396,12 @@ function renderSeats() {
       p.finished ? 'finished' : '',
     ].filter(Boolean).join(' ');
     const charRank = rank || 'citizen';
+    const shadowSrc = isActive
+      ? `/Resource/UI/character/${charRank}-shadow-red.png`
+      : `/Resource/UI/character/${charRank}-shadow.png`;
     div.innerHTML = `
       <div class="seat-char">
-        <img class="seat-char-shadow" src="/Resource/UI/character/${charRank}-shadow.png" alt="">
+        <img class="seat-char-shadow" src="${shadowSrc}" alt="">
         <img class="seat-char-face" src="/Resource/UI/character/${charRank}-face.png" alt="">
       </div>
       <div class="seat-content">
