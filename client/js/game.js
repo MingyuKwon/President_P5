@@ -410,13 +410,13 @@ socket.on('player-passed', ({ playerId }) => {
   document.body.appendChild(img);
 
   gsap.timeline({ onComplete: () => img.remove() })
-    .fromTo(img, { opacity: 0, scale: 0.6 }, { opacity: 1, scale: 1, duration: 0.12, ease: 'back.out(1.5)' })
-    .to(img, { scale: 1.18, duration: 0.12, ease: 'power2.out' })
-    .to(img, { scale: 1.0,  duration: 0.12, ease: 'power2.in' })
-    .to(img, { scale: 1.1,  duration: 0.1,  ease: 'power2.out' })
-    .to(img, { scale: 1.0,  duration: 0.1,  ease: 'power2.in' })
-    .to({}, { duration: 0.3 })
-    .to(img, { opacity: 0, scale: 0.8, duration: 0.2, ease: 'power2.in' });
+    .fromTo(img, { opacity: 0, scale: 0.6 }, { opacity: 1, scale: 1, duration: 0.08, ease: 'back.out(1.5)' })
+    .to(img, { scale: 1.18, duration: 0.08, ease: 'power2.out' })
+    .to(img, { scale: 1.0,  duration: 0.08, ease: 'power2.in' })
+    .to(img, { scale: 1.1,  duration: 0.06, ease: 'power2.out' })
+    .to(img, { scale: 1.0,  duration: 0.06, ease: 'power2.in' })
+    .to({}, { duration: 0.2 })
+    .to(img, { opacity: 0, scale: 0.8, duration: 0.14, ease: 'power2.in' });
 });
 
 socket.on('hand-updated', ({ hand }) => {
@@ -947,23 +947,6 @@ function renderCardOrder() {
   document.getElementById('revolution-indicator').style.display = currentRevolution ? 'block' : 'none';
 }
 
-// DEBUG: my-seat에 PassWord 이미지 위치 확인용 (고정 표시)
-setTimeout(() => {
-  const seatEl = document.getElementById('my-seat');
-  if (!seatEl) return;
-  const rect = seatEl.getBoundingClientRect();
-  const img = document.createElement('img');
-  img.id = 'debug-pass-img';
-  img.src = '/Resource/UI/ControlPanel/PassWord.png';
-  Object.assign(img.style, {
-    position: 'fixed',
-    left: `${rect.left - 110}px`,
-    top: `${rect.top + rect.height / 2 - 30}px`,
-    width: '62px', height: '48px',
-    objectFit: 'contain', zIndex: '500', pointerEvents: 'none',
-  });
-  document.body.appendChild(img);
-}, 1000);
 
 
 function animateMessage(text, color = '#fff') {
