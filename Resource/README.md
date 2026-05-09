@@ -77,6 +77,14 @@
 | `cardGame-state-exchange-i18n #370.png` | "카드교환중..." |
 | `cardGame-state-fall-i18n #406.png` | "몰락! / 대부호는 1위를 하지 못하면 대빈민으로 전락" |
 
+### UI/result/
+게임 결과창 레이어 구조. 빨간 배경을 뒤에 크게 깔고, 검정 패널을 앞에 올린 뒤 그 안에 결과를 표시.
+
+| 파일 | 레이어 | 설명 |
+|---|---|---|
+| `result-bg-red.png` | 하단 (배경) | 빨간 사각형 — 결과창 뒷 배경 |
+| `result-panel-dark.png` | 상단 (전경) | 검정 다각형 패널 — 결과 텍스트가 표시되는 영역 |
+
 ### UI/background/
 배경 및 기타 UI 요소.
 
@@ -84,8 +92,6 @@
 |---|---|
 | `CardGame-rankReward-bg2.png` | 빨간 카드 패널 (세로형, 왕 일러스트) |
 | `CardGame-goal-itemBG1 #596.png` | 체크무늬 가로 배너 (베이지) |
-| `CardGame-result-bg2.png` | 검은 다각형 배경 |
-| `Texture-taozhuang-ka02-new.png` | 빨간 사각형 텍스처 |
 | `CardGame-info-title-i18n.png` | "상세/detail" 텍스트 이미지 |
 | `CardGame-joy-income-bg1.png` | 검은 불규칙 도형 배경 |
 | `CardGame-preFree-clickBg-left.png` | 좌측 클릭 배경 (흰색) |
