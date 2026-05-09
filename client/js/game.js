@@ -453,7 +453,7 @@ socket.on('round-end', ({ reason }) => {
   clearAutoPlayTimer();
   if (reason === '8-clear') enqueueCutscene({ image: '/Resource/UI/game-state/Eight_RoundEnd.png', text: '8 Clear!' });
   else if (reason === 'spade-reversal') enqueueCutscene({ image: '/Resource/UI/game-state/S3_RoundEnd.png', text: '♠ Reversal!' });
-  else if (reason === 'all-pass') enqueueCutscene({ image: '/Resource/UI/game-state/AllPass_RoundENd.png', text: '전원 패스' });
+  else if (reason === 'all-pass') enqueueCutscene({ image: '/Resource/UI/game-state/AllPass_RoundENd.png', text: '전원 패스', duration: 0.5, fadeIn: 0.1 });
   gsap.to('#table .table-group', {
     opacity: 0, y: -20, duration: 0.4, stagger: 0.05,
     onComplete: () => { tableEl.innerHTML = ''; },

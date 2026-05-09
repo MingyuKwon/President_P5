@@ -16,7 +16,7 @@
     play(queue.shift()).then(next);
   }
 
-  function play({ image, subImage, text, duration = 0.9, delay = 0.3, textColor = '#fff', imageScale = 1 }) {
+  function play({ image, subImage, text, duration = 0.9, delay = 0.3, textColor = '#fff', imageScale = 1, fadeIn = 0.35 }) {
     return new Promise(resolve => {
       const overlay = document.createElement('div');
       Object.assign(overlay.style, {
@@ -65,7 +65,7 @@
       overlay.appendChild(content);
       document.body.appendChild(overlay);
 
-      const FADE_IN  = 0.35;
+      const FADE_IN  = fadeIn;
       const FADE_OUT = 0.15;
       const hold = Math.max(0.05, duration - FADE_IN - FADE_OUT);
 
