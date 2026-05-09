@@ -312,11 +312,14 @@ socket.on('game-over', ({ ranks }) => {
   const ranksEl = document.getElementById('game-over-ranks');
   ranksEl.innerHTML = sorted.map(([id, rank]) => {
     const p = players.find(p => p.id === id);
+    const name = p ? p.nickname : id;
     return `
-      <div class="go-rank-row">
-        <div class="go-rank-icon"><img src="${rankImg(rank)}" alt="${rankLabel(rank)}"></div>
-        <div class="go-rank-label">${rankLabel(rank)}</div>
-        <div class="go-rank-name">${p ? p.nickname : id}</div>
+      <div class="go-player-card">
+        <img class="go-card-bg" src="/Resource/UI/result/result-bg-red.png" alt="">
+        <div class="go-card-content">
+          <div class="go-card-rank">${rankLabel(rank)}</div>
+          <div class="go-card-name">${name}</div>
+        </div>
       </div>`;
   }).join('');
 
