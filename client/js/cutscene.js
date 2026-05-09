@@ -16,7 +16,7 @@
     play(queue.shift()).then(next);
   }
 
-  function play({ image, text, duration = 0.8, delay = 0.4, textColor = '#fff' }) {
+  function play({ image, text, duration = 0.7, delay = 0.3, textColor = '#fff' }) {
     return new Promise(resolve => {
       const overlay = document.createElement('div');
       Object.assign(overlay.style, {
