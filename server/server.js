@@ -15,7 +15,8 @@ app.use('/Resource', express.static(path.join(__dirname, '../Resource')));
 const gameStates = new Map();   // roomId → gameState
 const sessionMap = new Map();   // sessionId → { socketId, roomId }
 const socketSession = new Map(); // socketId → sessionId
-const turnTimers = new Map();   // roomId → timeoutId
+const turnTimers = new Map();   // roomId → { timeoutId, startedAt, playerId }
+const taxTimers  = new Map();   // roomId → { timeoutId, startedAt, playerId } (세금 페이즈 전용)
 const readySets = new Map();    // roomId → Set<sessionId>
 const roomScores = new Map();   // roomId → { sessionId → score }
 const botPlayers = new Map();   // roomId → Set<sessionId>
@@ -75,6 +76,13 @@ function clearTurnTimer(roomId) {
   if (turnTimers.has(roomId)) {
     clearTimeout(turnTimers.get(roomId).timeoutId);
     turnTimers.delete(roomId);
+  }
+}
+
+function clearTaxTimer(roomId) {
+  if (taxTimers.has(roomId)) {
+    clearTimeout(taxTimers.get(roomId).timeoutId);
+    taxTimers.delete(roomId);
   }
 }
 
@@ -217,7 +225,7 @@ io.on('connection', (socket) => {
           taxInfo,
         });
 
-        const timerInfo = turnTimers.get(roomId);
+        const timerInfo = gameState.phase === 'tax' ? taxTimers.get(roomId) : turnTimers.get(roomId);
         if (timerInfo) {
           const elapsed = Math.floor((Date.now() - timerInfo.startedAt) / 1000);
           const remaining = Math.max(1, TURN_DURATION - elapsed);
@@ -312,7 +320,7 @@ io.on('connection', (socket) => {
     const expectedCount = isPresident ? 2 : 1;
     if (!Array.isArray(cards) || cards.length !== expectedCount) { console.log('[tax-return] REJECT — wrong card count, expected:', expectedCount, 'got:', cards?.length); return; }
     console.log('[tax-return] ACCEPTED — calling processTaxReturn');
-    clearTurnTimer(session.roomId);
+    clearTaxTimer(session.roomId);
     processTaxReturn(session.roomId, sessionId, cards);
   });
 
@@ -333,6 +341,8 @@ io.on('connection', (socket) => {
     if (room && room.hostId === sessionId && room.players.length > 1) {
       // 방장 퇴장 → 방 강제 해산
       clearTurnTimer(roomId);
+      clearTaxTimer(roomId);
+      taxStates.delete(roomId);
       io.to(roomId).emit('room-closed', { reason: 'host-left' });
       const playerIds = closeRoom(roomId);
       roomScores.delete(roomId);
@@ -343,7 +353,7 @@ io.on('connection', (socket) => {
       }
     } else {
       const gameState = gameStates.get(roomId);
-      if (gameState && gameState.phase === 'playing') {
+      if (gameState && (gameState.phase === 'playing' || gameState.phase === 'tax')) {
         // 게임 중 퇴장 → 봇으로 전환
         if (!botPlayers.has(roomId)) botPlayers.set(roomId, new Set());
         botPlayers.get(roomId).add(sessionId);
@@ -354,6 +364,8 @@ io.on('connection', (socket) => {
         // 남은 인원이 3명 미만이면 방 강제 해산
         if (!updatedRoom || updatedRoom.players.length < 3) {
           clearTurnTimer(roomId);
+          clearTaxTimer(roomId);
+          taxStates.delete(roomId);
           io.to(roomId).emit('room-closed', { reason: 'not-enough-players' });
           const playerIds = closeRoom(roomId);
           roomScores.delete(roomId);
@@ -362,13 +374,14 @@ io.on('connection', (socket) => {
             const sess = sessionMap.get(pid);
             if (sess) sess.roomId = null;
           }
-        } else if (gameState.turnOrder[gameState.currentIndex] === sessionId) {
+        } else if (gameState.phase === 'playing' && gameState.turnOrder[gameState.currentIndex] === sessionId) {
           // 떠난 플레이어가 현재 차례면 봇 턴 즉시 시작
           clearTurnTimer(roomId);
           startTurnTimer(roomId, gameState);
         }
       } else {
         clearTurnTimer(roomId);
+        clearTaxTimer(roomId);
         const updated = leaveRoom(roomId, sessionId);
         if (updated) io.to(roomId).emit('room-updated', { players: publicPlayers(updated.players) });
       }
@@ -537,11 +550,11 @@ function removeCardsFromHand(hand, cards) {
 }
 
 function startTaxTimer(roomId, playerId) {
-  clearTurnTimer(roomId);
+  clearTaxTimer(roomId);
   console.log('[startTaxTimer] roomId:', roomId, '| playerId:', playerId, '| TURN_DURATION:', TURN_DURATION);
   io.to(roomId).emit('turn-timer', { playerId, duration: TURN_DURATION });
   const timeoutId = setTimeout(() => {
-    turnTimers.delete(roomId);
+    taxTimers.delete(roomId);
     const state = gameStates.get(roomId);
     const tax = taxStates.get(roomId);
     console.log('[taxTimer TIMEOUT] playerId:', playerId, '| state exists:', !!state, '| tax exists:', !!tax);
@@ -557,7 +570,7 @@ function startTaxTimer(roomId, playerId) {
     console.log('[taxTimer TIMEOUT] auto-submitting cards:', cards, '| isPresident:', isPresident);
     processTaxReturn(roomId, playerId, cards);
   }, TURN_DURATION * 1000);
-  turnTimers.set(roomId, { timeoutId, startedAt: Date.now(), playerId });
+  taxTimers.set(roomId, { timeoutId, startedAt: Date.now(), playerId });
 }
 
 function processTaxReturn(roomId, giverId, cards) {
@@ -612,6 +625,7 @@ function processTaxReturn(roomId, giverId, cards) {
 
 function finishTaxPhase(roomId, state) {
   console.log('[finishTaxPhase] roomId:', roomId, '| phase transition: tax → playing | currentIndex:', state.currentIndex, '| turnOrder:', state.turnOrder);
+  clearTaxTimer(roomId);
   taxStates.delete(roomId);
   const playingState = { ...state, phase: 'playing' };
   gameStates.set(roomId, playingState);
