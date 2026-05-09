@@ -217,6 +217,7 @@ socket.on('connect', () => {
 });
 
 socket.on('game-started', ({ hand, turnOrder: to, currentPlayerId: cpId, players: ps }) => {
+  clearTimeout(gameOverTimer);
   sessionStorage.removeItem('gameOverRanks');
   document.getElementById('game-over-overlay').classList.remove('open');
   myHand = sortHand(hand);
@@ -327,10 +328,11 @@ function showGameOverPanel(ranks) {
   document.getElementById('game-over-overlay').classList.add('open');
 }
 
+let gameOverTimer = null;
 socket.on('game-over', ({ ranks }) => {
   clearTimerUI();
   sessionStorage.setItem('gameOverRanks', JSON.stringify(ranks));
-  setTimeout(() => showGameOverPanel(ranks), 800);
+  gameOverTimer = setTimeout(() => showGameOverPanel(ranks), 800);
 });
 
 document.getElementById('btn-to-room').onclick = () => {
