@@ -515,10 +515,8 @@ function renderCardOrder() {
     return `<span class="order-rank" style="color:${color};font-weight:${weight}">${rank}</span>${sep}`;
   }).join('');
 
-  const revTag = currentRevolution
-    ? '<img class="order-rev-img" src="/Resource/UI/game-state/Revolution.png" alt="혁명">'
-    : '';
-  orderBarEl.innerHTML = `<span class="order-label">강약</span>${ranks}${revTag}`;
+  orderBarEl.innerHTML = `<span class="order-label">강약</span>${ranks}`;
+  document.getElementById('revolution-indicator').style.display = currentRevolution ? 'block' : 'none';
 }
 
 

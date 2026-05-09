@@ -59,7 +59,9 @@
     .order-label { color:#888; font-size:0.75rem; margin-right:10px; letter-spacing:.03em; }
     .order-rank { padding:0 6px; font-weight:500; }
     .order-sep { color:#777; padding:0 2px; font-size:1rem; }
-    .order-rev-img { margin-left:12px; height:66px; width:auto; vertical-align:middle; }
+    #revolution-indicator { display:none; position:absolute; top:60px; left:50%; transform:translateX(-50%);
+      pointer-events:none; z-index:10; }
+    #revolution-indicator img { height:80px; width:auto; }
     #turn-timer { position:relative; display:inline-flex; align-items:center; justify-content:center;
       pointer-events:none; align-self:center; }
     #turn-timer img { display:block; height:66px; width:auto; }
@@ -174,6 +176,7 @@
       </div>
     </div>
     <div id="card-order-bar"></div>
+    <div id="revolution-indicator"><img src="/Resource/UI/game-state/Revolution.png" alt="혁명"></div>
     <div id="player-seats"></div>
     <div id="table"></div>
     <div id="bottom-ui">
