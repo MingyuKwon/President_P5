@@ -435,7 +435,7 @@ socket.on('revolution', ({ active }) => enqueueCutscene({ image: '/Resource/UI/g
 socket.on('player-finished', ({ playerId, rank }) => {
   if (rank === 'scum') return;
   const p = players.find(p => p.id === playerId);
-  enqueueCutscene({ image: '/Resource/UI/game-state/allout.png', text: `${p ? p.nickname : playerId} — ${rankLabel(rank)}` });
+  enqueueCutscene({ image: '/Resource/UI/game-state/allout.png', subImage: rankImg(rank), text: p ? p.nickname : playerId });
 });
 
 socket.on('player-bot', ({ playerId }) => {

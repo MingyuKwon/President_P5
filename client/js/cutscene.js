@@ -16,7 +16,7 @@
     play(queue.shift()).then(next);
   }
 
-  function play({ image, text, duration = 0.9, delay = 0.3, textColor = '#fff' }) {
+  function play({ image, subImage, text, duration = 0.9, delay = 0.3, textColor = '#fff' }) {
     return new Promise(resolve => {
       const overlay = document.createElement('div');
       Object.assign(overlay.style, {
@@ -38,6 +38,13 @@
           width: '27.44vw', height: '21.56vh', objectFit: 'contain',
         });
         content.appendChild(img);
+      }
+
+      if (subImage) {
+        const img2 = document.createElement('img');
+        img2.src = subImage;
+        Object.assign(img2.style, { width: '9vw', height: '9vh', objectFit: 'contain' });
+        content.appendChild(img2);
       }
 
       if (text) {
