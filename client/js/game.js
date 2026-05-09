@@ -947,6 +947,31 @@ function renderCardOrder() {
   document.getElementById('revolution-indicator').style.display = currentRevolution ? 'block' : 'none';
 }
 
+// DEBUG: 3초 후 my-seat에 PassWord 애니메이션 테스트
+setTimeout(() => {
+  const seatEl = document.getElementById('my-seat');
+  if (!seatEl) return;
+  const rect = seatEl.getBoundingClientRect();
+  const img = document.createElement('img');
+  img.src = '/Resource/UI/ControlPanel/PassWord.png';
+  Object.assign(img.style, {
+    position: 'fixed',
+    left: `${rect.left - 60}px`,
+    top: `${rect.top + rect.height / 2 - 20}px`,
+    width: '52px', height: '40px',
+    objectFit: 'contain', zIndex: '500', pointerEvents: 'none',
+  });
+  document.body.appendChild(img);
+  gsap.timeline({ onComplete: () => img.remove() })
+    .fromTo(img, { opacity: 0, scale: 0.6 }, { opacity: 1, scale: 1, duration: 0.12, ease: 'back.out(1.5)' })
+    .to(img, { scale: 1.18, duration: 0.12, ease: 'power2.out' })
+    .to(img, { scale: 1.0,  duration: 0.12, ease: 'power2.in' })
+    .to(img, { scale: 1.1,  duration: 0.1,  ease: 'power2.out' })
+    .to(img, { scale: 1.0,  duration: 0.1,  ease: 'power2.in' })
+    .to({}, { duration: 0.3 })
+    .to(img, { opacity: 0, scale: 0.8, duration: 0.2, ease: 'power2.in' });
+}, 3000);
+
 
 function animateMessage(text, color = '#fff') {
   const el = document.createElement('div');
