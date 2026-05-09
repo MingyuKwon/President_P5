@@ -217,6 +217,8 @@ socket.on('connect', () => {
 });
 
 socket.on('game-started', ({ hand, turnOrder: to, currentPlayerId: cpId, players: ps }) => {
+  sessionStorage.removeItem('gameOverRanks');
+  document.getElementById('game-over-overlay').classList.remove('open');
   myHand = sortHand(hand);
   currentPlayerId = cpId;
   turnOrder = to;
@@ -301,9 +303,7 @@ socket.on('president-penalty', ({ playerId }) => {
   animateMessage(`${p ? p.nickname : playerId} 대부호 방어 실패!`, '#e94560');
 });
 
-socket.on('game-over', ({ ranks }) => {
-  clearTimerUI();
-
+function showGameOverPanel(ranks) {
   const RANK_ORDER = ['president', 'vice-president', 'citizen', 'vice-scum', 'scum'];
   const sorted = Object.entries(ranks).sort(
     (a, b) => RANK_ORDER.indexOf(a[1]) - RANK_ORDER.indexOf(b[1])
@@ -323,14 +323,23 @@ socket.on('game-over', ({ ranks }) => {
       </div>`;
   }).join('');
 
-  setTimeout(() => {
-    document.getElementById('game-over-overlay').classList.add('open');
-  }, 800);
+  document.getElementById('game-over-overlay').classList.add('open');
+}
+
+socket.on('game-over', ({ ranks }) => {
+  clearTimerUI();
+  sessionStorage.setItem('gameOverRanks', JSON.stringify(ranks));
+  setTimeout(() => showGameOverPanel(ranks), 800);
 });
 
 document.getElementById('btn-to-room').onclick = () => {
+  sessionStorage.removeItem('gameOverRanks');
   location.href = `room.html?id=${roomId}`;
 };
+
+// 새로고침 후 결과창 복원
+const savedRanks = sessionStorage.getItem('gameOverRanks');
+if (savedRanks) showGameOverPanel(JSON.parse(savedRanks));
 
 socket.on('room-closed', () => {
   alert('방장이 방을 나갔습니다. 로비로 이동합니다.');
