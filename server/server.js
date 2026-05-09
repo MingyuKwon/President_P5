@@ -260,9 +260,12 @@ io.on('connection', (socket) => {
     readySets.get(roomId).add(sessionId);
 
     const readyPlayers = [...readySets.get(roomId)];
-    const total = room.players.length;
-    io.to(roomId).emit('ready-updated', { readyPlayers, total });
-    if (readyPlayers.length >= total) {
+    const connectedCount = room.players.filter(p => {
+      const sess = sessionMap.get(p.id);
+      return sess?.socketId && io.sockets.sockets.has(sess.socketId);
+    }).length;
+    io.to(roomId).emit('ready-updated', { readyPlayers, total: connectedCount });
+    if (readyPlayers.length >= connectedCount) {
       io.to(roomId).emit('all-ready');
       setTimeout(() => doStartGame(roomId), 3000);
     }
