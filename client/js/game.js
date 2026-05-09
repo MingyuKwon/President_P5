@@ -337,10 +337,6 @@ socket.on('game-over', ({ ranks }) => {
   gameOverTimer = setTimeout(() => showGameOverPanel(ranks), 800);
 });
 
-document.getElementById('btn-to-room').onclick = () => {
-  sessionStorage.removeItem('gameOverRanks');
-  location.href = `room.html?id=${roomId}`;
-};
 
 // 새로고침 후 결과창 복원
 const savedRanks = sessionStorage.getItem('gameOverRanks');
@@ -366,6 +362,7 @@ btnPlay.onclick = () => {
 btnPass.onclick = () => socket.emit('pass', { sessionId: myId });
 document.getElementById('btn-exit').onclick = () => {
   if (!confirm('게임을 나가시겠습니까?')) return;
+  sessionStorage.removeItem('gameOverRanks');
   socket.emit('leave-room', { sessionId: myId });
   location.href = '/';
 };
