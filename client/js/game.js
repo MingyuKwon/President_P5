@@ -388,6 +388,37 @@ socket.on('card-played', ({ cards }) => {
   addCardGroupToTable(cards);
 });
 
+socket.on('player-passed', ({ playerId }) => {
+  const seatEl = playerId === myId
+    ? document.getElementById('my-seat')
+    : document.querySelector(`.player-seat[data-player-id="${playerId}"]`);
+  if (!seatEl) return;
+
+  const rect = seatEl.getBoundingClientRect();
+  const img = document.createElement('img');
+  img.src = '/Resource/UI/ControlPanel/PassWord.png';
+  Object.assign(img.style, {
+    position: 'fixed',
+    left: `${rect.left - 60}px`,
+    top: `${rect.top + rect.height / 2 - 20}px`,
+    width: '52px',
+    height: '40px',
+    objectFit: 'contain',
+    zIndex: '500',
+    pointerEvents: 'none',
+  });
+  document.body.appendChild(img);
+
+  gsap.timeline({ onComplete: () => img.remove() })
+    .fromTo(img, { opacity: 0, scale: 0.6 }, { opacity: 1, scale: 1, duration: 0.12, ease: 'back.out(1.5)' })
+    .to(img, { scale: 1.18, duration: 0.12, ease: 'power2.out' })
+    .to(img, { scale: 1.0,  duration: 0.12, ease: 'power2.in' })
+    .to(img, { scale: 1.1,  duration: 0.1,  ease: 'power2.out' })
+    .to(img, { scale: 1.0,  duration: 0.1,  ease: 'power2.in' })
+    .to({}, { duration: 0.3 })
+    .to(img, { opacity: 0, scale: 0.8, duration: 0.2, ease: 'power2.in' });
+});
+
 socket.on('hand-updated', ({ hand }) => {
   console.log('[hand-updated] new hand size:', hand.length, '| taxPhase:', JSON.stringify(taxPhase), '| taxSubmitted:', taxSubmitted);
   // 세금 페이즈 중 새로 받은 카드 감지 → floating 애니메이션

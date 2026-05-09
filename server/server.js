@@ -294,6 +294,7 @@ io.on('connection', (socket) => {
     const result = pass(state, sessionId);
     if (result.error) return socket.emit('error', { message: result.error });
     gameStates.set(session.roomId, result.state);
+    io.to(session.roomId).emit('player-passed', { playerId: sessionId });
     broadcastGameUpdate(session.roomId, result.state, result.events);
     if (!result.events.some(e => e.type === 'game-over')) {
       startTurnTimer(session.roomId, result.state);
