@@ -182,6 +182,19 @@ io.on('connection', (socket) => {
     if (gameState && result.status === 'playing') {
       const playerState = gameState.players[sessionId];
       if (playerState) {
+        const tax = taxStates.get(roomId);
+        let taxInfo = null;
+        if (gameState.phase === 'tax' && tax) {
+          const role = gameState.ranks[sessionId] || 'citizen';
+          const alreadyDone = (role === 'president' && tax.presidentDone) || (role === 'vice-president' && tax.vpDone);
+          taxInfo = {
+            role,
+            taxGiven: [],
+            taxReceived: [],
+            taxReturnCount: alreadyDone ? 0 : (role === 'president' ? 2 : role === 'vice-president' && tax.needsVP ? 1 : 0),
+            taxSubmitted: alreadyDone,
+          };
+        }
         socket.emit('game-state-sync', {
           hand: playerState.hand,
           tableCards: gameState.tableCards,
@@ -196,6 +209,7 @@ io.on('connection', (socket) => {
           readyPlayers: [...(readySets.get(roomId) || [])],
           scores: roomScores.get(roomId) || {},
           isHost,
+          taxInfo,
         });
 
         const timerInfo = turnTimers.get(roomId);

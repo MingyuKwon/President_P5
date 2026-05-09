@@ -265,7 +265,7 @@ socket.on('game-started', ({ hand, turnOrder: to, currentPlayerId: cpId, players
   }
 });
 
-socket.on('game-state-sync', ({ hand, tableCards, tablePile, currentPlayerId: cpId, revolution, players: ps, turnOrder: to, phase, readyPlayers, scores, isHost: h }) => {
+socket.on('game-state-sync', ({ hand, tableCards, tablePile, currentPlayerId: cpId, revolution, players: ps, turnOrder: to, phase, readyPlayers, scores, isHost: h, taxInfo }) => {
   if (h !== undefined) isHost = h;
   myHand = sortHand(hand);
   currentPlayerId = cpId;
@@ -274,18 +274,34 @@ socket.on('game-state-sync', ({ hand, tableCards, tablePile, currentPlayerId: cp
   players = ps;
   if (to.length > 0) { turnOrder = to; if (originalOrder.length === 0) originalOrder = [...to]; }
   selectedCards = [];
-  renderHand();
-  renderSeats();
-  renderTablePile(tablePile || []);
-  renderCardOrder();
 
-  if (phase === 'gameover' && readyPlayers) {
+  if (phase === 'tax' && taxInfo) {
+    taxPhase = taxInfo;
+    taxSubmitted = taxInfo.taxSubmitted || false;
+    enterTaxPhase(taxInfo);
+    renderTablePile(tablePile || []);
+    renderCardOrder();
+  } else if (phase === 'gameover' && readyPlayers) {
+    taxPhase = null;
+    exitTaxPhase();
+    renderHand();
+    renderSeats();
+    renderTablePile(tablePile || []);
+    renderCardOrder();
     if (scores) sessionStorage.setItem('gameOverScores', JSON.stringify(scores));
     readyPlayers.forEach(pid => {
       const card = document.querySelector(`.go-player-card[data-player-id="${pid}"]`);
-      if (card) card.querySelector('.go-card-ready').style.display = 'block'; // 복원은 애니메이션 없이
+      if (card) card.querySelector('.go-card-ready').style.display = 'block';
     });
     if (readyPlayers.includes(myId)) setReadyBtn(true);
+  } else {
+    taxPhase = null;
+    exitTaxPhase();
+    renderHand();
+    renderSeats();
+    renderTablePile(tablePile || []);
+    renderCardOrder();
+    if (cpId === myId) { tryAutoPass(); tryAutoPlay(); }
   }
 });
 
