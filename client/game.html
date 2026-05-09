@@ -172,13 +172,10 @@
       transform:translate(-50%, -50%);
       width:90%; height:auto; z-index:6; pointer-events:none; display:none;
     }
-    #btn-ready {
-      padding:10px 32px; font-size:0.95rem; border-radius:8px;
-      cursor:pointer; border:none; font-weight:bold; transition:background .15s;
-      background:#444; color:#fff;
-    }
-    #btn-ready.ready { background:#2a7a2a; cursor:default; }
-    #btn-ready:hover:not(.ready) { background:#555; }
+    #btn-ready { padding:0; background:none; border:none; cursor:pointer; }
+    #btn-ready img { display:block; height:68px; width:auto; transition:transform .1s; }
+    #btn-ready:hover:not(:disabled) img { transform:scale(1.05); }
+    #btn-ready:disabled { cursor:default; }
     #ready-countdown { color:#e94560; font-size:1.1rem; font-weight:bold; display:none; }
 
     /* 이미지 없을 때 폴백 텍스트 (기본 숨김, onerror 시 표시) */
@@ -200,7 +197,7 @@
       <div id="game-over-content">
         <div id="game-over-ranks"></div>
         <div id="ready-section">
-          <button id="btn-ready">준비 완료</button>
+          <button id="btn-ready"><img src="/Resource/UI/result/ReadyButtonBefore.png" alt="준비 완료"></button>
           <div id="ready-countdown"></div>
         </div>
       </div>

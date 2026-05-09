@@ -228,10 +228,7 @@ socket.on('game-started', ({ hand, turnOrder: to, currentPlayerId: cpId, players
   sessionStorage.removeItem('gameOverRanks');
   document.getElementById('game-over-overlay').classList.remove('open');
   if (countdownInterval) { clearInterval(countdownInterval); countdownInterval = null; }
-  const btnReady = document.getElementById('btn-ready');
-  btnReady.classList.remove('ready');
-  btnReady.disabled = false;
-  btnReady.textContent = '준비 완료';
+  setReadyBtn(false);
   const cdEl2 = document.getElementById('ready-countdown');
   cdEl2.style.display = 'none';
   cdEl2.textContent = '';
@@ -272,12 +269,7 @@ socket.on('game-state-sync', ({ hand, tableCards, tablePile, currentPlayerId: cp
       const card = document.querySelector(`.go-player-card[data-player-id="${pid}"]`);
       if (card) card.querySelector('.go-card-ready').style.display = 'block';
     });
-    if (readyPlayers.includes(myId)) {
-      const btn = document.getElementById('btn-ready');
-      btn.classList.add('ready');
-      btn.disabled = true;
-      btn.textContent = '✓ 준비됨';
-    }
+    if (readyPlayers.includes(myId)) setReadyBtn(true);
   }
 });
 
@@ -360,9 +352,7 @@ function showGameOverPanel(ranks) {
 
   document.getElementById('game-over-overlay').classList.add('open');
   const btnReady = document.getElementById('btn-ready');
-  btnReady.classList.remove('ready');
-  btnReady.disabled = false;
-  btnReady.textContent = '준비 완료';
+  setReadyBtn(false);
   const cdEl = document.getElementById('ready-countdown');
   cdEl.style.display = 'none';
   cdEl.textContent = '';
@@ -376,6 +366,14 @@ socket.on('game-over', ({ ranks }) => {
 });
 
 
+function setReadyBtn(ready) {
+  const btn = document.getElementById('btn-ready');
+  btn.querySelector('img').src = ready
+    ? '/Resource/UI/result/ReadyButtonAfter.png'
+    : '/Resource/UI/result/ReadyButtonBefore.png';
+  btn.disabled = ready;
+}
+
 document.getElementById('btn-ready').onclick = () => {
   console.log('[btn-ready] click — myId:', myId, '| socket.connected:', socket.connected);
   socket.emit('player-ready', { sessionId: myId });
@@ -387,12 +385,7 @@ socket.on('ready-updated', ({ readyPlayers }) => {
     const card = document.querySelector(`.go-player-card[data-player-id="${pid}"]`);
     if (card) card.querySelector('.go-card-ready').style.display = 'block';
   });
-  if (readyPlayers.includes(myId)) {
-    const btn = document.getElementById('btn-ready');
-    btn.classList.add('ready');
-    btn.disabled = true;
-    btn.textContent = '✓ 준비됨';
-  }
+  if (readyPlayers.includes(myId)) setReadyBtn(true);
 });
 
 socket.on('all-ready', () => {
