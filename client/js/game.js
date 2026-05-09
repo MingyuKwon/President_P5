@@ -420,7 +420,8 @@ socket.on('round-end', ({ reason }) => {
 socket.on('revolution', ({ active }) => enqueueCutscene({ image: '/Resource/UI/game-state/Revolution.png', text: active ? '혁명 발동!' : '반혁명!' }));
 
 socket.on('player-finished', ({ playerId, rank }) => {
-  enqueueCutscene({ image: '/Resource/UI/game-state/allout.png', text: rankLabel(rank) });
+  const p = players.find(p => p.id === playerId);
+  enqueueCutscene({ image: '/Resource/UI/game-state/allout.png', text: `${p ? p.nickname : playerId} — ${rankLabel(rank)}` });
 });
 
 socket.on('player-bot', ({ playerId }) => {
