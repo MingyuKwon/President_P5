@@ -306,8 +306,19 @@ io.on('connection', (socket) => {
         leaveRoom(roomId, sessionId);
         const updatedRoom = getRoom(roomId);
         if (updatedRoom) io.to(roomId).emit('room-updated', { players: publicPlayers(updatedRoom.players) });
-        // 떠난 플레이어가 현재 차례면 봇 턴 즉시 시작
-        if (gameState.turnOrder[gameState.currentIndex] === sessionId) {
+        // 남은 인원이 3명 미만이면 방 강제 해산
+        if (!updatedRoom || updatedRoom.players.length < 3) {
+          clearTurnTimer(roomId);
+          io.to(roomId).emit('room-closed', { reason: 'not-enough-players' });
+          const playerIds = closeRoom(roomId);
+          roomScores.delete(roomId);
+          botPlayers.delete(roomId);
+          for (const pid of playerIds) {
+            const sess = sessionMap.get(pid);
+            if (sess) sess.roomId = null;
+          }
+        } else if (gameState.turnOrder[gameState.currentIndex] === sessionId) {
+          // 떠난 플레이어가 현재 차례면 봇 턴 즉시 시작
           clearTurnTimer(roomId);
           startTurnTimer(roomId, gameState);
         }
