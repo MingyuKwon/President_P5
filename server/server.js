@@ -21,6 +21,7 @@ const readySets = new Map();    // roomId → Set<sessionId>
 const roomScores = new Map();   // roomId → { sessionId → score }
 const botPlayers = new Map();   // roomId → Set<sessionId>
 const taxStates = new Map();    // roomId → tax info
+const playerAutoSettings = new Map(); // playerId → { autoPass, autoPlay }
 
 const TAX_CARD_ORDER = ['3','4','5','6','7','8','9','10','J','Q','K','A','2'];
 function taxCardStrength(card) { return TAX_CARD_ORDER.indexOf(card.slice(0, -1)); }
@@ -225,6 +226,7 @@ io.on('connection', (socket) => {
           scores: roomScores.get(roomId) || {},
           isHost,
           taxInfo,
+          autoSettings: playerAutoSettings.get(sessionId) || { autoPass: false, autoPlay: false },
         });
 
         const timerInfo = gameState.phase === 'tax' ? taxTimers.get(roomId) : turnTimers.get(roomId);
@@ -248,6 +250,13 @@ io.on('connection', (socket) => {
 
   socket.on('leave-room', ({ sessionId }) => {
     doLeave(sessionId, socket);
+  });
+
+  socket.on('set-auto-setting', ({ sessionId, key, value }) => {
+    if (key !== 'autoPass' && key !== 'autoPlay') return;
+    const settings = playerAutoSettings.get(sessionId) || { autoPass: false, autoPlay: false };
+    settings[key] = value;
+    playerAutoSettings.set(sessionId, settings);
   });
 
   socket.on('start-game', ({ sessionId }) => {
@@ -503,6 +512,9 @@ function doStartGame(roomId) {
         taxReceived:    role === 'president' ? scumGave : role === 'vice-president' ? vscumGave : [],
         taxReturnCount: role === 'president' ? 2 : role === 'vice-president' && needsVP ? 1 : 0,
       };
+      const settings = playerAutoSettings.get(p.id) || { autoPass: false, autoPlay: false };
+      settings.autoPlay = false;
+      playerAutoSettings.set(p.id, settings);
       const sess = sessionMap.get(p.id);
       const playerSocket = sess ? io.sockets.sockets.get(sess.socketId) : null;
       console.log('[tax-setup] emitting game-started to', p.id, '(', p.nickname, ') | role:', role, '| taxInfo:', JSON.stringify(taxInfo), '| hand size:', state.players[p.id].hand.length, '| socket exists:', !!playerSocket);
@@ -516,6 +528,7 @@ function doStartGame(roomId) {
             id: q.id, nickname: q.nickname, cardCount: q.hand.length, finished: q.finished,
             rank: state.ranks[q.id] || 'citizen',
           })),
+          autoSettings: settings,
         });
       }
     });
@@ -536,6 +549,9 @@ function emitGameStarted(roomId, state, gameNumber) {
   const room = getRoom(roomId);
   if (!room) return;
   room.players.forEach(p => {
+    const settings = playerAutoSettings.get(p.id) || { autoPass: false, autoPlay: false };
+    settings.autoPlay = false;
+    playerAutoSettings.set(p.id, settings);
     const sess = sessionMap.get(p.id);
     const playerSocket = sess ? io.sockets.sockets.get(sess.socketId) : null;
     if (playerSocket) {
@@ -548,6 +564,7 @@ function emitGameStarted(roomId, state, gameNumber) {
           id: q.id, nickname: q.nickname, cardCount: q.hand.length, finished: q.finished,
           rank: state.ranks[q.id] || 'citizen',
         })),
+        autoSettings: settings,
       });
     }
   });

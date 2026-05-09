@@ -135,6 +135,7 @@ function tryAutoPass() {
 btnAutoPass.onclick = () => {
   autoPass = !autoPass;
   btnAutoPass.classList.toggle('on', autoPass);
+  socket.emit('set-auto-setting', { sessionId: myId, key: 'autoPass', value: autoPass });
   if (!autoPass) clearAutoPassTimer();
   else tryAutoPass();
 };
@@ -220,9 +221,19 @@ btnAuto.onclick = () => {
   autoPlay = !autoPlay;
   btnAuto.classList.toggle('on', autoPlay);
   gameBoardEl.classList.toggle('auto-mode', autoPlay);
+  socket.emit('set-auto-setting', { sessionId: myId, key: 'autoPlay', value: autoPlay });
   if (!autoPlay) { clearAutoPlayTimer(); clearAutoTaxTimer(); }
   else { tryAutoPlay(); tryAutoTax(); }
 };
+
+function applyAutoSettings(settings) {
+  if (!settings) return;
+  autoPlay = settings.autoPlay || false;
+  autoPass = settings.autoPass || false;
+  btnAuto.classList.toggle('on', autoPlay);
+  gameBoardEl.classList.toggle('auto-mode', autoPlay);
+  btnAutoPass.classList.toggle('on', autoPass);
+}
 
 function clearTimerUI() {
   if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
@@ -256,8 +267,9 @@ socket.on('room-joined', ({ isHost: h }) => {
   isHost = h;
 });
 
-socket.on('game-started', ({ hand, turnOrder: to, currentPlayerId: cpId, players: ps, phase, taxInfo }) => {
+socket.on('game-started', ({ hand, turnOrder: to, currentPlayerId: cpId, players: ps, phase, taxInfo, autoSettings }) => {
   clearCutsceneQueue();
+  applyAutoSettings(autoSettings);
   clearTimeout(gameOverTimer);
   sessionStorage.removeItem('gameOverRanks');
   sessionStorage.removeItem('gameOverScores');
@@ -302,9 +314,10 @@ socket.on('game-started', ({ hand, turnOrder: to, currentPlayerId: cpId, players
   });
 });
 
-socket.on('game-state-sync', ({ hand, tableCards, tablePile, currentPlayerId: cpId, revolution, players: ps, turnOrder: to, phase, readyPlayers, scores, isHost: h, taxInfo }) => {
+socket.on('game-state-sync', ({ hand, tableCards, tablePile, currentPlayerId: cpId, revolution, players: ps, turnOrder: to, phase, readyPlayers, scores, isHost: h, taxInfo, autoSettings }) => {
   console.log('[game-state-sync] phase:', phase, '| taxInfo:', taxInfo, '| hand.length:', hand?.length);
   if (h !== undefined) isHost = h;
+  applyAutoSettings(autoSettings);
   myHand = sortHand(hand);
   currentPlayerId = cpId;
   currentTableCards = tableCards || [];
