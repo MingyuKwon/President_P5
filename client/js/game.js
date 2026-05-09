@@ -17,6 +17,8 @@ function cardImg(card) {
   return `/Resource/CardImage/${card}.png`;
 }
 
+const RANK_SCORES = { president: 30, 'vice-president': 20, citizen: 10, 'vice-scum': 0, scum: -10 };
+
 const CARD_ORDER = ['3','4','5','6','7','8','9','10','J','Q','K','A','2','Joker'];
 function cardRank(card) {
   const num = card === 'Joker' ? 'Joker' : card.slice(0, -1);
@@ -347,7 +349,7 @@ function showGameOverPanel(ranks, scores = {}) {
         <img class="go-card-badge" src="/Resource/UI/rank-badge/${rank}.png" alt="${rankLabel(rank)}">
         <div class="go-card-content">
           <div class="go-card-name">${name}</div>
-          <div class="go-card-score">${scores[id] !== undefined ? scores[id] : 0}점</div>
+          <div class="go-card-score">${(() => { const total = scores[id] ?? 0; const delta = RANK_SCORES[rank] ?? 0; const sign = delta >= 0 ? '+' : ''; return `${total}점 (${sign}${delta})`; })()}</div>
         </div>
         <img class="go-card-ready" src="/Resource/UI/result/Ready.png" alt="">
       </div>`;
