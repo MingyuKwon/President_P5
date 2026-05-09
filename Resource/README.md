@@ -27,33 +27,31 @@
 | `rank_scum.png` | 대빈민 등급 뱃지 | `game.js` `rankImg()` |
 
 ### UI/character/
-등수별 캐릭터 이미지. shadow(그림자)와 face(컬러 얼굴)를 겹쳐서 표시하는 레이어 구조.
-- `*-3-2-i18n*.png` — 검은 실루엣 (하단 레이어, 그림자 역할)
-- `*-3-i18n*.png` / `*-2-i18n*.png` — 컬러 얼굴 (상단 레이어)
+등수별 캐릭터 이미지. `*-shadow.png`(검은 실루엣)를 하단에, `*-face.png`(컬러 얼굴)를 상단에 겹쳐서 표시하는 레이어 구조.
 
-| 파일 | 설명 |
-|---|---|
-| `cardGame-level1-3-i18n #424.png` | 해골+폭탄 캐릭터 얼굴 |
-| `cardGame-level1-3-2-i18n.png` | 해골+폭탄 실루엣 |
-| `cardGame-level2-3-i18n #351.png` | 파란 머리 해골 얼굴 |
-| `cardGame-level2-3-2-i18n.png` | 파란 머리 해골 실루엣 |
-| `cardGame-level3-3-i18n #429.png` | 하늘색 단발 캐릭터 얼굴 |
-| `cardGame-level3-3-2-i18n.png` | 하늘색 단발 실루엣 |
-| `cardGame-level4-3-i18n #387.png` | 초록 모자 캐릭터 얼굴 |
-| `cardGame-level4-3-2-i18n.png` | 초록 모자 실루엣 |
-| `cardGame-level5-2-i18n.png` | 황금 왕관 캐릭터 얼굴 |
-| `cardGame-level5-3-2-i18n #373.png` | 황금 왕관 실루엣 |
+| 파일 | 등수 | 설명 |
+|---|---|---|
+| `president-face.png` | 대부호 | 금색 왕관 남자 얼굴 |
+| `president-shadow.png` | 대부호 | 금색 왕관 실루엣 |
+| `vice-president-face.png` | 부호 | 초록 모자 남자 얼굴 |
+| `vice-president-shadow.png` | 부호 | 초록 모자 실루엣 |
+| `citizen-face.png` | 평민 | 파란색 단발 여자 얼굴 |
+| `citizen-shadow.png` | 평민 | 파란색 단발 실루엣 |
+| `vice-scum-face.png` | 빈민 | 보라색 해골 남자 얼굴 |
+| `vice-scum-shadow.png` | 빈민 | 보라색 해골 실루엣 |
+| `scum-face.png` | 대빈민 | 회색 해골+폭탄 얼굴 |
+| `scum-shadow.png` | 대빈민 | 회색 해골+폭탄 실루엣 |
 
 ### UI/rank-badge/
 등수별 원형 뱃지 아이콘.
 
-| 파일 | 설명 |
-|---|---|
-| `huizhang-cardGame1 #520.png` | 해골 뱃지 |
-| `huizhang-cardGame4 #570.png` | 보라/파랑 캐릭터 뱃지 |
-| `huizhang-cardGame9.png` | 청록 캐릭터 뱃지 |
-| `huizhang-cardGame14.png` | 초록 모자 캐릭터 뱃지 |
-| `huizhang-cardGame15.png` | 황금 왕관 캐릭터 뱃지 |
+| 파일 | 등수 | 설명 |
+|---|---|---|
+| `president.png` | 대부호 | 황금 왕관 캐릭터 뱃지 |
+| `vice-president.png` | 부호 | 초록 모자 캐릭터 뱃지 |
+| `citizen.png` | 평민 | 청록 여자 캐릭터 뱃지 |
+| `vice-scum.png` | 빈민 | 보라색 캐릭터 뱃지 |
+| `scum.png` | 대빈민 | 해골 뱃지 |
 
 ### UI/game-state/
 게임 중 화면에 애니메이션으로 표시하는 상태 텍스트 이미지.
