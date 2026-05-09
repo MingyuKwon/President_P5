@@ -461,7 +461,8 @@ socket.on('game-over', ({ ranks, scores }) => {
   clearTimerUI();
   sessionStorage.setItem('gameOverRanks', JSON.stringify(ranks));
   sessionStorage.setItem('gameOverScores', JSON.stringify(scores || {}));
-  gameOverTimer = setTimeout(() => showGameOverPanel(ranks, scores), 800);
+  enqueueCutscene({ image: '/Resource/UI/game-state/GameEnd.png' });
+  afterCutsceneQueue(() => showGameOverPanel(ranks, scores));
 });
 
 

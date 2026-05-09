@@ -3,9 +3,14 @@
 
   const queue = [];
   let playing = false;
+  let drainCallback = null;
 
   function next() {
-    if (queue.length === 0) { playing = false; return; }
+    if (queue.length === 0) {
+      playing = false;
+      if (drainCallback) { const cb = drainCallback; drainCallback = null; cb(); }
+      return;
+    }
     playing = true;
     play(queue.shift()).then(next);
   }
@@ -68,5 +73,10 @@
   window.enqueueCutscene = function (config) {
     queue.push(config);
     if (!playing) next();
+  };
+
+  window.afterCutsceneQueue = function (callback) {
+    if (!playing && queue.length === 0) callback();
+    else drainCallback = callback;
   };
 })();
