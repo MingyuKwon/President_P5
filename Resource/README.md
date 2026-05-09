@@ -62,7 +62,7 @@
 | `cardGame-state-start-i18n #427.png` | "게임시작 / GAME START" |
 | `cardGame-state-gameover-i18n #400.png` | "게임종료 / GAME SET" |
 | `cardGame-state-allpass-i18n #342.png` | "전원패스 / ALL MEMBERS PASS" |
-| `cardGame-state-allout-i18n #414.png` | "냈다 / DONE!" |
+| `cardGame-state-allout-i18n #414.png` | "냈다 / DONE!" — 카드를 다 낸 플레이어의 시트 위에 오버레이로 표시 |
 | `cardGame-state-end-i18n #336.png` | "8리셋 / 현재 턴 강제 종료" (전체) |
 | `cardGame-state-end2-i18n #365.png` | "8리" (조각 1) |
 | `cardGame-state-end3-i18n #355.png` | "셋 / 현재 턴 강제 종료" (조각 2) |
@@ -75,7 +75,7 @@
 | `cardGame-state-wonderEnd7-i18n #395.png` | "카드 유형 무시..." (조각) |
 | `cardGame-state-3max-i18n #428.png` | "스페이드3 / 조커를 받아칠 수 있는 유일한 카드" |
 | `cardGame-state-exchange-i18n #370.png` | "카드교환중..." |
-| `cardGame-state-fall-i18n #406.png` | "몰락! / 대부호는 1위를 하지 못하면 대빈민으로 전락" |
+| `cardGame-state-fall-i18n #406.png` | "몰락! / 대부호는 1위를 하지 못하면 대빈민으로 전락" — 몰락한 대부호의 시트 위에 오버레이로 표시 |
 
 ### UI/result/
 게임 결과창 레이어 구조. 빨간 배경을 뒤에 크게 깔고, 검정 패널을 앞에 올린 뒤 그 안에 결과를 표시.
