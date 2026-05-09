@@ -412,6 +412,7 @@ function doStartGame(roomId) {
   const vpId        = Object.entries(prevRanks).find(([, r]) => r === 'vice-president')?.[0];
   const vscumId     = Object.entries(prevRanks).find(([, r]) => r === 'vice-scum')?.[0];
 
+  console.log('[tax-setup] gameNumber:', gameNumber, '| prevRanks:', prevRanks, '| presidentId:', presidentId, '| scumId:', scumId, '| vpId:', vpId, '| vscumId:', vscumId);
   if (gameNumber > 1 && presidentId && scumId && state.players[presidentId] && state.players[scumId]) {
     const scumGave = topNonJoker(state.players[scumId].hand, 2);
     state = {
@@ -425,6 +426,7 @@ function doStartGame(roomId) {
     };
 
     const needsVP = !!(vpId && vscumId && state.players[vpId] && state.players[vscumId]);
+    console.log('[tax-setup] needsVP:', needsVP, '| vpId in state:', !!(vpId && state.players[vpId]), '| vscumId in state:', !!(vscumId && state.players[vscumId]));
     let vscumGave = [];
     if (needsVP) {
       vscumGave = topNonJoker(state.players[vscumId].hand, 1);
@@ -529,6 +531,7 @@ function processTaxReturn(roomId, giverId, cards) {
   if (!tax || !state) return;
   const isPresident = giverId === tax.presidentId;
   const targetId = isPresident ? tax.scumId : tax.vscumId;
+  console.log('[processTaxReturn] giverId:', giverId, '| isPresident:', isPresident, '| needsVP:', tax.needsVP, '| presidentDone:', tax.presidentDone, '| vpDone:', tax.vpDone);
 
   const giverHand = removeCardsFromHand(state.players[giverId].hand, cards);
   const targetHand = [...state.players[targetId].hand, ...cards];
