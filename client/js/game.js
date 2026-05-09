@@ -91,6 +91,7 @@ players.forEach(p => { if (p.rank) playerRanks[p.id] = p.rank; });
 let currentTableCards = [];
 let currentRevolution = false;
 let fallenPresidentId = null;
+let isHost = false;
 
 const seatsEl        = document.getElementById('player-seats');
 const tableEl        = document.getElementById('table');
@@ -217,10 +218,20 @@ socket.on('connect', () => {
   socket.emit('join-room', { roomId, nickname, sessionId: myId });
 });
 
+socket.on('room-joined', ({ isHost: h }) => {
+  isHost = h;
+});
+
 socket.on('game-started', ({ hand, turnOrder: to, currentPlayerId: cpId, players: ps }) => {
   clearTimeout(gameOverTimer);
   sessionStorage.removeItem('gameOverRanks');
   document.getElementById('game-over-overlay').classList.remove('open');
+  const btnReady = document.getElementById('btn-ready');
+  btnReady.classList.remove('ready');
+  btnReady.disabled = false;
+  btnReady.textContent = '준비 완료';
+  document.getElementById('btn-start-from-result').style.display = 'none';
+  document.getElementById('ready-count').textContent = '0명 준비';
   myHand = sortHand(hand);
   currentPlayerId = cpId;
   turnOrder = to;
@@ -237,7 +248,8 @@ socket.on('game-started', ({ hand, turnOrder: to, currentPlayerId: cpId, players
   renderCardOrder();
 });
 
-socket.on('game-state-sync', ({ hand, tableCards, tablePile, currentPlayerId: cpId, revolution, players: ps, turnOrder: to }) => {
+socket.on('game-state-sync', ({ hand, tableCards, tablePile, currentPlayerId: cpId, revolution, players: ps, turnOrder: to, phase, readyPlayers, isHost: h }) => {
+  if (h !== undefined) isHost = h;
   myHand = sortHand(hand);
   currentPlayerId = cpId;
   currentTableCards = tableCards || [];
@@ -249,6 +261,20 @@ socket.on('game-state-sync', ({ hand, tableCards, tablePile, currentPlayerId: cp
   renderSeats();
   renderTablePile(tablePile || []);
   renderCardOrder();
+
+  if (phase === 'gameover' && readyPlayers) {
+    const total = ps.length;
+    document.getElementById('ready-count').textContent = `${readyPlayers.length} / ${total}명 준비`;
+    if (readyPlayers.includes(myId)) {
+      const btn = document.getElementById('btn-ready');
+      btn.classList.add('ready');
+      btn.disabled = true;
+      btn.textContent = '✓ 준비됨';
+    }
+    if (readyPlayers.length >= total && isHost) {
+      document.getElementById('btn-start-from-result').style.display = 'inline-block';
+    }
+  }
 });
 
 socket.on('state-updated', ({ tableCards, tablePile, currentPlayerId: cpId, revolution, players: ps }) => {
@@ -328,6 +354,12 @@ function showGameOverPanel(ranks) {
   }).join('');
 
   document.getElementById('game-over-overlay').classList.add('open');
+  document.getElementById('ready-count').textContent = '0명 준비';
+  const btnReady = document.getElementById('btn-ready');
+  btnReady.classList.remove('ready');
+  btnReady.disabled = false;
+  btnReady.textContent = '준비 완료';
+  document.getElementById('btn-start-from-result').style.display = 'none';
 }
 
 let gameOverTimer = null;
@@ -337,6 +369,28 @@ socket.on('game-over', ({ ranks }) => {
   gameOverTimer = setTimeout(() => showGameOverPanel(ranks), 800);
 });
 
+
+document.getElementById('btn-ready').onclick = () => {
+  socket.emit('player-ready', { sessionId: myId });
+};
+
+document.getElementById('btn-start-from-result').onclick = () => {
+  socket.emit('start-game', { sessionId: myId });
+};
+
+socket.on('ready-updated', ({ readyPlayers, total }) => {
+  document.getElementById('ready-count').textContent = `${readyPlayers.length} / ${total}명 준비`;
+  if (readyPlayers.includes(myId)) {
+    const btn = document.getElementById('btn-ready');
+    btn.classList.add('ready');
+    btn.disabled = true;
+    btn.textContent = '✓ 준비됨';
+  }
+});
+
+socket.on('all-ready', () => {
+  if (isHost) document.getElementById('btn-start-from-result').style.display = 'inline-block';
+});
 
 // 새로고침 후 결과창 복원
 const savedRanks = sessionStorage.getItem('gameOverRanks');

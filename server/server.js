@@ -16,6 +16,7 @@ const gameStates = new Map();   // roomId → gameState
 const sessionMap = new Map();   // sessionId → { socketId, roomId }
 const socketSession = new Map(); // socketId → sessionId
 const turnTimers = new Map();   // roomId → timeoutId
+const readySets = new Map();    // roomId → Set<sessionId>
 
 const TURN_DURATION = 30; // seconds
 
@@ -125,6 +126,9 @@ io.on('connection', (socket) => {
             id: p.id, nickname: p.nickname, cardCount: p.hand.length, finished: p.finished,
           })),
           turnOrder: gameState.turnOrder,
+          phase: gameState.phase,
+          readyPlayers: [...(readySets.get(roomId) || [])],
+          isHost,
         });
 
         const timerInfo = turnTimers.get(roomId);
@@ -148,6 +152,8 @@ io.on('connection', (socket) => {
     const room = getRoom(roomId);
     if (!room || room.hostId !== sessionId) return;
     if (room.players.length < 3) return socket.emit('error', { message: 'need-3-players' });
+
+    readySets.delete(roomId);
 
     const prevState = gameStates.get(roomId);
     const prevRanks = prevState?.ranks || {};
@@ -208,6 +214,22 @@ io.on('connection', (socket) => {
     if (!result.events.some(e => e.type === 'game-over')) {
       startTurnTimer(session.roomId, result.state);
     }
+  });
+
+  socket.on('player-ready', ({ sessionId }) => {
+    const session = sessionMap.get(sessionId);
+    if (!session?.roomId) return;
+    const roomId = session.roomId;
+    const room = getRoom(roomId);
+    if (!room) return;
+
+    if (!readySets.has(roomId)) readySets.set(roomId, new Set());
+    readySets.get(roomId).add(sessionId);
+
+    const readyPlayers = [...readySets.get(roomId)];
+    const total = room.players.length;
+    io.to(roomId).emit('ready-updated', { readyPlayers, total });
+    if (readyPlayers.length >= total) io.to(roomId).emit('all-ready');
   });
 
   // 페이지 이동 시 소켓만 끊기므로 즉시 방에서 제거하지 않음
