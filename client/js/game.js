@@ -295,8 +295,6 @@ socket.on('revolution', ({ active }) => animateMessage(active ? '혁명 발동!'
 socket.on('player-finished', ({ playerId, rank }) => {
   const p = players.find(p => p.id === playerId);
   animateMessage(`${p ? p.nickname : playerId} — ${rankLabel(rank)}`);
-  playerRanks[playerId] = rank;
-  renderSeats();
 });
 
 socket.on('president-penalty', ({ playerId }) => {
