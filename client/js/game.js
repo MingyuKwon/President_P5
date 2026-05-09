@@ -405,7 +405,7 @@ function renderSeats() {
       ? '/Resource/UI/game-state/cardGame-state-fall-i18n %23406.png'
       : p.finished
         ? '/Resource/UI/game-state/cardGame-state-allout-i18n %23414.png'
-        : '/Resource/UI/game-state/cardGame-state-allout-i18n %23414.png';
+        : '';
     div.innerHTML = `
       <div class="seat-char">
         <img class="seat-char-shadow" src="${shadowSrc}" alt="">
