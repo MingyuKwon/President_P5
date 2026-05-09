@@ -337,11 +337,24 @@ socket.on('game-state-sync', ({ hand, tableCards, tablePile, currentPlayerId: cp
   } else {
     taxPhase = null;
     exitTaxPhase();
-    renderHand();
-    renderSeats();
-    renderTablePile(tablePile || []);
-    renderCardOrder();
-    if (cpId === myId) { tryAutoPass(); tryAutoPlay(); }
+    const showStartCutscene = sessionStorage.getItem('showGameStartCutscene');
+    if (showStartCutscene) {
+      sessionStorage.removeItem('showGameStartCutscene');
+      enqueueCutscene({ image: '/Resource/UI/game-state/GameStart.png' });
+      afterCutsceneQueue(() => {
+        renderHand();
+        renderSeats();
+        renderTablePile(tablePile || []);
+        renderCardOrder();
+        if (cpId === myId) { tryAutoPass(); tryAutoPlay(); }
+      });
+    } else {
+      renderHand();
+      renderSeats();
+      renderTablePile(tablePile || []);
+      renderCardOrder();
+      if (cpId === myId) { tryAutoPass(); tryAutoPlay(); }
+    }
   }
 });
 

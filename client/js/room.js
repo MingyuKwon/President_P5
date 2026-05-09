@@ -45,6 +45,7 @@ socket.on('game-started', ({ hand, turnOrder, currentPlayerId, gameNumber, playe
   sessionStorage.setItem('currentPlayerId', currentPlayerId);
   sessionStorage.setItem('gameNumber', gameNumber);
   sessionStorage.setItem('players', JSON.stringify(players));
+  sessionStorage.setItem('showGameStartCutscene', '1');
   location.href = `game.html?id=${roomId}`;
 });
 
