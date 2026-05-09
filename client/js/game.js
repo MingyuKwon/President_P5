@@ -254,6 +254,7 @@ socket.on('game-started', ({ hand, turnOrder: to, currentPlayerId: cpId, players
 
   if (phase === 'tax' && taxInfo) {
     taxPhase = taxInfo;
+    taxSubmitted = false; // 새 판 시작이므로 항상 초기화
     enterTaxPhase(taxInfo);
   } else {
     taxPhase = null;
@@ -273,6 +274,8 @@ socket.on('game-state-sync', ({ hand, tableCards, tablePile, currentPlayerId: cp
   currentTableCards = tableCards || [];
   currentRevolution = revolution;
   players = ps;
+  playerRanks = {};
+  ps.forEach(p => { if (p.rank) playerRanks[p.id] = p.rank; });
   if (to.length > 0) { turnOrder = to; if (originalOrder.length === 0) originalOrder = [...to]; }
   selectedCards = [];
 
@@ -422,16 +425,24 @@ const taxBannerEl = document.getElementById('tax-banner');
 const ROLE_LABEL = { president: '대부호', 'vice-president': '부호', citizen: '평민', 'vice-scum': '빈민', scum: '대빈민' };
 
 function enterTaxPhase(taxInfo) {
-  console.log('[enterTaxPhase]', JSON.stringify(taxInfo), '| taxSubmitted will be:', taxInfo.taxSubmitted || false);
+  console.log('[enterTaxPhase]', JSON.stringify(taxInfo), '| taxSubmitted:', taxSubmitted);
   const { role, taxGiven, taxReceived, taxReturnCount } = taxInfo;
-  taxSubmitted = false;
+  // taxSubmitted은 호출자가 설정 — 여기서 초기화하지 않음
   gameBoardEl.classList.add('tax-mode');
   taxBannerEl.style.display = 'block';
 
   if (taxReturnCount > 0) {
-    taxBannerEl.textContent = `세금: 돌려줄 카드 ${taxReturnCount}장을 선택하세요`;
-    renderHand();
-    renderTaxButtons(taxReturnCount);
+    if (taxSubmitted) {
+      taxBannerEl.textContent = '제출 완료, 세금 교환 대기 중...';
+      handEl.classList.add('tax-waiting');
+      renderHand();
+      btnPlay.disabled = true;
+      btnPass.style.display = 'none';
+    } else {
+      taxBannerEl.textContent = `세금: 돌려줄 카드 ${taxReturnCount}장을 선택하세요`;
+      renderHand();
+      renderTaxButtons(taxReturnCount);
+    }
   } else if (taxGiven.length > 0) {
     taxBannerEl.textContent = `세금 ${taxGiven.length}장 납부됨 (${taxGiven.map(c => c.slice(0, -1)).join(', ')})`;
     handEl.classList.add('tax-waiting');

@@ -207,6 +207,7 @@ io.on('connection', (socket) => {
           revolution: gameState.revolution,
           players: Object.values(gameState.players).map(p => ({
             id: p.id, nickname: p.nickname, cardCount: p.hand.length, finished: p.finished,
+            rank: gameState.ranks[p.id] || 'citizen',
           })),
           turnOrder: gameState.turnOrder,
           phase: gameState.phase,
