@@ -12,23 +12,7 @@
       "Bash(python3 *)",
       "Bash(magick D:/President_P5/Resource/CardImage/Joker.jpg D:/President_P5/Resource/CardImage/Joker.png)",
       "Bash(rm D:/President_P5/Resource/CardImage/Joker.jpg)",
-      "Bash(powershell *)",
-      "PowerShell(npm *)",
-      "PowerShell(Receive-Job *)",
-      "Bash(Find \"D:\\\\Nexon\\\\P5_President\" -maxdepth 2 -name \"server.js\" -o -name \"index.js\")",
-      "Bash(Find D:\\\\Nexon\\\\P5_President\\\\client *)",
-      "Bash(git revert *)",
-      "Bash(mkdir -p \"Resource/UI/character-face\")",
-      "Bash(git mv *)",
-      "Bash(mkdir -p \"Resource/UI/character-shadow\")",
-      "Bash(mkdir -p \"Resource/UI/rank-badge\")",
-      "Bash(mkdir -p \"Resource/UI/game-state\")",
-      "Bash(mkdir -p \"Resource/UI/background\")",
-      "Bash(dir D:\\\\Nexon\\\\P5_President\\\\Resource\\\\UI\\\\character *)",
-      "Bash(dir D:\\\\Nexon\\\\P5_President\\\\Resource\\\\UI *)",
-      "Bash(rm \"Resource/UI/character/.claude/settings.local.json\")",
-      "Bash(rmdir \"Resource/UI/character/.claude\")",
-      "Bash(git rm *)"
+      "Bash(powershell *)"
     ]
   },
   "enabledPlugins": {
