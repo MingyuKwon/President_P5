@@ -402,8 +402,7 @@ socket.on('round-end', ({ reason }) => {
 socket.on('revolution', ({ active }) => enqueueCutscene({ image: null, text: active ? '혁명 발동!' : '반혁명!' }));
 
 socket.on('player-finished', ({ playerId, rank }) => {
-  const p = players.find(p => p.id === playerId);
-  enqueueCutscene({ image: null, text: `${p ? p.nickname : playerId} — ${rankLabel(rank)}` });
+  enqueueCutscene({ image: null, text: rankLabel(rank) });
 });
 
 socket.on('player-bot', ({ playerId }) => {
@@ -420,8 +419,7 @@ socket.on('room-updated', ({ players: newPlayers }) => {
 });
 
 socket.on('president-penalty', ({ playerId }) => {
-  const p = players.find(p => p.id === playerId);
-  enqueueCutscene({ image: null, text: `${p ? p.nickname : playerId} 대부호 방어 실패!`, textColor: '#e94560' });
+  enqueueCutscene({ image: null, text: '대부호 방어 실패!', textColor: '#e94560' });
   fallenPresidentId = playerId;
   renderSeats();
 });
