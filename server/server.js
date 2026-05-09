@@ -298,17 +298,20 @@ io.on('connection', (socket) => {
   });
 
   socket.on('tax-return', ({ sessionId, cards }) => {
+    console.log('[tax-return] received | sessionId:', sessionId, '| cards:', cards);
     const session = sessionMap.get(sessionId);
-    if (!session?.roomId) return;
+    if (!session?.roomId) { console.log('[tax-return] REJECT — no session/roomId'); return; }
     const tax = taxStates.get(session.roomId);
-    if (!tax) return;
+    if (!tax) { console.log('[tax-return] REJECT — no taxState for room:', session.roomId); return; }
     const isPresident = sessionId === tax.presidentId;
     const isVP = sessionId === tax.vpId;
-    if (!isPresident && !isVP) return;
-    if (isPresident && tax.presidentDone) return;
-    if (isVP && (!tax.presidentDone || tax.vpDone)) return;
+    console.log('[tax-return] isPresident:', isPresident, '| isVP:', isVP, '| presidentDone:', tax.presidentDone, '| vpDone:', tax.vpDone, '| needsVP:', tax.needsVP);
+    if (!isPresident && !isVP) { console.log('[tax-return] REJECT — sender is neither president nor VP'); return; }
+    if (isPresident && tax.presidentDone) { console.log('[tax-return] REJECT — president already done'); return; }
+    if (isVP && (!tax.presidentDone || tax.vpDone)) { console.log('[tax-return] REJECT — VP condition failed (presidentDone:', tax.presidentDone, ', vpDone:', tax.vpDone, ')'); return; }
     const expectedCount = isPresident ? 2 : 1;
-    if (!Array.isArray(cards) || cards.length !== expectedCount) return;
+    if (!Array.isArray(cards) || cards.length !== expectedCount) { console.log('[tax-return] REJECT — wrong card count, expected:', expectedCount, 'got:', cards?.length); return; }
+    console.log('[tax-return] ACCEPTED — calling processTaxReturn');
     clearTurnTimer(session.roomId);
     processTaxReturn(session.roomId, sessionId, cards);
   });
@@ -431,9 +434,12 @@ function doStartGame(roomId) {
   const vpId        = Object.entries(prevRanks).find(([, r]) => r === 'vice-president')?.[0];
   const vscumId     = Object.entries(prevRanks).find(([, r]) => r === 'vice-scum')?.[0];
 
-  console.log('[tax-setup] gameNumber:', gameNumber, '| prevRanks:', prevRanks, '| presidentId:', presidentId, '| scumId:', scumId, '| vpId:', vpId, '| vscumId:', vscumId);
+  console.log('[tax-setup] gameNumber:', gameNumber, '| prevRanks:', JSON.stringify(prevRanks));
+  console.log('[tax-setup] presidentId:', presidentId, '| scumId:', scumId, '| vpId:', vpId, '| vscumId:', vscumId);
+  console.log('[tax-setup] condition check — gameNumber>1:', gameNumber > 1, '| presidentId:', !!presidentId, '| scumId:', !!scumId, '| president in state:', !!(presidentId && state.players[presidentId]), '| scum in state:', !!(scumId && state.players[scumId]));
   if (gameNumber > 1 && presidentId && scumId && state.players[presidentId] && state.players[scumId]) {
     const scumGave = topNonJoker(state.players[scumId].hand, 2);
+    console.log('[tax-setup] scumGave:', scumGave, '| scum hand before:', state.players[scumId].hand);
     state = {
       ...state,
       phase: 'tax',
@@ -443,12 +449,14 @@ function doStartGame(roomId) {
         [presidentId]: { ...state.players[presidentId], hand: [...state.players[presidentId].hand, ...scumGave] },
       },
     };
+    console.log('[tax-setup] after scum→president transfer | president hand size:', state.players[presidentId].hand.length, '| scum hand size:', state.players[scumId].hand.length);
 
     const needsVP = !!(vpId && vscumId && state.players[vpId] && state.players[vscumId]);
     console.log('[tax-setup] needsVP:', needsVP, '| vpId in state:', !!(vpId && state.players[vpId]), '| vscumId in state:', !!(vscumId && state.players[vscumId]));
     let vscumGave = [];
     if (needsVP) {
       vscumGave = topNonJoker(state.players[vscumId].hand, 1);
+      console.log('[tax-setup] vscumGave:', vscumGave, '| vscum hand before:', state.players[vscumId].hand.length, 'cards');
       state = {
         ...state,
         players: {
@@ -457,10 +465,12 @@ function doStartGame(roomId) {
           [vpId]: { ...state.players[vpId], hand: [...state.players[vpId].hand, ...vscumGave] },
         },
       };
+      console.log('[tax-setup] after vscum→vp transfer | vp hand size:', state.players[vpId].hand.length, '| vscum hand size:', state.players[vscumId].hand.length);
     }
 
     gameStates.set(roomId, state);
     taxStates.set(roomId, { presidentId, scumId, vpId, vscumId, needsVP, presidentDone: false, vpDone: false });
+    console.log('[tax-setup] taxStates set | state.phase:', state.phase, '| state.ranks:', JSON.stringify(state.ranks));
 
     currentRoom.players.forEach(p => {
       const role = prevRanks[p.id] || 'citizen';
@@ -472,6 +482,7 @@ function doStartGame(roomId) {
       };
       const sess = sessionMap.get(p.id);
       const playerSocket = sess ? io.sockets.sockets.get(sess.socketId) : null;
+      console.log('[tax-setup] emitting game-started to', p.id, '(', p.nickname, ') | role:', role, '| taxInfo:', JSON.stringify(taxInfo), '| hand size:', state.players[p.id].hand.length, '| socket exists:', !!playerSocket);
       if (playerSocket) {
         playerSocket.emit('game-started', {
           hand: state.players[p.id].hand,
@@ -486,9 +497,11 @@ function doStartGame(roomId) {
       }
     });
     io.emit('room-list', { rooms: getRoomList() });
+    console.log('[tax-setup] starting tax timer for presidentId:', presidentId);
     startTaxTimer(roomId, presidentId);
     return;
   }
+  console.log('[tax-setup] tax conditions not met — skipping tax phase');
 
   gameStates.set(roomId, state);
   emitGameStarted(roomId, state, gameNumber);
@@ -525,11 +538,13 @@ function removeCardsFromHand(hand, cards) {
 
 function startTaxTimer(roomId, playerId) {
   clearTurnTimer(roomId);
+  console.log('[startTaxTimer] roomId:', roomId, '| playerId:', playerId, '| TURN_DURATION:', TURN_DURATION);
   io.to(roomId).emit('turn-timer', { playerId, duration: TURN_DURATION });
   const timeoutId = setTimeout(() => {
     turnTimers.delete(roomId);
     const state = gameStates.get(roomId);
     const tax = taxStates.get(roomId);
+    console.log('[taxTimer TIMEOUT] playerId:', playerId, '| state exists:', !!state, '| tax exists:', !!tax);
     if (!state || !tax) return;
     const isPresident = playerId === tax.presidentId;
     const count = isPresident ? 2 : 1;
@@ -539,6 +554,7 @@ function startTaxTimer(roomId, playerId) {
       const idx = Math.floor(Math.random() * hand.length);
       cards.push(...hand.splice(idx, 1));
     }
+    console.log('[taxTimer TIMEOUT] auto-submitting cards:', cards, '| isPresident:', isPresident);
     processTaxReturn(roomId, playerId, cards);
   }, TURN_DURATION * 1000);
   turnTimers.set(roomId, { timeoutId, startedAt: Date.now(), playerId });
@@ -547,13 +563,18 @@ function startTaxTimer(roomId, playerId) {
 function processTaxReturn(roomId, giverId, cards) {
   const tax = taxStates.get(roomId);
   const state = gameStates.get(roomId);
-  if (!tax || !state) return;
+  console.log('[processTaxReturn] START | giverId:', giverId, '| cards:', cards);
+  if (!tax || !state) {
+    console.log('[processTaxReturn] ABORT — tax:', !!tax, '| state:', !!state);
+    return;
+  }
   const isPresident = giverId === tax.presidentId;
   const targetId = isPresident ? tax.scumId : tax.vscumId;
-  console.log('[processTaxReturn] giverId:', giverId, '| isPresident:', isPresident, '| needsVP:', tax.needsVP, '| presidentDone:', tax.presidentDone, '| vpDone:', tax.vpDone);
+  console.log('[processTaxReturn] isPresident:', isPresident, '| targetId:', targetId, '| needsVP:', tax.needsVP, '| presidentDone:', tax.presidentDone, '| vpDone:', tax.vpDone);
 
   const giverHand = removeCardsFromHand(state.players[giverId].hand, cards);
   const targetHand = [...state.players[targetId].hand, ...cards];
+  console.log('[processTaxReturn] giver hand: ', state.players[giverId].hand.length, '→', giverHand.length, '| target hand:', state.players[targetId].hand.length, '→', targetHand.length);
   let newState = {
     ...state,
     players: {
@@ -566,31 +587,37 @@ function processTaxReturn(roomId, giverId, cards) {
   [giverId, targetId].forEach(pid => {
     const sess = sessionMap.get(pid);
     const sock = sess ? io.sockets.sockets.get(sess.socketId) : null;
+    console.log('[processTaxReturn] emitting hand-updated to', pid, '| hand size:', newState.players[pid].hand.length, '| socket exists:', !!sock);
     if (sock) sock.emit('hand-updated', { hand: newState.players[pid].hand });
   });
+  console.log('[processTaxReturn] emitting tax-returned | giverId:', giverId, '| targetId:', targetId, '| cardCount:', cards.length);
   io.to(roomId).emit('tax-returned', { giverId, targetId, cardCount: cards.length });
 
   if (isPresident) {
     tax.presidentDone = true;
     if (tax.needsVP) {
+      console.log('[processTaxReturn] president done, needsVP=true → waiting for VP:', tax.vpId);
       gameStates.set(roomId, newState);
       startTaxTimer(roomId, tax.vpId);
     } else {
+      console.log('[processTaxReturn] president done, needsVP=false → finishTaxPhase');
       finishTaxPhase(roomId, newState);
     }
   } else {
     tax.vpDone = true;
+    console.log('[processTaxReturn] VP done → finishTaxPhase');
     finishTaxPhase(roomId, newState);
   }
 }
 
 function finishTaxPhase(roomId, state) {
+  console.log('[finishTaxPhase] roomId:', roomId, '| phase transition: tax → playing | currentIndex:', state.currentIndex, '| turnOrder:', state.turnOrder);
   taxStates.delete(roomId);
   const playingState = { ...state, phase: 'playing' };
   gameStates.set(roomId, playingState);
-  io.to(roomId).emit('tax-phase-end', {
-    currentPlayerId: playingState.turnOrder[playingState.currentIndex],
-  });
+  const firstPlayer = playingState.turnOrder[playingState.currentIndex];
+  console.log('[finishTaxPhase] emitting tax-phase-end | firstPlayer:', firstPlayer);
+  io.to(roomId).emit('tax-phase-end', { currentPlayerId: firstPlayer });
   startTurnTimer(roomId, playingState);
 }
 

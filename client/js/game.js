@@ -253,6 +253,7 @@ socket.on('game-started', ({ hand, turnOrder: to, currentPlayerId: cpId, players
   tableEl.innerHTML = '';
 
   if (phase === 'tax' && taxInfo) {
+    console.log('[game-started] TAX phase | taxInfo:', JSON.stringify(taxInfo), '| myId:', myId, '| playerRanks:', JSON.stringify(playerRanks));
     taxPhase = taxInfo;
     taxSubmitted = false; // 새 판 시작이므로 항상 초기화
     enterTaxPhase(taxInfo);
@@ -327,11 +328,15 @@ socket.on('card-played', ({ cards }) => {
 });
 
 socket.on('hand-updated', ({ hand }) => {
+  console.log('[hand-updated] new hand size:', hand.length, '| taxPhase:', JSON.stringify(taxPhase), '| taxSubmitted:', taxSubmitted);
   myHand = sortHand(hand);
   selectedCards = [];
   renderHand();
   // 세금 제출 전이고 내가 선택할 차례면 버튼 갱신
-  if (taxPhase && taxPhase.taxReturnCount > 0 && !taxSubmitted) renderTaxButtons(taxPhase.taxReturnCount);
+  if (taxPhase && taxPhase.taxReturnCount > 0 && !taxSubmitted) {
+    console.log('[hand-updated] re-rendering tax buttons');
+    renderTaxButtons(taxPhase.taxReturnCount);
+  }
 });
 
 socket.on('turn-timer', ({ playerId, duration }) => {
@@ -461,6 +466,7 @@ function enterTaxPhase(taxInfo) {
 }
 
 function exitTaxPhase() {
+  console.log('[exitTaxPhase] called | taxSubmitted was:', taxSubmitted);
   taxSubmitted = false;
   gameBoardEl.classList.remove('tax-mode');
   taxBannerEl.style.display = 'none';
@@ -471,13 +477,16 @@ function exitTaxPhase() {
 }
 
 function renderTaxButtons(count) {
-  if (taxSubmitted) return; // 이미 제출한 경우 버튼 상태 변경 안 함
+  console.log('[renderTaxButtons] count:', count, '| taxSubmitted:', taxSubmitted, '| selectedCards:', selectedCards.length);
+  if (taxSubmitted) { console.log('[renderTaxButtons] already submitted — skip'); return; }
   btnPlay.innerHTML = `<img src="/Resource/UI/ControlPanel/CardSelect.png" alt="세금 내기"><span>세금 내기 (${count}장)</span>`;
   btnPlay.disabled = selectedCards.length !== count;
   btnPlay.onclick = () => {
-    if (selectedCards.length !== count || taxSubmitted) return;
+    console.log('[renderTaxButtons] submit clicked | selectedCards:', selectedCards, '| taxSubmitted:', taxSubmitted);
+    if (selectedCards.length !== count || taxSubmitted) { console.log('[renderTaxButtons] submit BLOCKED'); return; }
     taxSubmitted = true;
     const submitted = [...selectedCards];
+    console.log('[renderTaxButtons] emitting tax-return | cards:', submitted);
     socket.emit('tax-return', { sessionId: myId, cards: submitted });
     // 즉시 손패에서 제거 (서버 응답 전 낙관적 UI)
     myHand = myHand.filter(c => { const i = submitted.indexOf(c); if (i !== -1) { submitted.splice(i, 1); return false; } return true; });
@@ -491,17 +500,21 @@ function renderTaxButtons(count) {
 }
 
 socket.on('tax-returned', ({ giverId, targetId, cardCount }) => {
-  if (!taxPhase) return;
+  console.log('[tax-returned] giverId:', giverId, '| targetId:', targetId, '| cardCount:', cardCount, '| myId:', myId, '| taxPhase:', JSON.stringify(taxPhase), '| taxSubmitted:', taxSubmitted);
+  if (!taxPhase) { console.log('[tax-returned] taxPhase is null — ignoring'); return; }
   if (taxPhase.taxReturnCount > 0 && !taxSubmitted) {
-    // 내 차례가 됐을 때 (부호: 대부호 반환 후) 배너 갱신
+    console.log('[tax-returned] my turn to return — updating UI | taxReturnCount:', taxPhase.taxReturnCount);
     taxBannerEl.textContent = `세금: 돌려줄 카드 ${taxPhase.taxReturnCount}장을 선택하세요`;
     handEl.classList.remove('tax-waiting');
     renderHand();
     renderTaxButtons(taxPhase.taxReturnCount);
+  } else {
+    console.log('[tax-returned] not my return turn (taxReturnCount:', taxPhase.taxReturnCount, ', taxSubmitted:', taxSubmitted, ') — no UI change');
   }
 });
 
 socket.on('tax-phase-end', ({ currentPlayerId: cpId }) => {
+  console.log('[tax-phase-end] received | cpId:', cpId, '| myId:', myId, '| taxPhase:', JSON.stringify(taxPhase));
   taxPhase = null;
   currentPlayerId = cpId;
   exitTaxPhase();
