@@ -16,7 +16,7 @@
     play(queue.shift()).then(next);
   }
 
-  function play({ image, text, duration = 0.5, textColor = '#fff' }) {
+  function play({ image, text, duration = 0.8, delay = 0.4, textColor = '#fff' }) {
     return new Promise(resolve => {
       const overlay = document.createElement('div');
       Object.assign(overlay.style, {
@@ -58,11 +58,12 @@
       overlay.appendChild(content);
       document.body.appendChild(overlay);
 
-      const FADE_IN  = 0.12;
-      const FADE_OUT = 0.13;
+      const FADE_IN  = 0.15;
+      const FADE_OUT = 0.15;
       const hold = Math.max(0.05, duration - FADE_IN - FADE_OUT);
 
       gsap.timeline({ onComplete: () => { overlay.remove(); resolve(); } })
+        .to({}, { duration: delay })
         .to(overlay,  { background: 'rgba(0,0,0,0.72)', duration: FADE_IN, ease: 'power2.out' })
         .fromTo(content, { opacity: 0, scale: 0.7 }, { opacity: 1, scale: 1, duration: FADE_IN, ease: 'back.out(1.4)' }, '<')
         .to({}, { duration: hold })
