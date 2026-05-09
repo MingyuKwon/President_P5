@@ -57,11 +57,12 @@
     .order-sep { color:#777; padding:0 2px; font-size:1rem; }
     .order-rev { margin-left:12px; background:#e94560; padding:2px 10px;
       border-radius:10px; font-size:0.8rem; font-weight:bold; color:#fff; }
-    #turn-timer { font-size:1.1rem; font-weight:bold; color:#fff; background:rgba(0,0,0,.6);
-      border:1px solid rgba(255,255,255,.2); border-radius:20px; padding:4px 18px;
-      pointer-events:none; white-space:nowrap; align-self:center;
-      min-width:4.5em; text-align:center; }
-    #turn-timer.urgent { color:#e94560; border-color:#e94560; }
+    #turn-timer { position:relative; display:inline-flex; align-items:center; justify-content:center;
+      pointer-events:none; align-self:center; }
+    #turn-timer img { display:block; height:60px; width:auto; }
+    #turn-timer .timer-text { position:absolute; font-size:1.15rem; font-weight:bold; color:#fff;
+      text-shadow:0 1px 4px rgba(0,0,0,.9); }
+    #turn-timer.urgent .timer-text { color:#e94560; }
     #btn-exit { position:absolute; top:0; right:14px; transform:translateY(calc(-100% - 8px));
       padding:4px 14px;
       background:rgba(0,0,0,.5); border:1.5px solid rgba(255,255,255,.7); border-radius:8px;
@@ -177,13 +178,16 @@
         <div id="my-seat"></div>
         <div id="action-btns">
           <button id="btn-play" disabled>
-            <img src="/Resource/UI/btn_play.png" alt="카드 내기"
+            <img src="/Resource/UI/ControlPanel/CardSelect.png" alt="카드 내기"
                  onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block'">
             <span>카드 내기</span>
           </button>
-          <div id="turn-timer" style="visibility:hidden"></div>
+          <div id="turn-timer" style="visibility:hidden">
+            <img src="/Resource/UI/ControlPanel/Time.png" alt="">
+            <span class="timer-text"></span>
+          </div>
           <button id="btn-pass" disabled>
-            <img src="/Resource/UI/btn_pass.png" alt="패스"
+            <img src="/Resource/UI/ControlPanel/Pass.png" alt="패스"
                  onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block'">
             <span>패스</span>
           </button>
