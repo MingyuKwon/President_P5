@@ -388,8 +388,9 @@ socket.on('round-end', ({ reason }) => {
   clearTimerUI();
   clearAutoPassTimer();
   clearAutoPlayTimer();
-  if (reason === '8-clear') animateMessage('8-Clear!');
-  else if (reason === 'spade-reversal') animateMessage('♠ Reversal!');
+  if (reason === '8-clear') enqueueCutscene({ image: null, text: '8 Clear!' });
+  else if (reason === 'spade-reversal') enqueueCutscene({ image: null, text: '♠ Reversal!' });
+  else if (reason === 'all-pass') enqueueCutscene({ image: null, text: '전원 패스' });
   gsap.to('#table .table-group', {
     opacity: 0, y: -20, duration: 0.4, stagger: 0.05,
     onComplete: () => { tableEl.innerHTML = ''; },
@@ -398,11 +399,11 @@ socket.on('round-end', ({ reason }) => {
   if (currentPlayerId === myId) { tryAutoPass(); tryAutoPlay(); }
 });
 
-socket.on('revolution', ({ active }) => animateMessage(active ? '혁명 발동!' : '반혁명!'));
+socket.on('revolution', ({ active }) => enqueueCutscene({ image: null, text: active ? '혁명 발동!' : '반혁명!' }));
 
 socket.on('player-finished', ({ playerId, rank }) => {
   const p = players.find(p => p.id === playerId);
-  animateMessage(`${p ? p.nickname : playerId} — ${rankLabel(rank)}`);
+  enqueueCutscene({ image: null, text: `${p ? p.nickname : playerId} — ${rankLabel(rank)}` });
 });
 
 socket.on('player-bot', ({ playerId }) => {
@@ -420,7 +421,7 @@ socket.on('room-updated', ({ players: newPlayers }) => {
 
 socket.on('president-penalty', ({ playerId }) => {
   const p = players.find(p => p.id === playerId);
-  animateMessage(`${p ? p.nickname : playerId} 대부호 방어 실패!`, '#e94560');
+  enqueueCutscene({ image: null, text: `${p ? p.nickname : playerId} 대부호 방어 실패!`, textColor: '#e94560' });
   fallenPresidentId = playerId;
   renderSeats();
 });
