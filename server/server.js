@@ -115,6 +115,7 @@ function startTurnTimer(roomId, state) {
     const result = pass(currentState, currentPlayerId);
     if (result.error) return;
     gameStates.set(roomId, result.state);
+    io.to(roomId).emit('player-passed', { playerId: currentPlayerId });
     broadcastGameUpdate(roomId, result.state, result.events);
     if (!result.events.some(e => e.type === 'game-over')) {
       startTurnTimer(roomId, result.state);
