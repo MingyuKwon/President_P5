@@ -139,10 +139,15 @@ btnAutoPass.onclick = () => {
 
 let autoPlay = false;
 let autoPlayTimer = null;
+let autoTaxTimer = null;
 const gameBoardEl = document.getElementById('game-board');
 
 function clearAutoPlayTimer() {
   if (autoPlayTimer) { clearTimeout(autoPlayTimer); autoPlayTimer = null; }
+}
+
+function clearAutoTaxTimer() {
+  if (autoTaxTimer) { clearTimeout(autoTaxTimer); autoTaxTimer = null; }
 }
 
 function groupByRank(hand) {
@@ -189,12 +194,32 @@ function tryAutoPlay() {
   }, 1000);
 }
 
+function tryAutoTax() {
+  if (!autoPlay || !taxPhase || taxPhase.taxReturnCount <= 0 || taxSubmitted) return;
+  clearAutoTaxTimer();
+  const count = taxPhase.taxReturnCount;
+  autoTaxTimer = setTimeout(() => {
+    if (!autoPlay || !taxPhase || taxSubmitted) return;
+    // 가장 약한 카드 count장 선택
+    const sorted = [...myHand].sort((a, b) => playRank(a, currentRevolution) - playRank(b, currentRevolution));
+    const cards = sorted.slice(0, count);
+    taxSubmitted = true;
+    socket.emit('tax-return', { sessionId: myId, cards });
+    const toRemove = [...cards];
+    myHand = myHand.filter(c => { const i = toRemove.indexOf(c); if (i !== -1) { toRemove.splice(i, 1); return false; } return true; });
+    selectedCards = [];
+    taxBannerEl.textContent = '제출 완료, 세금 교환 대기 중...';
+    handEl.classList.add('tax-waiting');
+    renderHand();
+  }, 1000);
+}
+
 btnAuto.onclick = () => {
   autoPlay = !autoPlay;
   btnAuto.classList.toggle('on', autoPlay);
   gameBoardEl.classList.toggle('auto-mode', autoPlay);
-  if (!autoPlay) clearAutoPlayTimer();
-  else tryAutoPlay();
+  if (!autoPlay) { clearAutoPlayTimer(); clearAutoTaxTimer(); }
+  else { tryAutoPlay(); tryAutoTax(); }
 };
 
 function clearTimerUI() {
@@ -506,10 +531,12 @@ function enterTaxPhase(taxInfo) {
 
   renderSeats();
   renderCardOrder();
+  tryAutoTax();
 }
 
 function exitTaxPhase() {
   console.log('[exitTaxPhase] called | taxSubmitted was:', taxSubmitted);
+  clearAutoTaxTimer();
   taxSubmitted = false;
   gameBoardEl.classList.remove('tax-mode');
   taxBannerEl.style.display = 'none';
