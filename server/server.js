@@ -18,7 +18,7 @@ const socketSession = new Map(); // socketId → sessionId
 const turnTimers = new Map();   // roomId → timeoutId
 const readySets = new Map();    // roomId → Set<sessionId>
 
-const TURN_DURATION = 30; // seconds
+const TURN_DURATION = 20; // seconds
 
 function clearTurnTimer(roomId) {
   if (turnTimers.has(roomId)) {
