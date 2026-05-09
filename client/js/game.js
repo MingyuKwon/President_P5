@@ -292,7 +292,7 @@ socket.on('round-end', ({ reason }) => {
   if (currentPlayerId === myId) { tryAutoPass(); tryAutoPlay(); }
 });
 
-socket.on('revolution', () => animateMessage({ img: '/Resource/UI/game-state/Revolution.png' }));
+socket.on('revolution', ({ active }) => animateMessage(active ? '혁명 발동!' : '반혁명!'));
 
 socket.on('player-finished', ({ playerId, rank }) => {
   const p = players.find(p => p.id === playerId);
@@ -516,7 +516,7 @@ function renderCardOrder() {
   }).join('');
 
   const revTag = currentRevolution
-    ? '<span class="order-rev">혁명!</span>'
+    ? '<img class="order-rev-img" src="/Resource/UI/game-state/Revolution.png" alt="혁명">'
     : '';
   orderBarEl.innerHTML = `<span class="order-label">강약</span>${ranks}${revTag}`;
 }
@@ -524,21 +524,11 @@ function renderCardOrder() {
 
 function animateMessage(text, color = '#fff') {
   const el = document.createElement('div');
-  if (text && typeof text === 'object' && text.img) {
-    const img = document.createElement('img');
-    img.src = text.img;
-    img.style.cssText = 'height:80px; width:auto; display:block;';
-    el.appendChild(img);
-  } else {
-    el.textContent = text;
-    Object.assign(el.style, {
-      fontSize: '1.8rem', fontWeight: 'bold', color,
-      textShadow: '0 2px 8px rgba(0,0,0,.8)', whiteSpace: 'nowrap',
-    });
-  }
+  el.textContent = text;
   Object.assign(el.style, {
     position: 'fixed', top: '38%', left: '50%', transform: 'translateX(-50%)',
-    zIndex: 999, pointerEvents: 'none',
+    fontSize: '1.8rem', fontWeight: 'bold', color, zIndex: 999, pointerEvents: 'none',
+    textShadow: '0 2px 8px rgba(0,0,0,.8)', whiteSpace: 'nowrap',
   });
   document.body.appendChild(el);
   gsap.fromTo(el, { y: 0, opacity: 1 }, { y: -60, opacity: 0, duration: 1.4, onComplete: () => el.remove() });
