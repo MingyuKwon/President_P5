@@ -448,10 +448,15 @@ function renderTaxButtons(count) {
   btnPlay.onclick = () => {
     if (selectedCards.length !== count || taxSubmitted) return;
     taxSubmitted = true;
-    socket.emit('tax-return', { sessionId: myId, cards: [...selectedCards] });
+    const submitted = [...selectedCards];
+    socket.emit('tax-return', { sessionId: myId, cards: submitted });
+    // 즉시 손패에서 제거 (서버 응답 전 낙관적 UI)
+    myHand = myHand.filter(c => { const i = submitted.indexOf(c); if (i !== -1) { submitted.splice(i, 1); return false; } return true; });
+    selectedCards = [];
     btnPlay.disabled = true;
     taxBannerEl.textContent = '제출 완료, 세금 교환 대기 중...';
-    handEl.classList.add('tax-waiting'); // 제출 후 손패 dimmed
+    handEl.classList.add('tax-waiting');
+    renderHand();
   };
   btnPass.style.display = 'none';
 }
