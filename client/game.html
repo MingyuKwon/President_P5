@@ -118,9 +118,9 @@
     }
     @keyframes auto-pulse { 0%,100%{opacity:1} 50%{opacity:0.45} }
     .auto-mode #auto-indicator { display:block; animation:auto-pulse 1.4s ease-in-out infinite; }
-    #action-btns button:not(#btn-autopass):not(#btn-auto) { padding:12px 20px; background:none; border:none; cursor:pointer; }
+    #action-btns button:not(#btn-autopass):not(#btn-auto) { padding:0; background:none; border:none; cursor:pointer; }
     #action-btns button:not(#btn-autopass):not(#btn-auto):disabled { cursor:default; }
-    #action-btns button:not(#btn-autopass):not(#btn-auto) img { display:block; height:48px; width:auto;
+    #action-btns button:not(#btn-autopass):not(#btn-auto) img { display:block; height:76px; width:auto;
       transition:opacity .15s, transform .1s; }
     #action-btns button:not(#btn-autopass):not(#btn-auto):disabled img { opacity:0.35; }
     #action-btns button:not(#btn-autopass):not(#btn-auto):not(:disabled):hover img { transform:scale(1.05); }
