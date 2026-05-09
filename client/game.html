@@ -97,7 +97,7 @@
     .hand-card img { width:100%; height:100%; object-fit:cover; pointer-events:none; }
     #action-btns { display:flex; flex-wrap:wrap; column-gap:27px; row-gap:8px; justify-content:center; transform:translateY(40px); }
     #tax-banner {
-      display:none; position:absolute; top:8px; left:50%; transform:translateX(-50%);
+      display:none; position:absolute; bottom:10px; left:50%; transform:translateX(-50%);
       background:rgba(0,0,0,.82); border:1.5px solid #f0a030;
       border-radius:20px; padding:8px 24px;
       color:#f0a030; font-size:1rem; font-weight:bold;
@@ -207,6 +207,7 @@
 </head>
 <body>
   <div id="game-board">
+    <div id="tax-banner"></div>
     <button id="btn-exit"><img src="/Resource/UI/ControlPanel/Exit.png" alt="나가기"></button>
     <div id="autopass-row">
       <button id="btn-autopass"><img src="/Resource/UI/ControlPanel/AutoPass.png" alt="자동 패스"></button>
@@ -246,7 +247,6 @@
         </div>
       </div>
       <div id="my-area">
-        <div id="tax-banner"></div>
         <div id="auto-indicator">⚡ 자동 진행 중</div>
         <div id="hand"></div>
       </div>
