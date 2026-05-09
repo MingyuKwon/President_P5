@@ -288,12 +288,16 @@ io.on('connection', (socket) => {
 
   socket.on('pass', ({ sessionId }) => {
     const session = sessionMap.get(sessionId);
+    console.log('[pass] sessionId:', sessionId, '| session:', session);
     if (!session) return;
     const state = gameStates.get(session.roomId);
+    console.log('[pass] roomId:', session.roomId, '| state exists:', !!state);
     if (!state) return;
     const result = pass(state, sessionId);
+    console.log('[pass] result.error:', result.error);
     if (result.error) return socket.emit('error', { message: result.error });
     gameStates.set(session.roomId, result.state);
+    console.log('[pass] emitting player-passed to room:', session.roomId);
     io.to(session.roomId).emit('player-passed', { playerId: sessionId });
     broadcastGameUpdate(session.roomId, result.state, result.events);
     if (!result.events.some(e => e.type === 'game-over')) {
