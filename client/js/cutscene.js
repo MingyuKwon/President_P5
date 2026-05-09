@@ -16,7 +16,7 @@
     play(queue.shift()).then(next);
   }
 
-  function play({ image, subImage, text, duration = 0.9, delay = 0.3, textColor = '#fff' }) {
+  function play({ image, subImage, text, duration = 0.9, delay = 0.3, textColor = '#fff', imageScale = 1 }) {
     return new Promise(resolve => {
       const overlay = document.createElement('div');
       Object.assign(overlay.style, {
@@ -35,7 +35,7 @@
         const img = document.createElement('img');
         img.src = image;
         Object.assign(img.style, {
-          width: '27.44vw', height: '21.56vh', objectFit: 'contain',
+          width: `${27.44 * imageScale}vw`, height: `${21.56 * imageScale}vh`, objectFit: 'contain',
         });
         content.appendChild(img);
       }

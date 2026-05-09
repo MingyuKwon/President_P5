@@ -430,7 +430,7 @@ socket.on('round-end', ({ reason }) => {
   if (currentPlayerId === myId) { tryAutoPass(); tryAutoPlay(); }
 });
 
-socket.on('revolution', ({ active }) => enqueueCutscene({ image: '/Resource/UI/game-state/Revolution.png', text: active ? '혁명 발동!' : '반혁명!' }));
+socket.on('revolution', ({ active }) => enqueueCutscene({ image: '/Resource/UI/game-state/Revolution.png', text: active ? '혁명 발동!' : '반혁명!', imageScale: 1.4 }));
 
 socket.on('player-finished', ({ playerId, rank }) => {
   if (rank === 'scum') return;
