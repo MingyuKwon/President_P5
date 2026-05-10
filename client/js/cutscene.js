@@ -18,6 +18,8 @@
 
   function play({ image, subImage, text, duration = 0.9, delay = 0.3, textColor = '#fff', imageScale = 1, fadeIn = 0.35 }) {
     return new Promise(resolve => {
+      if (document.hidden) { resolve(); return; }
+
       const overlay = document.createElement('div');
       Object.assign(overlay.style, {
         position: 'fixed', inset: '0', zIndex: '9999',
@@ -69,13 +71,21 @@
       const FADE_OUT = 0.15;
       const hold = Math.max(0.05, duration - FADE_IN - FADE_OUT);
 
-      gsap.timeline({ onComplete: () => { overlay.remove(); resolve(); } })
+      const tl = gsap.timeline({ onComplete: () => { overlay.remove(); resolve(); } })
         .to({}, { duration: delay })
         .to(overlay,  { background: 'rgba(0,0,0,0.72)', duration: FADE_IN, ease: 'power2.out' })
         .fromTo(content, { opacity: 0, scale: 0.7 }, { opacity: 1, scale: 1, duration: FADE_IN, ease: 'back.out(1.4)' }, '<')
         .to({}, { duration: hold })
         .to(overlay,  { background: 'rgba(0,0,0,0)', duration: FADE_OUT, ease: 'power2.in' })
         .to(content,  { opacity: 0, scale: 1.06, duration: FADE_OUT, ease: 'power2.in' }, '<');
+
+      function onHidden() {
+        if (document.hidden) {
+          document.removeEventListener('visibilitychange', onHidden);
+          tl.progress(1);
+        }
+      }
+      document.addEventListener('visibilitychange', onHidden);
     });
   }
 

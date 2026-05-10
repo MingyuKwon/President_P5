@@ -123,7 +123,7 @@ function clearAutoPassTimer() {
 }
 
 function tryAutoPass() {
-  if (!autoPass || currentPlayerId !== myId) return;
+  if (!autoPass || currentPlayerId !== myId || isCutscenePlaying()) return;
   const selectable = computeSelectableSet(myHand, selectedCards, currentTableCards, currentRevolution);
   if (selectable.size > 0) return;
   clearAutoPassTimer();
@@ -187,7 +187,7 @@ function selectCardsToPlay() {
 }
 
 function tryAutoPlay() {
-  if (!autoPlay || currentPlayerId !== myId) return;
+  if (!autoPlay || currentPlayerId !== myId || isCutscenePlaying()) return;
   clearAutoPlayTimer();
   autoPlayTimer = setTimeout(() => {
     if (!autoPlay || currentPlayerId !== myId) return;
@@ -198,7 +198,7 @@ function tryAutoPlay() {
 }
 
 function tryAutoTax() {
-  if (!autoPlay || !taxPhase || taxPhase.taxReturnCount <= 0 || taxSubmitted) return;
+  if (!autoPlay || !taxPhase || taxPhase.taxReturnCount <= 0 || taxSubmitted || isCutscenePlaying()) return;
   clearAutoTaxTimer();
   const count = taxPhase.taxReturnCount;
   autoTaxTimer = setTimeout(() => {
