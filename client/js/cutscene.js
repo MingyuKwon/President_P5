@@ -65,7 +65,7 @@
     return { overlay, content };
   }
 
-  function play({ image, subImage, text, duration = 0.9, delay = 0.3, textColor = '#fff', imageScale = 1, fadeIn = 0.35 }) {
+  function play({ image, subImage, text, duration = 1.0, delay = 0.3, textColor = '#fff', imageScale = 1, fadeIn = 0.35 }) {
     return new Promise(resolve => {
       const FADE_IN  = fadeIn;
       const FADE_OUT = 0.15;
