@@ -148,7 +148,11 @@ function broadcastGameUpdate(roomId, state, events) {
     if (event.type === 'game-over') {
       const scores = updateScores(roomId, event.ranks);
       const room = getRoom(roomId);
-      if (room) room.players.forEach(p => playerAutoSettings.set(p.id, { autoPass: false, autoPlay: false }));
+      if (room) room.players.forEach(p => {
+        const s = playerAutoSettings.get(p.id) || { autoPass: false, autoPlay: false };
+        s.autoPlay = false;
+        playerAutoSettings.set(p.id, s);
+      });
       io.to(roomId).emit('game-over', { ...event, scores });
     } else {
       io.to(roomId).emit(event.type, event);
