@@ -375,8 +375,8 @@ socket.on('state-updated', ({ tableCards, tablePile, currentPlayerId: cpId, revo
   currentTableCards = tableCards || [];
   currentRevolution = revolution;
   if (wasMyTurn && cpId !== myId) { selectedCards = []; clearAutoPassTimer(); clearAutoPlayTimer(); }
-  renderSeats();
-  renderHand();
+  updateSeats();
+  updateHandSelectability();
   renderCardOrder();
   if (cpId === myId) { tryAutoPass(); tryAutoPlay(); }
 });
@@ -845,6 +845,58 @@ function renderSeats() {
   });
 }
 
+function updateSeats() {
+  const order = originalOrder.length > 0 ? originalOrder : turnOrder;
+  const allExist = order.every(pid => {
+    const c = pid === myId ? mySeatEl : seatsEl;
+    return !!c.querySelector(`[data-player-id="${pid}"]`);
+  });
+  if (!allExist) { renderSeats(); return; }
+  order.forEach(playerId => {
+    const p = players.find(p => p.id === playerId);
+    if (!p) return;
+    const isActive = playerId === currentPlayerId;
+    const container = playerId === myId ? mySeatEl : seatsEl;
+    const div = container.querySelector(`[data-player-id="${playerId}"]`);
+    div.classList.toggle('active', isActive);
+    div.classList.toggle('finished', p.finished);
+    const cardsEl = div.querySelector('.seat-cards');
+    if (cardsEl) cardsEl.textContent = p.finished ? '완료' : p.cardCount + '장';
+    const shadowImg = div.querySelector('.seat-char-shadow');
+    if (shadowImg) {
+      const rank = playerRanks[playerId] || 'citizen';
+      shadowImg.src = isActive
+        ? `/Resource/UI/character/${rank}-shadow-red.png`
+        : `/Resource/UI/character/${rank}-shadow.png`;
+    }
+  });
+}
+
+function updateHandSelectability() {
+  const isTaxSelecting = taxPhase && taxPhase.taxReturnCount > 0 && !taxSubmitted;
+  const isMyTurn = currentPlayerId === myId;
+  const selectable = isTaxSelecting
+    ? (selectedCards.length >= taxPhase.taxReturnCount ? new Set(selectedCards) : new Set(myHand))
+    : computeSelectableSet(myHand, selectedCards, currentTableCards, currentRevolution);
+  const tempSel = [...selectedCards];
+  handEl.querySelectorAll('.hand-card').forEach(div => {
+    const card = div.dataset.card;
+    const idx = tempSel.indexOf(card);
+    const isSelected = idx !== -1;
+    if (isSelected) tempSel.splice(idx, 1);
+    div.classList.toggle('selected', isSelected);
+    div.classList.toggle('dimmed', !isSelected && !selectable.has(card));
+  });
+  if (isTaxSelecting) {
+    myAreaEl.classList.add('active');
+    btnPlay.disabled = selectedCards.length !== taxPhase.taxReturnCount;
+  } else {
+    myAreaEl.classList.toggle('active', isMyTurn);
+    btnPass.disabled = !isMyTurn;
+    btnPlay.disabled = !isMyTurn || selectedCards.length === 0;
+  }
+}
+
 function renderHand() {
   const isTaxSelecting = taxPhase && taxPhase.taxReturnCount > 0 && !taxSubmitted;
   const isMyTurn = currentPlayerId === myId;
@@ -919,15 +971,18 @@ function renderTablePile(pile) {
   pile.forEach(cards => addCardGroupToTable(cards, false));
 }
 
+let _cardOrderKey = null;
 function renderCardOrder() {
+  const nonJoker = currentTableCards.filter(c => c !== 'Joker');
+  const activeRank = currentTableCards.length === 0 ? null
+    : nonJoker.length > 0 ? nonJoker[0].slice(0, -1) : 'Joker';
+  const key = `${currentRevolution}|${activeRank}`;
+  if (key === _cardOrderKey) return;
+  _cardOrderKey = key;
+
   const order = currentRevolution
     ? ['2','A','K','Q','J','10','9','8','7','6','5','4','3','Joker']
     : ['3','4','5','6','7','8','9','10','J','Q','K','A','2','Joker'];
-
-  const nonJoker = currentTableCards.filter(c => c !== 'Joker');
-  const activeRank = currentTableCards.length === 0 ? null
-    : nonJoker.length > 0 ? nonJoker[0].slice(0, -1)
-    : 'Joker';
 
   const last = order.length - 1;
   const ranks = order.map((rank, i) => {
