@@ -132,7 +132,10 @@
     });
   }
 
-  window.isCutscenePlaying = function () { return playing; };
+  let animLockCount = 0;
+  window.lockAnim   = () => { animLockCount++; };
+  window.unlockAnim = () => { if (animLockCount > 0) animLockCount--; };
+  window.isCutscenePlaying = function () { return playing || animLockCount > 0; };
 
   window.enqueueCutscene = function (config) {
     queue.push(config);

@@ -473,12 +473,12 @@ socket.on('round-end', ({ reason }) => {
   if (reason === '8-clear') enqueueCutscene({ image: '/Resource/UI/game-state/Eight_RoundEnd.png', text: '8 Clear!' });
   else if (reason === 'spade-reversal') enqueueCutscene({ image: '/Resource/UI/game-state/S3_RoundEnd.png', text: '♠ Reversal!' });
   else if (reason === 'all-pass') enqueueCutscene({ image: '/Resource/UI/game-state/AllPass_RoundENd.png', text: '전원 패스', duration: 0.6, fadeIn: 0.1 });
+  lockAnim();
   gsap.to('#table .table-group', {
-    opacity: 0, y: -20, duration: 0.4, stagger: 0.05,
+    opacity: 0, y: -20, duration: 0.6, stagger: 0.05,
     onComplete: () => { tableEl.innerHTML = ''; },
   });
-  // 탭이 최소화되어 애니메이션이 완료되지 않아도 DOM이 정리되도록 보장
-  setTimeout(() => { tableEl.innerHTML = ''; }, 600);
+  setTimeout(() => { tableEl.innerHTML = ''; unlockAnim(); }, 800);
   // state-updated가 round-end보다 먼저 도착하므로, 내 차례면 재트리거
   if (currentPlayerId === myId) { tryAutoPass(); tryAutoPlay(); }
 });
@@ -589,9 +589,17 @@ function hideTaxExchangeImage() {
 }
 
 function animateTaxReceive(cards) {
+  if (!cards.length) return;
   const handRect = handEl.getBoundingClientRect();
   const centerX = handRect.left + handRect.width / 2;
   const targetY = handRect.top + handRect.height * 0.3;
+
+  lockAnim();
+  let completed = 0;
+  let unlocked = false;
+  const doUnlock = () => { if (!unlocked) { unlocked = true; unlockAnim(); } };
+  const maxDelay = (cards.length - 1) * 0.1 + 0.52 + 0.45;
+  setTimeout(doUnlock, maxDelay * 1000 + 200);
 
   cards.forEach((card, i) => {
     const el = document.createElement('div');
@@ -609,9 +617,9 @@ function animateTaxReceive(cards) {
     document.body.appendChild(el);
 
     const delay = i * 0.1;
-    gsap.to(el, { top: targetY, duration: 0.35, ease: 'power2.in', delay });
-    gsap.to(el, { opacity: 0, scale: 0.7, duration: 0.25, ease: 'power1.in',
-      delay: delay + 0.32, onComplete: () => el.remove() });
+    gsap.to(el, { top: targetY, duration: 0.55, ease: 'power2.in', delay });
+    gsap.to(el, { opacity: 0, scale: 0.7, duration: 0.45, ease: 'power1.in',
+      delay: delay + 0.52, onComplete: () => { el.remove(); completed++; if (completed === cards.length) doUnlock(); } });
   });
 }
 
@@ -676,13 +684,15 @@ function renderTaxButtons(count) {
 
     // 선택된 카드 요소를 클론해서 날리는 send 애니메이션
     const selectedEls = [...handEl.querySelectorAll('.hand-card.selected')];
+    if (selectedEls.length > 0) lockAnim();
     selectedEls.forEach(el => {
       const rect = el.getBoundingClientRect();
       const clone = el.cloneNode(true);
       clone.style.cssText = `position:fixed; left:${rect.left}px; top:${rect.top}px; width:${rect.width}px; height:${rect.height}px; z-index:500; pointer-events:none; border-radius:8px; overflow:hidden;`;
       document.body.appendChild(clone);
-      gsap.to(clone, { y: -260, x: (Math.random() - 0.5) * 60, opacity: 0, scale: 0.75, duration: 0.5, ease: 'power2.in', onComplete: () => clone.remove() });
+      gsap.to(clone, { y: -260, x: (Math.random() - 0.5) * 60, opacity: 0, scale: 0.75, duration: 0.7, ease: 'power2.in', onComplete: () => clone.remove() });
     });
+    if (selectedEls.length > 0) setTimeout(unlockAnim, 800);
 
     socket.emit('tax-return', { sessionId: myId, cards: submitted });
     // 낙관적 UI: 손패에서 즉시 제거
@@ -717,7 +727,7 @@ socket.on('tax-phase-end', ({ currentPlayerId: cpId }) => {
 });
 
 function onBtnPlayClick() {
-  if (!selectedCards.length) return;
+  if (!selectedCards.length || isCutscenePlaying()) return;
   socket.emit('play-cards', { cards: selectedCards, sessionId: myId });
 }
 
@@ -792,7 +802,7 @@ socket.on('error', ({ message }) => {
 });
 
 btnPlay.onclick = onBtnPlayClick;
-btnPass.onclick = () => socket.emit('pass', { sessionId: myId });
+btnPass.onclick = () => { if (!isCutscenePlaying()) socket.emit('pass', { sessionId: myId }); };
 document.getElementById('btn-exit').onclick = () => {
   if (!confirm('게임을 나가시겠습니까?')) return;
   sessionStorage.removeItem('gameOverRanks');
@@ -982,7 +992,11 @@ function addCardGroupToTable(cards, animate = true) {
     group.appendChild(div);
   });
   tableEl.appendChild(group);
-  if (animate) gsap.from(group, { scale: 0.6, opacity: 0, duration: 0.25, clearProps: 'opacity' });
+  if (animate) {
+    lockAnim();
+    gsap.from(group, { scale: 0.6, opacity: 0, duration: 0.45, clearProps: 'opacity' });
+    setTimeout(unlockAnim, 500);
+  }
 }
 
 function renderTablePile(pile) {
