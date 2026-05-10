@@ -210,6 +210,9 @@
   <div id="game-board">
     <div id="tax-banner"></div>
     <button id="btn-exit"><img src="/Resource/UI/ControlPanel/Exit.png" alt="나가기"></button>
+    <button id="btn-rules" style="position:absolute;top:10px;right:80px;padding:0;background:none;border:none;cursor:pointer;z-index:110;">
+      <img src="/Resource/UI/Overview.png" alt="게임 설명" style="display:block;height:56px;width:auto;transition:opacity .15s,transform .1s;">
+    </button>
     <div id="autopass-row">
       <button id="btn-autopass"><img src="/Resource/UI/ControlPanel/AutoPass.png" alt="자동 패스"></button>
       <button id="btn-auto"><img src="/Resource/UI/ControlPanel/Auto.png" alt="자동"></button>
@@ -253,11 +256,6 @@
       </div>
     </div>
   </div>
-
-  <!-- 게임 설명 버튼 -->
-  <button id="btn-rules" style="position:fixed;top:20px;right:20px;background:none;border:none;padding:0;cursor:pointer;z-index:99998;">
-    <img src="/Resource/UI/Overview.png" alt="게임 설명" style="width:112px;height:112px;object-fit:contain;transition:transform 0.15s;">
-  </button>
 
   <!-- 게임 설명 모달 -->
   <div id="rules-overlay" style="display:none;position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,0.7);align-items:center;justify-content:center;">
@@ -346,10 +344,12 @@
         document.getElementById('rules-overlay').style.display = 'none';
     });
     document.getElementById('btn-rules').addEventListener('mouseenter', () => {
-      document.getElementById('btn-rules').querySelector('img').style.transform = 'scale(1.1)';
+      const img = document.getElementById('btn-rules').querySelector('img');
+      img.style.transform = 'scale(1.05)'; img.style.opacity = '0.85';
     });
     document.getElementById('btn-rules').addEventListener('mouseleave', () => {
-      document.getElementById('btn-rules').querySelector('img').style.transform = '';
+      const img = document.getElementById('btn-rules').querySelector('img');
+      img.style.transform = ''; img.style.opacity = '';
     });
   </script>
 
