@@ -71,7 +71,7 @@ function updateScores(roomId, ranks) {
   return { ...scores };
 }
 
-const TURN_DURATION = 20; // seconds
+const TURN_DURATION = 30; // seconds
 
 function clearTurnTimer(roomId) {
   if (turnTimers.has(roomId)) {
