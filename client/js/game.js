@@ -70,12 +70,31 @@ function computeSelectableSet(hand, selected, tableCards, revolution) {
       if (canBeat(testSel, tableCards, revolution)) result.add(card);
     } else {
       const pool = subtractCards(remaining, [card]);
-      const eligible = pool.filter(c => c === 'Joker' || (testNum && c.slice(0, -1) === testNum) || !testNum);
-      if (eligible.length >= N - testSel.length) {
-        const sorted = [...eligible].sort((a, b) =>
-          (b === 'Joker' ? 1 : 0) - (a === 'Joker' ? 1 : 0) || playRank(b, revolution) - playRank(a, revolution)
-        );
-        if (canBeat([...testSel, ...sorted.slice(0, N - testSel.length)], tableCards, revolution)) result.add(card);
+      const need = N - testSel.length;
+      const sortFn = (a, b) => (b === 'Joker' ? 1 : 0) - (a === 'Joker' ? 1 : 0) || playRank(b, revolution) - playRank(a, revolution);
+      if (testNum !== null) {
+        // 숫자가 확정된 경우: 같은 숫자 + 조커만 eligible
+        const eligible = pool.filter(c => c === 'Joker' || c.slice(0, -1) === testNum);
+        if (eligible.length >= need) {
+          const sorted = [...eligible].sort(sortFn);
+          if (canBeat([...testSel, ...sorted.slice(0, need)], tableCards, revolution)) result.add(card);
+        }
+      } else {
+        // 조커만 선택된 경우: 숫자가 미확정이므로 각 숫자별로 조합 가능한지 검사
+        const extraJokers = pool.filter(c => c === 'Joker');
+        const rankGroups = {};
+        for (const c of pool) {
+          if (c === 'Joker') continue;
+          const r = c.slice(0, -1);
+          (rankGroups[r] = rankGroups[r] || []).push(c);
+        }
+        for (const rankCards of Object.values(rankGroups)) {
+          const available = [...rankCards, ...extraJokers];
+          if (available.length >= need) {
+            const sorted = [...available].sort(sortFn);
+            if (canBeat([...testSel, ...sorted.slice(0, need)], tableCards, revolution)) { result.add(card); break; }
+          }
+        }
       }
     }
   }
