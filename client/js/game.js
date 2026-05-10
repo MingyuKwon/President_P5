@@ -845,7 +845,7 @@ function renderSeats() {
       : `/Resource/UI/character/${charRank}-shadow.png`;
     const overlayImg = playerId === fallenPresidentId
       ? '/Resource/UI/game-state/fall.png'
-      : p.finished
+      : (p.finished && playerRanks[playerId] !== 'scum')
         ? '/Resource/UI/game-state/allout.png'
         : '';
     div.innerHTML = `
@@ -902,7 +902,7 @@ function updateSeats() {
     if (charDiv) {
       const overlaySrc = playerId === fallenPresidentId
         ? '/Resource/UI/game-state/fall.png'
-        : p.finished
+        : (p.finished && playerRanks[playerId] !== 'scum')
           ? '/Resource/UI/game-state/allout.png'
           : '';
       let overlayImg = div.querySelector('.seat-overlay');
