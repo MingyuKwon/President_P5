@@ -898,6 +898,26 @@ function updateSeats() {
         ? `/Resource/UI/character/${rank}-shadow-red.png`
         : `/Resource/UI/character/${rank}-shadow.png`;
     }
+    const charDiv = div.querySelector('.seat-char');
+    if (charDiv) {
+      const overlaySrc = playerId === fallenPresidentId
+        ? '/Resource/UI/game-state/fall.png'
+        : p.finished
+          ? '/Resource/UI/game-state/allout.png'
+          : '';
+      let overlayImg = div.querySelector('.seat-overlay');
+      if (overlaySrc) {
+        if (!overlayImg) {
+          overlayImg = document.createElement('img');
+          overlayImg.className = 'seat-overlay';
+          overlayImg.alt = '';
+          charDiv.appendChild(overlayImg);
+        }
+        overlayImg.src = overlaySrc;
+      } else if (overlayImg) {
+        overlayImg.remove();
+      }
+    }
   });
 }
 
