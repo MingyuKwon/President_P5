@@ -454,10 +454,15 @@ socket.on('round-end', ({ reason }) => {
   if (reason === '8-clear') enqueueCutscene({ image: '/Resource/UI/game-state/Eight_RoundEnd.png', text: '8 Clear!' });
   else if (reason === 'spade-reversal') enqueueCutscene({ image: '/Resource/UI/game-state/S3_RoundEnd.png', text: '♠ Reversal!' });
   else if (reason === 'all-pass') enqueueCutscene({ image: '/Resource/UI/game-state/AllPass_RoundENd.png', text: '전원 패스', duration: 0.5, fadeIn: 0.1 });
-  gsap.to('#table .table-group', {
-    opacity: 0, y: -20, duration: 0.4, stagger: 0.05,
-    onComplete: () => { tableEl.innerHTML = ''; },
+  // 클론을 body에 붙여서 애니메이션 재생 - DOM 초기화를 애니메이션 완료에 의존하지 않음
+  [...tableEl.querySelectorAll('.table-group')].forEach((g, i) => {
+    const rect = g.getBoundingClientRect();
+    const clone = g.cloneNode(true);
+    Object.assign(clone.style, { position: 'fixed', left: rect.left + 'px', top: rect.top + 'px', width: rect.width + 'px', zIndex: '100', pointerEvents: 'none' });
+    document.body.appendChild(clone);
+    gsap.to(clone, { opacity: 0, y: -20, duration: 0.4, delay: i * 0.05, onComplete: () => clone.remove() });
   });
+  tableEl.innerHTML = '';
   // state-updated가 round-end보다 먼저 도착하므로, 내 차례면 재트리거
   if (currentPlayerId === myId) { tryAutoPass(); tryAutoPlay(); }
 });
