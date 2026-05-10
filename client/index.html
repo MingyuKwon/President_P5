@@ -21,11 +21,11 @@
 
     #rules-modal {
       position: relative;
-      width: min(1000px, 96vw); max-height: 60vh;
+      width: min(1000px, 96vw); height: 82vh;
       background-image: url('/Resource/UI/background/CardGame-joy-income-bg1.png');
       background-size: cover; background-position: center;
       border-radius: 12px; overflow: hidden;
-      display: flex; flex-direction: column;
+      display: flex; align-items: center; justify-content: center;
     }
     #rules-modal::before {
       content: ''; position: absolute; inset: 0;
@@ -33,6 +33,7 @@
     }
     #rules-content {
       position: relative; z-index: 1;
+      width: 100%; max-height: 55vh;
       overflow-y: auto; padding: 36px 170px 32px;
       color: #f0e6d0;
     }
