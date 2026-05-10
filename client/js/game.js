@@ -526,6 +526,14 @@ function showGameOverPanel(ranks, scores = {}) {
 let gameOverTimer = null;
 socket.on('game-over', ({ ranks, scores }) => {
   clearTimerUI();
+  autoPass = false;
+  autoPlay = false;
+  btnAutoPass.classList.remove('on');
+  btnAuto.classList.remove('on');
+  gameBoardEl.classList.remove('auto-mode');
+  clearAutoPassTimer();
+  clearAutoPlayTimer();
+  clearAutoTaxTimer();
   sessionStorage.setItem('gameOverRanks', JSON.stringify(ranks));
   sessionStorage.setItem('gameOverScores', JSON.stringify(scores || {}));
   enqueueCutscene({ image: '/Resource/UI/game-state/GameEnd.png' });

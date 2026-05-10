@@ -147,6 +147,8 @@ function broadcastGameUpdate(roomId, state, events) {
     }
     if (event.type === 'game-over') {
       const scores = updateScores(roomId, event.ranks);
+      const room = getRoom(roomId);
+      if (room) room.players.forEach(p => playerAutoSettings.set(p.id, { autoPass: false, autoPlay: false }));
       io.to(roomId).emit('game-over', { ...event, scores });
     } else {
       io.to(roomId).emit(event.type, event);
@@ -515,8 +517,6 @@ function doStartGame(roomId) {
         taxReturnCount: role === 'president' ? 2 : role === 'vice-president' && needsVP ? 1 : 0,
       };
       const settings = playerAutoSettings.get(p.id) || { autoPass: false, autoPlay: false };
-      settings.autoPlay = false;
-      playerAutoSettings.set(p.id, settings);
       const sess = sessionMap.get(p.id);
       const playerSocket = sess ? io.sockets.sockets.get(sess.socketId) : null;
       console.log('[tax-setup] emitting game-started to', p.id, '(', p.nickname, ') | role:', role, '| taxInfo:', JSON.stringify(taxInfo), '| hand size:', state.players[p.id].hand.length, '| socket exists:', !!playerSocket);
@@ -552,8 +552,6 @@ function emitGameStarted(roomId, state, gameNumber) {
   if (!room) return;
   room.players.forEach(p => {
     const settings = playerAutoSettings.get(p.id) || { autoPass: false, autoPlay: false };
-    settings.autoPlay = false;
-    playerAutoSettings.set(p.id, settings);
     const sess = sessionMap.get(p.id);
     const playerSocket = sess ? io.sockets.sockets.get(sess.socketId) : null;
     if (playerSocket) {
