@@ -254,6 +254,105 @@
     </div>
   </div>
 
+  <!-- 게임 설명 버튼 -->
+  <button id="btn-rules" style="position:fixed;top:20px;right:20px;background:none;border:none;padding:0;cursor:pointer;z-index:99998;">
+    <img src="/Resource/UI/Overview.png" alt="게임 설명" style="width:112px;height:112px;object-fit:contain;transition:transform 0.15s;">
+  </button>
+
+  <!-- 게임 설명 모달 -->
+  <div id="rules-overlay" style="display:none;position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,0.7);align-items:center;justify-content:center;">
+    <div id="rules-modal" style="position:relative;width:min(1000px,96vw);height:82vh;background-image:url('/Resource/UI/background/CardGame-joy-income-bg1.png');background-size:contain;background-position:center;background-repeat:no-repeat;border-radius:12px;overflow:hidden;display:flex;align-items:center;justify-content:center;">
+      <div style="position:absolute;inset:0;background:rgba(0,0,0,0.55);border-radius:12px;"></div>
+      <button id="btn-close-rules" style="position:absolute;top:14px;right:16px;z-index:2;background:none;border:none;color:#ccc;font-size:1.6rem;cursor:pointer;line-height:1;">✕</button>
+      <div id="rules-content" style="position:relative;z-index:1;width:100%;max-height:55vh;overflow-y:auto;padding:36px 170px 32px;color:#f0e6d0;font-family:sans-serif;">
+        <h2 style="font-size:1.5rem;color:#ffd700;margin-bottom:20px;text-align:center;letter-spacing:0.05em;">대부호 게임 규칙</h2>
+
+        <h3 style="font-size:1.05rem;color:#ffc04d;margin:20px 0 8px;border-left:3px solid #e94560;padding-left:10px;">덱 구성</h3>
+        <ul style="padding-left:20px;margin:6px 0;font-size:0.9rem;line-height:1.7;">
+          <li>트럼프 52장 + 조커 2장 = 총 54장</li>
+          <li>플레이어 수: 3명 ~ 8명</li>
+        </ul>
+
+        <h3 style="font-size:1.05rem;color:#ffc04d;margin:20px 0 8px;border-left:3px solid #e94560;padding-left:10px;">카드 강약 순서</h3>
+        <p style="font-size:0.9rem;line-height:1.7;">3 &lt; 4 &lt; 5 &lt; 6 &lt; 7 &lt; 8 &lt; 9 &lt; 10 &lt; J &lt; Q &lt; K &lt; A &lt; 2 &lt; <span style="color:#e94560;font-weight:bold;">조커 (최강)</span></p>
+
+        <h3 style="font-size:1.05rem;color:#ffc04d;margin:20px 0 8px;border-left:3px solid #e94560;padding-left:10px;">기본 규칙</h3>
+        <ul style="padding-left:20px;margin:6px 0;font-size:0.9rem;line-height:1.7;">
+          <li>첫 게임은 모든 플레이어가 평민으로 시작하고, 선 플레이어를 랜덤으로 정한다.</li>
+          <li>2번째 게임부터는 대빈민이 선 플레이어가 된다.</li>
+          <li>선 플레이어가 카드를 내면 이후 플레이어는 <strong>같은 장수의 더 강한 카드</strong>를 내야 한다.</li>
+          <li>낼 수 없거나 싫으면 패스 (패스 횟수 제한 없음).</li>
+          <li>손패를 다 낸 플레이어는 즉시 해당 순위로 계급이 확정되고 게임에서 빠진다.</li>
+          <li>마지막까지 카드가 남은 플레이어가 자동으로 대빈민이 된다.</li>
+        </ul>
+
+        <h3 style="font-size:1.05rem;color:#ffc04d;margin:20px 0 8px;border-left:3px solid #e94560;padding-left:10px;">판 종료 조건</h3>
+        <ol style="padding-left:20px;margin:6px 0;font-size:0.9rem;line-height:1.7;">
+          <li><span style="color:#e94560;font-weight:bold;">전원 패스</span> — 마지막으로 낸 플레이어에게 선이 돌아온다.</li>
+          <li><span style="color:#e94560;font-weight:bold;">8-Clear</span> — 8을 내면 즉시 판 종료, 낸 플레이어가 새 선.</li>
+          <li><span style="color:#e94560;font-weight:bold;">♠ Reversal</span> — 테이블에 조커 1장뿐일 때 ♠3을 내면 즉시 판 종료.</li>
+        </ol>
+
+        <h3 style="font-size:1.05rem;color:#ffc04d;margin:20px 0 8px;border-left:3px solid #e94560;padding-left:10px;">계급</h3>
+        <table style="width:100%;border-collapse:collapse;margin:8px 0;font-size:0.88rem;">
+          <tr><th style="border:1px solid rgba(255,255,255,0.2);padding:6px 10px;background:rgba(233,69,96,0.4);color:#ffd700;">인원</th><th style="border:1px solid rgba(255,255,255,0.2);padding:6px 10px;background:rgba(233,69,96,0.4);color:#ffd700;">계급 순서 (높음 → 낮음)</th></tr>
+          <tr><td style="border:1px solid rgba(255,255,255,0.2);padding:6px 10px;">3명</td><td style="border:1px solid rgba(255,255,255,0.2);padding:6px 10px;">대부호 — 평민 — 대빈민</td></tr>
+          <tr><td style="border:1px solid rgba(255,255,255,0.2);padding:6px 10px;">4명</td><td style="border:1px solid rgba(255,255,255,0.2);padding:6px 10px;">대부호 — 부호 — 빈민 — 대빈민</td></tr>
+          <tr><td style="border:1px solid rgba(255,255,255,0.2);padding:6px 10px;">5명+</td><td style="border:1px solid rgba(255,255,255,0.2);padding:6px 10px;">대부호 — 부호 — 평민×(인원-4) — 빈민 — 대빈민</td></tr>
+        </table>
+
+        <h3 style="font-size:1.05rem;color:#ffc04d;margin:20px 0 8px;border-left:3px solid #e94560;padding-left:10px;">세금 (2번째 게임부터)</h3>
+        <ol style="padding-left:20px;margin:6px 0;font-size:0.9rem;line-height:1.7;">
+          <li>대빈민 → 대부호에게 가장 강한 카드 2장 헌납.</li>
+          <li>빈민 → 부호에게 가장 강한 카드 1장 헌납. (부호/빈민이 없으면 생략)</li>
+          <li>대부호는 받은 카드 포함 자기 패에서 원하는 2장을 대빈민에게 반환.</li>
+          <li>부호는 받은 카드 포함 자기 패에서 원하는 1장을 빈민에게 반환.</li>
+        </ol>
+        <p style="font-size:0.9rem;line-height:1.7;">※ 세금으로 낼 가장 강한 카드 선정 시 조커는 제외.</p>
+
+        <h3 style="font-size:1.05rem;color:#ffc04d;margin:20px 0 8px;border-left:3px solid #e94560;padding-left:10px;">조커</h3>
+        <ul style="padding-left:20px;margin:6px 0;font-size:0.9rem;line-height:1.7;">
+          <li>단독으로 내면 최강 카드로 취급.</li>
+          <li>다른 카드와 함께 내면 와일드카드로 장수에 포함. (예: 조커 + J 2장 = J 3장)</li>
+          <li>혁명의 영향을 받지 않는다.</li>
+        </ul>
+
+        <h3 style="font-size:1.05rem;color:#ffc04d;margin:20px 0 8px;border-left:3px solid #e94560;padding-left:10px;">혁명</h3>
+        <ul style="padding-left:20px;margin:6px 0;font-size:0.9rem;line-height:1.7;">
+          <li>같은 숫자 4장(또는 조커 보충)을 내면 즉시 혁명 발동.</li>
+          <li>카드 강약 순서 역전: 3이 최강, 2가 최약.</li>
+          <li>혁명 상태에서 다시 혁명 → 반혁명 (기본 상태로 복귀).</li>
+          <li>혁명 효과는 해당 게임이 끝나면 초기화.</li>
+        </ul>
+
+        <h3 style="font-size:1.05rem;color:#ffc04d;margin:20px 0 8px;border-left:3px solid #e94560;padding-left:10px;">대부호 방어 실패 패널티</h3>
+        <ul style="padding-left:20px;margin:6px 0;font-size:0.9rem;line-height:1.7;">
+          <li>대부호는 해당 게임에서 반드시 첫 번째로 모든 패를 다 내야 한다.</li>
+          <li>다른 플레이어가 먼저 패를 다 내면, 대부호는 즉시 이탈하고 다음 게임의 대빈민으로 고정.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    document.getElementById('btn-rules').addEventListener('click', () => {
+      document.getElementById('rules-overlay').style.display = 'flex';
+    });
+    document.getElementById('btn-close-rules').addEventListener('click', () => {
+      document.getElementById('rules-overlay').style.display = 'none';
+    });
+    document.getElementById('rules-overlay').addEventListener('click', (e) => {
+      if (e.target === document.getElementById('rules-overlay'))
+        document.getElementById('rules-overlay').style.display = 'none';
+    });
+    document.getElementById('btn-rules').addEventListener('mouseenter', () => {
+      document.getElementById('btn-rules').querySelector('img').style.transform = 'scale(1.1)';
+    });
+    document.getElementById('btn-rules').addEventListener('mouseleave', () => {
+      document.getElementById('btn-rules').querySelector('img').style.transform = '';
+    });
+  </script>
+
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
   <script src="/socket.io/socket.io.js"></script>
   <script src="js/ai-strategy.js"></script>
