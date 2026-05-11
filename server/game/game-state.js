@@ -183,6 +183,11 @@ function startNewRound(state, reason, lastCardPlayerId, events) {
     }
   } else {
     nextPlayerId = lastCardPlayerId || state.turnOrder[state.currentIndex];
+    // 마지막 카드를 낸 플레이어가 allout되어 turnOrder에서 제거된 경우
+    // 해당 플레이어가 있던 인덱스의 다음 사람이 선
+    if (!state.turnOrder.includes(nextPlayerId)) {
+      nextPlayerId = state.turnOrder[state.currentIndex % state.turnOrder.length];
+    }
   }
 
   events.push({ type: 'round-end', reason, nextPlayerId });
