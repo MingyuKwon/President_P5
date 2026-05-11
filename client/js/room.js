@@ -56,6 +56,29 @@ socket.on('room-closed', () => {
 
 socket.on('error', ({ message }) => alert(`오류: ${message}`));
 
+const chatMessagesEl = document.getElementById('chat-messages');
+const chatInputEl    = document.getElementById('chat-input');
+const chatSendEl     = document.getElementById('chat-send');
+
+function sendChat() {
+  const msg = chatInputEl.value.trim();
+  if (!msg) return;
+  socket.emit('chat-message', { sessionId: getSessionId(), message: msg });
+  chatInputEl.value = '';
+}
+
+chatSendEl.addEventListener('click', sendChat);
+chatInputEl.addEventListener('keydown', e => { if (e.key === 'Enter') sendChat(); });
+
+socket.on('chat-message', ({ senderId, nickname, message }) => {
+  const isMine = senderId === getSessionId();
+  const div = document.createElement('div');
+  div.className = `chat-msg${isMine ? ' mine' : ''}`;
+  div.innerHTML = `<span class="chat-nick">${nickname}</span><span class="chat-text">${message.replace(/</g, '&lt;')}</span>`;
+  chatMessagesEl.appendChild(div);
+  chatMessagesEl.scrollTop = chatMessagesEl.scrollHeight;
+});
+
 function renderPlayers(players) {
   const el = document.getElementById('player-list');
   const mySessionId = getSessionId();
