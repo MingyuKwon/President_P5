@@ -145,7 +145,7 @@ function clearAutoPassTimer() {
 
 function tryAutoPass() {
   if (!autoPass || currentPlayerId !== myId || isCutscenePlaying()) return;
-  const selectable = computeSelectableSet(myHand, selectedCards, currentTableCards, currentRevolution);
+  const selectable = computeSelectableSet(myHand, selectedCards.map(i => myHand[i]), currentTableCards, currentRevolution);
   if (selectable.size > 0) return;
   clearAutoPassTimer();
   autoPassTimer = setTimeout(() => {
@@ -715,7 +715,7 @@ function renderTaxButtons(count) {
   btnPlay.onclick = () => {
     if (selectedCards.length !== count || taxSubmitted) return;
     taxSubmitted = true;
-    const submitted = [...selectedCards];
+    const submitted = selectedCards.map(i => myHand[i]);
 
     // 선택된 카드 요소를 클론해서 날리는 send 애니메이션
     const selectedEls = [...handEl.querySelectorAll('.hand-card.selected')];
@@ -763,7 +763,7 @@ socket.on('tax-phase-end', ({ currentPlayerId: cpId }) => {
 
 function onBtnPlayClick() {
   if (!selectedCards.length || isCutscenePlaying()) return;
-  socket.emit('play-cards', { cards: selectedCards, sessionId: myId });
+  socket.emit('play-cards', { cards: selectedCards.map(i => myHand[i]), sessionId: myId });
 }
 
 function showReadyOverlay(el) {
@@ -973,15 +973,14 @@ function updateSeats() {
 function updateHandSelectability() {
   const isTaxSelecting = taxPhase && taxPhase.taxReturnCount > 0 && !taxSubmitted;
   const isMyTurn = currentPlayerId === myId;
+  const selCards = selectedCards.map(i => myHand[i]);
   const selectable = isTaxSelecting
-    ? (selectedCards.length >= taxPhase.taxReturnCount ? new Set(selectedCards) : new Set(myHand))
-    : computeSelectableSet(myHand, selectedCards, currentTableCards, currentRevolution);
-  const tempSel = [...selectedCards];
+    ? (selectedCards.length >= taxPhase.taxReturnCount ? new Set(selCards) : new Set(myHand))
+    : computeSelectableSet(myHand, selCards, currentTableCards, currentRevolution);
   handEl.querySelectorAll('.hand-card').forEach(div => {
-    const card = div.dataset.card;
-    const idx = tempSel.indexOf(card);
-    const isSelected = idx !== -1;
-    if (isSelected) tempSel.splice(idx, 1);
+    const handIdx = parseInt(div.dataset.handIdx, 10);
+    const card = myHand[handIdx];
+    const isSelected = selectedCards.includes(handIdx);
     div.classList.toggle('selected', isSelected);
     div.classList.toggle('dimmed', !isSelected && !selectable.has(card));
   });
@@ -998,26 +997,23 @@ function updateHandSelectability() {
 function renderHand() {
   const isTaxSelecting = taxPhase && taxPhase.taxReturnCount > 0 && !taxSubmitted;
   const isMyTurn = currentPlayerId === myId;
+  const selCards = selectedCards.map(i => myHand[i]);
   const selectable = isTaxSelecting
-    ? (selectedCards.length >= taxPhase.taxReturnCount ? new Set(selectedCards) : new Set(myHand))
-    : computeSelectableSet(myHand, selectedCards, currentTableCards, currentRevolution);
-  const tempSel = [...selectedCards];
+    ? (selectedCards.length >= taxPhase.taxReturnCount ? new Set(selCards) : new Set(myHand))
+    : computeSelectableSet(myHand, selCards, currentTableCards, currentRevolution);
   handEl.innerHTML = '';
   const n = myHand.length;
   const totalAngle = Math.min(12, n - 1);
 
   myHand.forEach((card, i) => {
-    const isSelected = (() => {
-      const idx = tempSel.indexOf(card);
-      if (idx !== -1) { tempSel.splice(idx, 1); return true; }
-      return false;
-    })();
+    const isSelected = selectedCards.includes(i);
     const isDimmed = !isSelected && !selectable.has(card);
     const div = document.createElement('div');
     div.className = ['hand-card', isSelected && 'selected', isDimmed && 'dimmed'].filter(Boolean).join(' ');
     div.dataset.card = card;
+    div.dataset.handIdx = i;
     div.innerHTML = `<img src="${cardImg(card)}" alt="${card}">`;
-    div.onclick = () => toggleCard(card);
+    div.onclick = () => toggleCard(i);
 
     const angleDeg = n <= 1 ? 0 : (i - (n - 1) / 2) / (n - 1) * totalAngle;
     const maxHalf = totalAngle / 2;
@@ -1038,11 +1034,11 @@ function renderHand() {
   }
 }
 
-function toggleCard(card) {
+function toggleCard(handIdx) {
   const isTaxSelecting = taxPhase && taxPhase.taxReturnCount > 0 && !taxSubmitted;
   if (!isTaxSelecting && currentPlayerId !== myId) return;
-  const idx = selectedCards.indexOf(card);
-  if (idx === -1) selectedCards.push(card);
+  const idx = selectedCards.indexOf(handIdx);
+  if (idx === -1) selectedCards.push(handIdx);
   else selectedCards.splice(idx, 1);
   renderHand();
 }
