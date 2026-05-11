@@ -311,6 +311,7 @@ socket.on('game-started', ({ hand, turnOrder: to, currentPlayerId: cpId, players
   leftPlayers = new Set();
   playerRanks = {};
   ps.forEach(p => { if (p.rank) playerRanks[p.id] = p.rank; });
+  renderScorePanel(JSON.parse(sessionStorage.getItem('gameOverScores') || '{}'));
   tableEl.innerHTML = '';
 
   enqueueCutscene({ image: '/Resource/UI/game-state/GameStart.png' });
@@ -899,12 +900,12 @@ function renderSeats() {
 }
 
 function renderScorePanel(scores) {
-  if (!scores || !Object.keys(scores).length) return;
+  const s = scores || {};
   const order = originalOrder.length > 0 ? originalOrder : turnOrder;
   const rows = order.map(pid => {
     const p = players.find(p => p.id === pid);
     const name = p ? p.nickname : pid;
-    const val = scores[pid] ?? 0;
+    const val = s[pid] ?? 0;
     return `<div class="score-row"><span class="score-name">${name}</span><span class="score-val">${val}점</span></div>`;
   }).join('');
   scorePanelEl.innerHTML = `<div class="score-title">누적 점수</div>${rows}`;
