@@ -42,7 +42,7 @@
     if (subImage) {
       const img2 = document.createElement('img');
       img2.src = subImage;
-      Object.assign(img2.style, { width: '9vw', height: '9vh', objectFit: 'contain' });
+      Object.assign(img2.style, { width: '18vw', height: '18vh', objectFit: 'contain' });
       content.appendChild(img2);
     }
 
