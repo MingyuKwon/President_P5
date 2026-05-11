@@ -7,6 +7,7 @@ function checkRoundEnd({ tableCards, passCount, activePlayers, prevTableCards = 
 
   if (tableCards.some(c => getNum(c) === '8')) return { ended: true, reason: '8-clear' };
 
+  const last = tableCards[tableCards.length - 1];
   if (prevTableCards.length === 1 && prevTableCards[0] === 'Joker' && last === '3S')
     return { ended: true, reason: 'spade-reversal' };
 
