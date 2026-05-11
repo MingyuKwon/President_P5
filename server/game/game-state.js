@@ -97,6 +97,7 @@ function pass(state, playerId) {
   if (state.turnOrder[state.currentIndex] !== playerId)
     return { error: 'not-your-turn' };
 
+  console.log('[pass] playerId:', playerId, '| currentIndex:', state.currentIndex, '| turnOrder:', state.turnOrder, '| passCount before:', state.passCount, '| alloutSuccessorId:', state.alloutSuccessorId);
   let next = { ...state, passCount: state.passCount + 1 };
   const events = [{ type: 'passed', playerId }];
 
@@ -121,6 +122,7 @@ function handlePlayerFinished(state, playerId, events) {
   let turnOrder = state.turnOrder.filter(id => id !== playerId);
   const successorIndex = turnOrder.length > 0 ? state.currentIndex % turnOrder.length : 0;
   const alloutSuccessorId = turnOrder[successorIndex] || null;
+  console.log('[handlePlayerFinished] playerId:', playerId, '| oldTurnOrder:', state.turnOrder, '| oldCurrentIndex:', state.currentIndex, '| newTurnOrder:', turnOrder, '| successorIndex:', successorIndex, '| alloutSuccessorId:', alloutSuccessorId);
   let next = {
     ...state,
     players: { ...state.players, [playerId]: { ...state.players[playerId], finished: true } },
@@ -184,11 +186,14 @@ function handlePlayerFinished(state, playerId, events) {
 }
 
 function startNewRound(state, reason, lastCardPlayerId, events) {
+  console.log('[startNewRound] reason:', reason, '| lastCardPlayerId:', lastCardPlayerId, '| state.lastPlayerId:', state.lastPlayerId, '| alloutSuccessorId:', state.alloutSuccessorId, '| currentIndex:', state.currentIndex, '| turnOrder:', state.turnOrder);
   let nextPlayerId;
   if (reason === 'all-pass') {
     nextPlayerId = state.lastPlayerId;
+    console.log('[startNewRound] all-pass — lastPlayerId:', nextPlayerId, '| inTurnOrder:', state.turnOrder.includes(nextPlayerId));
     if (!state.turnOrder.includes(nextPlayerId)) {
       nextPlayerId = state.alloutSuccessorId || state.turnOrder[state.currentIndex % state.turnOrder.length];
+      console.log('[startNewRound] all-pass fallback — nextPlayerId:', nextPlayerId);
     }
   } else {
     nextPlayerId = lastCardPlayerId || state.turnOrder[state.currentIndex];
@@ -199,6 +204,7 @@ function startNewRound(state, reason, lastCardPlayerId, events) {
     }
   }
 
+  console.log('[startNewRound] final nextPlayerId:', nextPlayerId);
   events.push({ type: 'round-end', reason, nextPlayerId });
 
   const newIndex = state.turnOrder.indexOf(nextPlayerId);
