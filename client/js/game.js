@@ -410,35 +410,57 @@ socket.on('player-passed', ({ playerId }) => {
     : document.querySelector(`.player-seat[data-player-id="${playerId}"]`);
   if (!seatEl) return;
 
-  const boardRect = gameBoardEl.getBoundingClientRect();
-  const scale = boardRect.width / 1350;
-  const seatRect = seatEl.getBoundingClientRect();
-  const imgW = 81, imgH = 62;
-  const bx = (seatRect.left - boardRect.left) / scale - imgW - 10;
-  const by = (seatRect.top  - boardRect.top)  / scale + seatRect.height / scale / 2 - imgH / 2;
+  const TOTAL_DURATION = 0.7; // seconds
+  const receivedAt = performance.now();
 
-  const img = document.createElement('img');
-  img.src = '/Resource/UI/ControlPanel/PassWord.png';
-  Object.assign(img.style, {
-    position: 'absolute',
-    left: `${bx}px`,
-    top:  `${by}px`,
-    width:  `${imgW}px`,
-    height: `${imgH}px`,
-    objectFit: 'contain',
-    zIndex: '500',
-    pointerEvents: 'none',
-  });
-  gameBoardEl.appendChild(img);
+  function playPassAnim() {
+    const elapsed = (performance.now() - receivedAt) / 1000;
+    if (elapsed >= TOTAL_DURATION) return;
 
-  gsap.timeline({ onComplete: () => img.remove() })
-    .fromTo(img, { opacity: 0, scale: 0.6 }, { opacity: 1, scale: 1, duration: 0.08, ease: 'back.out(1.5)' })
-    .to(img, { scale: 1.18, duration: 0.08, ease: 'power2.out' })
-    .to(img, { scale: 1.0,  duration: 0.08, ease: 'power2.in' })
-    .to(img, { scale: 1.1,  duration: 0.06, ease: 'power2.out' })
-    .to(img, { scale: 1.0,  duration: 0.06, ease: 'power2.in' })
-    .to({}, { duration: 0.2 })
-    .to(img, { opacity: 0, scale: 0.8, duration: 0.14, ease: 'power2.in' });
+    const boardRect = gameBoardEl.getBoundingClientRect();
+    const scale = boardRect.width / 1350;
+    const seatRect = seatEl.getBoundingClientRect();
+    const imgW = 81, imgH = 62;
+    const bx = (seatRect.left - boardRect.left) / scale - imgW - 10;
+    const by = (seatRect.top  - boardRect.top)  / scale + seatRect.height / scale / 2 - imgH / 2;
+
+    const img = document.createElement('img');
+    img.src = '/Resource/UI/ControlPanel/PassWord.png';
+    Object.assign(img.style, {
+      position: 'absolute',
+      left: `${bx}px`,
+      top:  `${by}px`,
+      width:  `${imgW}px`,
+      height: `${imgH}px`,
+      objectFit: 'contain',
+      zIndex: '500',
+      pointerEvents: 'none',
+    });
+    gameBoardEl.appendChild(img);
+
+    const tl = gsap.timeline({ onComplete: () => img.remove() })
+      .fromTo(img, { opacity: 0, scale: 0.6 }, { opacity: 1, scale: 1, duration: 0.08, ease: 'back.out(1.5)' })
+      .to(img, { scale: 1.18, duration: 0.08, ease: 'power2.out' })
+      .to(img, { scale: 1.0,  duration: 0.08, ease: 'power2.in' })
+      .to(img, { scale: 1.1,  duration: 0.06, ease: 'power2.out' })
+      .to(img, { scale: 1.0,  duration: 0.06, ease: 'power2.in' })
+      .to({}, { duration: 0.2 })
+      .to(img, { opacity: 0, scale: 0.8, duration: 0.14, ease: 'power2.in' });
+
+    if (elapsed > 0) tl.seek(elapsed);
+  }
+
+  if (!document.hidden) {
+    playPassAnim();
+  } else {
+    const onVisible = () => {
+      if (!document.hidden) {
+        document.removeEventListener('visibilitychange', onVisible);
+        playPassAnim();
+      }
+    };
+    document.addEventListener('visibilitychange', onVisible);
+  }
 });
 
 socket.on('hand-updated', ({ hand }) => {
