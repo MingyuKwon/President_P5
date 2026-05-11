@@ -337,8 +337,9 @@ socket.on('game-started', ({ hand, turnOrder: to, currentPlayerId: cpId, players
   });
 });
 
-socket.on('game-state-sync', ({ hand, tableCards, tablePile, currentPlayerId: cpId, revolution, players: ps, turnOrder: to, phase, readyPlayers, scores, isHost: h, taxInfo, autoSettings, chatHistory }) => {
+socket.on('game-state-sync', ({ hand, tableCards, tablePile, currentPlayerId: cpId, revolution, players: ps, turnOrder: to, phase, readyPlayers, scores, isHost: h, taxInfo, fallenPresidentId: fpId, autoSettings, chatHistory }) => {
   if (h !== undefined) isHost = h;
+  if (fpId !== undefined) fallenPresidentId = fpId;
   applyAutoSettings(autoSettings);
   if (chatHistory && chatMessagesEl.children.length === 0) {
     chatHistory.forEach(renderChatMsg);
@@ -890,7 +891,7 @@ function renderSeats() {
       : `/Resource/UI/character/${charRank}-shadow.png`;
     const overlayImg = playerId === fallenPresidentId
       ? '/Resource/UI/game-state/fall.png'
-      : (p.finished && playerRanks[playerId] !== 'scum')
+      : (p.finished && p.cardCount === 0)
         ? '/Resource/UI/game-state/allout.png'
         : '';
     div.innerHTML = `

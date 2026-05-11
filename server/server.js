@@ -235,6 +235,7 @@ io.on('connection', (socket) => {
           scores: roomScores.get(roomId) || {},
           isHost,
           taxInfo,
+          fallenPresidentId: gameState.presidentPenalty ? gameState.presidentId : null,
           autoSettings: playerAutoSettings.get(sessionId) || { autoPass: false, autoPlay: false },
           chatHistory: roomChats.get(roomId) || [],
         });
