@@ -35,6 +35,7 @@ socket.on('connect', () => {
 socket.on('room-joined', (data) => {
   isHost = data.isHost;
   renderPlayers(data.players);
+  if (data.chatHistory) data.chatHistory.forEach(renderChatMsg);
 });
 
 socket.on('room-updated', ({ players }) => renderPlayers(players));
@@ -70,14 +71,16 @@ function sendChat() {
 chatSendEl.addEventListener('click', sendChat);
 chatInputEl.addEventListener('keydown', e => { if (e.key === 'Enter') sendChat(); });
 
-socket.on('chat-message', ({ senderId, nickname, message }) => {
+function renderChatMsg({ senderId, nickname, message }) {
   const isMine = senderId === getSessionId();
   const div = document.createElement('div');
   div.className = `chat-msg${isMine ? ' mine' : ''}`;
   div.innerHTML = `<span class="chat-nick">${nickname}</span><span class="chat-text">${message.replace(/</g, '&lt;')}</span>`;
   chatMessagesEl.appendChild(div);
   chatMessagesEl.scrollTop = chatMessagesEl.scrollHeight;
-});
+}
+
+socket.on('chat-message', renderChatMsg);
 
 function renderPlayers(players) {
   const el = document.getElementById('player-list');

@@ -22,6 +22,7 @@ const roomScores = new Map();   // roomId → { sessionId → score }
 const botPlayers = new Map();   // roomId → Set<sessionId>
 const taxStates = new Map();    // roomId → tax info
 const playerAutoSettings = new Map(); // playerId → { autoPass, autoPlay }
+const roomChats = new Map();          // roomId → [{ senderId, nickname, message }]
 
 const TAX_CARD_ORDER = ['3','4','5','6','7','8','9','10','J','Q','K','A','2'];
 function taxCardStrength(card) { return TAX_CARD_ORDER.indexOf(card.slice(0, -1)); }
@@ -191,7 +192,8 @@ io.on('connection', (socket) => {
     socket.join(roomId);
     session.roomId = roomId;
     const isHost = result.hostId === sessionId;
-    socket.emit('room-joined', { roomId, players: publicPlayers(result.players), isHost });
+    const chatHistory = roomChats.get(roomId) || [];
+    socket.emit('room-joined', { roomId, players: publicPlayers(result.players), isHost, chatHistory });
     socket.to(roomId).emit('room-updated', { players: publicPlayers(result.players) });
     io.emit('room-list', { rooms: getRoomList() });
 
@@ -234,6 +236,7 @@ io.on('connection', (socket) => {
           isHost,
           taxInfo,
           autoSettings: playerAutoSettings.get(sessionId) || { autoPass: false, autoPlay: false },
+          chatHistory: roomChats.get(roomId) || [],
         });
 
         const timerInfo = gameState.phase === 'tax' ? taxTimers.get(roomId) : turnTimers.get(roomId);
@@ -365,7 +368,12 @@ io.on('connection', (socket) => {
     console.log('[chat-message] nickname:', nickname, '| trimmed:', trimmed);
     if (!trimmed) { console.log('[chat-message] abort: empty message'); return; }
     console.log('[chat-message] broadcasting to room:', session.roomId);
-    io.to(session.roomId).emit('chat-message', { senderId: sessionId, nickname, message: trimmed });
+    const entry = { senderId: sessionId, nickname, message: trimmed };
+    if (!roomChats.has(session.roomId)) roomChats.set(session.roomId, []);
+    const log = roomChats.get(session.roomId);
+    log.push(entry);
+    if (log.length > 100) log.shift();
+    io.to(session.roomId).emit('chat-message', entry);
   });
 
   // 페이지 이동 시 소켓만 끊기므로 즉시 방에서 제거하지 않음
@@ -390,6 +398,7 @@ io.on('connection', (socket) => {
       io.to(roomId).emit('room-closed', { reason: 'host-left' });
       const playerIds = closeRoom(roomId);
       roomScores.delete(roomId);
+      roomChats.delete(roomId);
       botPlayers.delete(roomId);
       for (const pid of playerIds) {
         const sess = sessionMap.get(pid);

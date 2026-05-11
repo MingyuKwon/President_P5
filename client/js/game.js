@@ -335,9 +335,12 @@ socket.on('game-started', ({ hand, turnOrder: to, currentPlayerId: cpId, players
   });
 });
 
-socket.on('game-state-sync', ({ hand, tableCards, tablePile, currentPlayerId: cpId, revolution, players: ps, turnOrder: to, phase, readyPlayers, scores, isHost: h, taxInfo, autoSettings }) => {
+socket.on('game-state-sync', ({ hand, tableCards, tablePile, currentPlayerId: cpId, revolution, players: ps, turnOrder: to, phase, readyPlayers, scores, isHost: h, taxInfo, autoSettings, chatHistory }) => {
   if (h !== undefined) isHost = h;
   applyAutoSettings(autoSettings);
+  if (chatHistory && chatMessagesEl.children.length === 0) {
+    chatHistory.forEach(renderChatMsg);
+  }
   myHand = sortHand(hand);
   currentPlayerId = cpId;
   currentTableCards = tableCards || [];
@@ -1168,13 +1171,17 @@ chatInputEl.addEventListener('input', e => {
 chatInputEl.addEventListener('focus', () => console.log('[chat] input focused'));
 chatInputEl.addEventListener('blur',  () => console.log('[chat] input blurred'));
 
-socket.on('chat-message', ({ senderId, nickname, message }) => {
-  console.log('[chat] received chat-message — senderId:', senderId, '| nickname:', nickname, '| message:', message);
+function renderChatMsg({ senderId, nickname, message }) {
   const isMine = senderId === myId;
   const div = document.createElement('div');
   div.className = `chat-msg${isMine ? ' mine' : ''}`;
   div.innerHTML = `<span class="chat-nick">${nickname}</span><span class="chat-text">${message.replace(/</g, '&lt;')}</span>`;
   chatMessagesEl.appendChild(div);
   chatMessagesEl.scrollTop = chatMessagesEl.scrollHeight;
+}
+
+socket.on('chat-message', ({ senderId, nickname, message }) => {
+  console.log('[chat] received chat-message — senderId:', senderId, '| nickname:', nickname, '| message:', message);
+  renderChatMsg({ senderId, nickname, message });
   console.log('[chat] message appended, total messages:', chatMessagesEl.children.length);
 });

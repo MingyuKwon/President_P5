@@ -177,14 +177,14 @@
     }
     #chat-messages::-webkit-scrollbar { width:4px; }
     #chat-messages::-webkit-scrollbar-thumb { background:#888; border-radius:2px; }
-    .chat-msg { display:flex; flex-direction:column; gap:2px; }
-    .chat-msg .chat-nick { font-size:0.65rem; color:#000; background:#fff; border-radius:4px; padding:1px 6px; display:inline-block; }
+    .chat-msg { display:flex; flex-direction:column; gap:2px; max-width:88%; }
+    .chat-msg .chat-nick { font-size:0.65rem; color:#000; background:#fff; border-radius:4px; padding:1px 6px; display:inline-block; align-self:flex-start; }
     .chat-msg .chat-text {
       font-size:0.75rem; color:#fff; background:#000;
       border:1px solid #fff; border-radius:6px; padding:4px 8px; word-break:break-all; line-height:1.4;
     }
-    .chat-msg.mine { align-items:flex-end; }
-    .chat-msg.mine .chat-nick { color:#000; background:#fff; }
+    .chat-msg.mine { align-items:flex-end; align-self:flex-end; }
+    .chat-msg.mine .chat-nick { color:#000; background:#fff; align-self:flex-end; }
     .chat-msg.mine .chat-text { background:#000; border-color:#fff; }
     #chat-input-row {
       display:flex; gap:4px; padding:6px 8px;
