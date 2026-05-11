@@ -345,6 +345,7 @@ socket.on('game-state-sync', ({ hand, tableCards, tablePile, currentPlayerId: cp
   ps.forEach(p => { if (p.rank) playerRanks[p.id] = p.rank; });
   if (to.length > 0) { turnOrder = to; if (originalOrder.length === 0) originalOrder = [...to]; }
   selectedCards = [];
+  renderScorePanel(scores || {});
 
   if (phase === 'tax' && taxInfo) {
     taxPhase = taxInfo;
@@ -359,7 +360,7 @@ socket.on('game-state-sync', ({ hand, tableCards, tablePile, currentPlayerId: cp
     renderSeats();
     renderTablePile(tablePile || []);
     renderCardOrder();
-    if (scores) { sessionStorage.setItem('gameOverScores', JSON.stringify(scores)); renderScorePanel(scores); }
+    if (scores) sessionStorage.setItem('gameOverScores', JSON.stringify(scores));
     readyPlayers.forEach(pid => {
       const card = document.querySelector(`.go-player-card[data-player-id="${pid}"]`);
       if (card) card.querySelector('.go-card-ready').style.display = 'block';
