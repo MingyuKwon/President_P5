@@ -114,6 +114,7 @@ players.forEach(p => { if (p.rank) playerRanks[p.id] = p.rank; });
 let currentTableCards = [];
 let currentRevolution = false;
 let fallenPresidentId = null;
+let lastPlayerId = null;
 let isHost = false;
 let leftPlayers = new Set();
 let taxPhase = null; // null | { role, taxReturnCount }
@@ -310,6 +311,7 @@ socket.on('game-started', ({ hand, turnOrder: to, currentPlayerId: cpId, players
   currentTableCards = [];
   currentRevolution = false;
   fallenPresidentId = null;
+  lastPlayerId = null;
   playerFinishedAnimating = false;
   leftPlayers = new Set();
   playerRanks = {};
@@ -337,8 +339,9 @@ socket.on('game-started', ({ hand, turnOrder: to, currentPlayerId: cpId, players
   });
 });
 
-socket.on('game-state-sync', ({ hand, tableCards, tablePile, currentPlayerId: cpId, revolution, players: ps, turnOrder: to, phase, readyPlayers, scores, isHost: h, taxInfo, fallenPresidentId: fpId, autoSettings, chatHistory }) => {
+socket.on('game-state-sync', ({ hand, tableCards, tablePile, currentPlayerId: cpId, revolution, players: ps, turnOrder: to, phase, readyPlayers, scores, isHost: h, taxInfo, lastPlayerId: lpId, fallenPresidentId: fpId, autoSettings, chatHistory }) => {
   if (h !== undefined) isHost = h;
+  if (lpId !== undefined) lastPlayerId = lpId || null;
   if (fpId !== undefined) fallenPresidentId = fpId;
   applyAutoSettings(autoSettings);
   if (chatHistory && chatMessagesEl.children.length === 0) {
@@ -397,7 +400,8 @@ socket.on('game-state-sync', ({ hand, tableCards, tablePile, currentPlayerId: cp
   }
 });
 
-socket.on('state-updated', ({ tableCards, tablePile, currentPlayerId: cpId, revolution, players: ps }) => {
+socket.on('state-updated', ({ tableCards, tablePile, currentPlayerId: cpId, revolution, lastPlayerId: lpId, players: ps }) => {
+  lastPlayerId = lpId || null;
   const wasMyTurn = currentPlayerId === myId;
   const someoneJustFinished = ps.some(p => p.finished && !(players.find(op => op.id === p.id)?.finished));
   if (someoneJustFinished) playerFinishedAnimating = true;
@@ -904,6 +908,7 @@ function renderSeats() {
         <div class="seat-name">${p.nickname}</div>
         <div class="seat-cards">${p.finished ? '완료' : p.cardCount + '장'}</div>
       </div>
+      ${playerId === lastPlayerId ? '<img class="last-play-indicator" src="/Resource/CardImage/Card-back.png" alt="">' : ''}
     `;
 
     if (isMe) {
@@ -977,6 +982,18 @@ function updateSeats() {
       } else if (overlayImg) {
         overlayImg.remove();
       }
+    }
+    let indicator = div.querySelector('.last-play-indicator');
+    if (playerId === lastPlayerId) {
+      if (!indicator) {
+        indicator = document.createElement('img');
+        indicator.className = 'last-play-indicator';
+        indicator.src = '/Resource/CardImage/Card-back.png';
+        indicator.alt = '';
+        div.appendChild(indicator);
+      }
+    } else if (indicator) {
+      indicator.remove();
     }
   });
 }

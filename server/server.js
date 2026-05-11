@@ -132,6 +132,7 @@ function broadcastGameUpdate(roomId, state, events) {
     currentPlayerId: state.turnOrder[state.currentIndex] || null,
     passCount: state.passCount,
     revolution: state.revolution,
+    lastPlayerId: state.lastPlayerId || null,
     players: Object.values(state.players).map(p => ({
       id: p.id, nickname: p.nickname, cardCount: p.hand.length, finished: p.finished,
     })),
@@ -235,6 +236,7 @@ io.on('connection', (socket) => {
           scores: roomScores.get(roomId) || {},
           isHost,
           taxInfo,
+          lastPlayerId: gameState.lastPlayerId || null,
           fallenPresidentId: gameState.presidentPenalty ? gameState.presidentId : null,
           autoSettings: playerAutoSettings.get(sessionId) || { autoPass: false, autoPlay: false },
           chatHistory: roomChats.get(roomId) || [],
