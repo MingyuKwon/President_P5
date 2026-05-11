@@ -31,12 +31,12 @@
     }
     #chat-messages::-webkit-scrollbar { width:4px; }
     #chat-messages::-webkit-scrollbar-thumb { background:#888; border-radius:2px; }
-    .chat-msg { display:flex; flex-direction:column; gap:2px; max-width:88%; filter:drop-shadow(0 0 2px #fff) drop-shadow(0 0 2px #fff); }
-    .chat-msg .chat-nick { font-size:0.65rem; color:#000; background:#fff; border-radius:0; padding:1px 6px; display:inline-block; align-self:flex-start; }
-    .chat-msg .chat-text { font-size:0.8rem; color:#fff; background:#000; border:none; border-radius:0; clip-path:polygon(0 0, 100% 0, 76% 100%, 0 100%); padding:4px 46px 4px 8px; word-break:break-all; line-height:1.4; }
-    .chat-msg.mine .chat-nick { color:#000; background:#fff; align-self:flex-end; border-radius:0; }
+    .chat-msg { display:flex; flex-direction:column; gap:0; max-width:88%; filter:drop-shadow(0 0 2px #fff) drop-shadow(0 0 2px #fff); }
+    .chat-msg .chat-nick { font-size:0.55rem; color:#000; background:#fff; border-radius:0; padding:1px 5px; display:inline-block; align-self:flex-start; position:relative; z-index:1; margin-bottom:-4px; }
+    .chat-msg .chat-text { font-size:0.8rem; color:#fff; background:#000; border:none; border-radius:0; clip-path:polygon(0 0, 100% 0, 65% 100%, 0 100%); padding:6px 60px 4px 8px; word-break:break-all; line-height:1.4; }
+    .chat-msg.mine .chat-nick { color:#000; background:#fff; align-self:flex-end; border-radius:0; margin-bottom:-4px; }
     .chat-msg.mine { align-items:flex-end; align-self:flex-end; }
-    .chat-msg.mine .chat-text { clip-path:polygon(0 0, 100% 0, 100% 100%, 24% 100%); padding:4px 8px 4px 46px; }
+    .chat-msg.mine .chat-text { clip-path:polygon(0 0, 100% 0, 100% 100%, 35% 100%); padding:6px 8px 4px 60px; }
     #chat-input-row { display:flex; gap:6px; padding:8px; background:rgba(0,0,0,0.4); border-top:1px solid rgba(255,255,255,0.5); }
     #chat-input { flex:1; background:#000; border:1px solid #fff; border-radius:0; color:#fff; font-size:0.82rem; padding:6px 10px; outline:none; width:0; min-width:0; margin-bottom:0; }
     #chat-input::placeholder { color:rgba(255,255,255,0.4); }
