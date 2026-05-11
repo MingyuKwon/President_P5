@@ -70,7 +70,8 @@ function playCards(state, playerId, cards) {
     events.push({ type: 'revolution', playerId, active: next.revolution });
   }
 
-  if (newHand.length === 0) {
+  const playerJustFinished = newHand.length === 0;
+  if (playerJustFinished) {
     next = handlePlayerFinished(next, playerId, events);
     if (next.phase === 'gameover') return { state: next, events };
   }
@@ -84,9 +85,10 @@ function playCards(state, playerId, cards) {
 
   if (roundResult.ended) {
     next = startNewRound(next, roundResult.reason, playerId, events);
-  } else {
+  } else if (!playerJustFinished) {
     next = advanceTurn(next);
   }
+  // playerJustFinished && !roundResult.ended: currentIndex already points to next player after removal
 
   return { state: next, events };
 }
@@ -129,12 +131,16 @@ function handlePlayerFinished(state, playerId, events) {
   if (next.presidentId && next.presidentId !== playerId && finishedOrder.length === 1) {
     const president = next.players[next.presidentId];
     if (president && !president.finished) {
+      const presidentIdx = next.turnOrder.indexOf(next.presidentId);
       const newTurnOrder = next.turnOrder.filter(id => id !== next.presidentId);
+      const adjustedIndex = (presidentIdx >= 0 && presidentIdx < next.currentIndex)
+        ? next.currentIndex - 1
+        : next.currentIndex;
       next = {
         ...next,
         players: { ...next.players, [next.presidentId]: { ...president, finished: true } },
         turnOrder: newTurnOrder,
-        currentIndex: newTurnOrder.length > 0 ? next.currentIndex % newTurnOrder.length : 0,
+        currentIndex: newTurnOrder.length > 0 ? adjustedIndex % newTurnOrder.length : 0,
         presidentPenalty: true,
       };
       events.push({ type: 'president-penalty', playerId: next.presidentId });
