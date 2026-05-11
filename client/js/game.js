@@ -144,7 +144,7 @@ function clearAutoPassTimer() {
 }
 
 function tryAutoPass() {
-  if (!autoPass || currentPlayerId !== myId || isCutscenePlaying()) return;
+  if (!autoPass || currentPlayerId !== myId || taxPhase || isCutscenePlaying()) return;
   const selectable = computeSelectableSet(myHand, selectedCards.map(i => myHand[i]), currentTableCards, currentRevolution);
   if (selectable.size > 0) return;
   clearAutoPassTimer();
@@ -208,7 +208,7 @@ function selectCardsToPlay() {
 }
 
 function tryAutoPlay() {
-  if (!autoPlay || currentPlayerId !== myId || isCutscenePlaying()) return;
+  if (!autoPlay || currentPlayerId !== myId || taxPhase || isCutscenePlaying()) return;
   clearAutoPlayTimer();
   autoPlayTimer = setTimeout(() => {
     if (!autoPlay || currentPlayerId !== myId) return;
@@ -988,9 +988,10 @@ function updateHandSelectability() {
     myAreaEl.classList.add('active');
     btnPlay.disabled = selectedCards.length !== taxPhase.taxReturnCount;
   } else {
-    myAreaEl.classList.toggle('active', isMyTurn);
-    btnPass.disabled = !isMyTurn;
-    btnPlay.disabled = !isMyTurn || selectedCards.length === 0;
+    const canAct = isMyTurn && !taxPhase;
+    myAreaEl.classList.toggle('active', canAct);
+    btnPass.disabled = !canAct;
+    btnPlay.disabled = !canAct || selectedCards.length === 0;
   }
 }
 
@@ -1028,15 +1029,16 @@ function renderHand() {
     myAreaEl.classList.add('active');
     btnPlay.disabled = selectedCards.length !== taxPhase.taxReturnCount;
   } else {
-    myAreaEl.classList.toggle('active', isMyTurn);
-    btnPass.disabled = !isMyTurn;
-    btnPlay.disabled = !isMyTurn || selectedCards.length === 0;
+    const canAct = isMyTurn && !taxPhase;
+    myAreaEl.classList.toggle('active', canAct);
+    btnPass.disabled = !canAct;
+    btnPlay.disabled = !canAct || selectedCards.length === 0;
   }
 }
 
 function toggleCard(handIdx) {
   const isTaxSelecting = taxPhase && taxPhase.taxReturnCount > 0 && !taxSubmitted;
-  if (!isTaxSelecting && currentPlayerId !== myId) return;
+  if (!isTaxSelecting && (taxPhase || currentPlayerId !== myId)) return;
   const idx = selectedCards.indexOf(handIdx);
   if (idx === -1) selectedCards.push(handIdx);
   else selectedCards.splice(idx, 1);

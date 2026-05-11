@@ -285,6 +285,7 @@ io.on('connection', (socket) => {
     if (!session) { console.warn('[play-cards] session 없음:', sessionId); return; }
     const state = gameStates.get(session.roomId);
     if (!state) { console.warn('[play-cards] gameState 없음 — roomId:', session.roomId); return; }
+    if (state.phase !== 'playing') { console.warn('[play-cards] REJECT — phase is', state.phase); return; }
     const expectedPlayer = state.turnOrder[state.currentIndex];
     console.log('[play-cards] currentPlayer:', expectedPlayer, '| requester:', sessionId);
     const result = playCards(state, sessionId, cards);
@@ -301,6 +302,7 @@ io.on('connection', (socket) => {
     if (!session) return;
     const state = gameStates.get(session.roomId);
     if (!state) return;
+    if (state.phase !== 'playing') { console.warn('[pass] REJECT — phase is', state.phase); return; }
     const result = pass(state, sessionId);
     if (result.error) return socket.emit('error', { message: result.error });
     gameStates.set(session.roomId, result.state);
