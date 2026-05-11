@@ -51,9 +51,11 @@
     #card-order-bar {
       position:absolute; top:20px; left:50%; transform:translateX(-50%);
       display:flex; align-items:center;
-      background:rgba(0,0,0,.75); border:2px solid #e94560;
-      border-radius:0; padding:5px 16px;
+      background:rgba(0,0,0,.75); border:none;
+      border-radius:0; padding:5px 28px;
       font-size:1.26rem; white-space:nowrap; pointer-events:none;
+      clip-path:polygon(5% 0, 100% 0, 95% 100%, 0% 100%);
+      filter:drop-shadow(0 0 0 2px #e94560) drop-shadow(1px 0 0 #e94560) drop-shadow(-1px 0 0 #e94560) drop-shadow(0 1px 0 #e94560) drop-shadow(0 -1px 0 #e94560);
       user-select:none;
     }
     .order-label { color:#aaa; font-size:0.9rem; margin-right:10px; letter-spacing:.03em; }
