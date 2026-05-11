@@ -76,15 +76,15 @@
     #turn-timer .timer-text { position:absolute; font-size:1.15rem; font-weight:bold; color:#fff;
       text-shadow:0 1px 4px rgba(0,0,0,.9); }
     #turn-timer.urgent .timer-text { color:#e94560; }
-    #btn-exit { position:absolute; bottom:10px; right:10px;
+    #btn-exit { position:absolute; bottom:10px; left:10px;
       padding:0; background:none; border:none; cursor:pointer; z-index:110; }
     #btn-exit img { display:block; height:56px; width:auto; transition:opacity .15s, transform .1s; }
     #btn-exit:hover img { transform:scale(1.05); opacity:0.85; }
-    #btn-rules { position:absolute; top:10px; right:10px;
+    #btn-rules { position:absolute; top:10px; left:10px;
       padding:0; background:none; border:none; cursor:pointer; z-index:110; }
     #btn-rules img { display:block; height:56px; width:auto; transition:opacity .15s, transform .1s; }
     #btn-rules:hover img { transform:scale(1.05); opacity:0.85; }
-    #goal-items { position:absolute; top:76px; right:10px; z-index:110; display:flex; flex-direction:column; gap:22px; }
+    #goal-items { position:absolute; top:76px; left:10px; z-index:110; display:flex; flex-direction:column; gap:22px; }
     .goal-item { background:url('/Resource/UI/background/CardGame-goal-itemBG1%20%23596.png') center/100% 100% no-repeat;
       display:flex; align-items:center; justify-content:center;
       padding:10px 22px; min-height:40px;
@@ -94,7 +94,7 @@
     #bottom-ui { position:absolute; bottom:-5px; left:0; right:0; display:flex; flex-direction:column; }
     #controls-row { position:relative; z-index:1; pointer-events:none; display:flex; justify-content:center; align-items:center; }
     #action-btns { pointer-events:auto; }
-    #my-seat { position:absolute; left:300px; pointer-events:auto; }
+    #my-seat { position:absolute; left:33%; bottom:20%; transform:translateX(-50%); pointer-events:auto; }
     #my-area { position:relative; width:100%; padding:16px; }
     #hand { display:flex; flex-wrap:nowrap; justify-content:center; min-height:180px; align-items:flex-end; transform:translateX(-10px); }
     .hand-card { width:106px; height:151px; border-radius:8px; overflow:hidden; position:relative;
@@ -105,7 +105,7 @@
     .hand-card.selected { transform:translateY(calc(var(--drop,0px) + 25px - 20px)) rotate(var(--rot,0deg)); z-index:5; }
     .hand-card.dimmed { filter:brightness(0.35); pointer-events:none; }
     .hand-card img { width:100%; height:100%; object-fit:cover; pointer-events:none; }
-    #action-btns { display:flex; flex-wrap:wrap; column-gap:27px; row-gap:8px; justify-content:center; transform:translateY(40px); }
+    #action-btns { display:flex; flex-wrap:wrap; column-gap:20px; row-gap:8px; justify-content:center; transform:translateY(40px); }
     #tax-banner {
       display:none; position:absolute; bottom:10px; left:50%; transform:translateX(-50%);
       background:rgba(0,0,0,.82); border:1.5px solid #f0a030;
@@ -134,11 +134,28 @@
       transition:opacity .15s, transform .1s; }
     #action-btns button:not(#btn-autopass):not(#btn-auto):disabled img { opacity:0.35; }
     #action-btns button:not(#btn-autopass):not(#btn-auto):not(:disabled):hover img { transform:scale(1.05); }
-    #autopass-row { position:absolute; bottom:95px; right:10px; display:flex; flex-direction:column; align-items:flex-end; gap:14px; z-index:20; }
+    #autopass-row { position:absolute; bottom:95px; left:10px; display:flex; flex-direction:column; align-items:flex-start; gap:14px; z-index:20; }
     #btn-autopass, #btn-auto { padding:0; background:none; border:none; cursor:pointer; }
     #btn-autopass img, #btn-auto img { display:block; height:68px; width:auto; transition:transform .12s, filter .15s; }
     #btn-autopass.on img, #btn-auto.on img { filter: sepia(1) saturate(6) hue-rotate(310deg); }
     #btn-autopass:hover img, #btn-auto:hover img { transform:scale(1.05); }
+
+    /* 누적 점수 패널 */
+    #score-panel {
+      position:absolute; left:10px; top:50%; transform:translateY(-50%);
+      z-index:20; display:flex; flex-direction:column; gap:6px;
+      background:rgba(0,0,0,0.55); border-radius:10px; padding:10px 14px;
+      min-width:130px;
+    }
+    #score-panel .score-title {
+      font-size:0.75rem; color:#aaa; text-align:center; margin-bottom:2px; letter-spacing:.05em;
+    }
+    #score-panel .score-row {
+      display:flex; justify-content:space-between; align-items:center; gap:12px;
+      font-size:0.82rem; color:#eee;
+    }
+    #score-panel .score-row .score-name { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:80px; }
+    #score-panel .score-row .score-val { font-weight:bold; color:#ffd700; }
 
     /* 게임 종료 오버레이 */
     #game-over-overlay {
@@ -231,6 +248,9 @@
       <button id="btn-autopass"><img src="/Resource/UI/ControlPanel/AutoPass.png" alt="자동 패스"></button>
       <button id="btn-auto"><img src="/Resource/UI/ControlPanel/Auto.png" alt="자동"></button>
     </div>
+    <div id="score-panel">
+      <div class="score-title">누적 점수</div>
+    </div>
     <div id="game-over-overlay">
       <div id="game-over-content">
         <div id="game-over-ranks"></div>
@@ -248,19 +268,19 @@
         <div id="my-seat"></div>
         <div id="revolution-indicator"><img src="/Resource/UI/game-state/Revolution.png" alt="혁명"></div>
         <div id="action-btns">
-          <button id="btn-play" disabled>
-            <img src="/Resource/UI/ControlPanel/CardSelect.png" alt="카드 내기"
+          <button id="btn-pass" disabled>
+            <img src="/Resource/UI/ControlPanel/Pass.png" alt="패스"
                  onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block'">
-            <span>카드 내기</span>
+            <span>패스</span>
           </button>
           <div id="turn-timer" style="visibility:hidden">
             <img src="/Resource/UI/ControlPanel/Time.png" alt="">
             <span class="timer-text"></span>
           </div>
-          <button id="btn-pass" disabled>
-            <img src="/Resource/UI/ControlPanel/Pass.png" alt="패스"
+          <button id="btn-play" disabled>
+            <img src="/Resource/UI/ControlPanel/CardSelect.png" alt="카드 내기"
                  onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block'">
-            <span>패스</span>
+            <span>카드 내기</span>
           </button>
         </div>
       </div>

@@ -121,6 +121,7 @@ let taxExchangeAnim = null;
 let taxNewCards = []; // 세금으로 새로 받은 카드 목록 (receive 애니메이션용)
 
 const seatsEl        = document.getElementById('player-seats');
+const scorePanelEl   = document.getElementById('score-panel');
 const tableEl        = document.getElementById('table');
 const handEl         = document.getElementById('hand');
 const myAreaEl       = document.getElementById('my-area');
@@ -357,7 +358,7 @@ socket.on('game-state-sync', ({ hand, tableCards, tablePile, currentPlayerId: cp
     renderSeats();
     renderTablePile(tablePile || []);
     renderCardOrder();
-    if (scores) sessionStorage.setItem('gameOverScores', JSON.stringify(scores));
+    if (scores) { sessionStorage.setItem('gameOverScores', JSON.stringify(scores)); renderScorePanel(scores); }
     readyPlayers.forEach(pid => {
       const card = document.querySelector(`.go-player-card[data-player-id="${pid}"]`);
       if (card) card.querySelector('.go-card-ready').style.display = 'block';
@@ -575,6 +576,7 @@ socket.on('game-over', ({ ranks, scores }) => {
   clearAutoTaxTimer();
   sessionStorage.setItem('gameOverRanks', JSON.stringify(ranks));
   sessionStorage.setItem('gameOverScores', JSON.stringify(scores || {}));
+  renderScorePanel(scores || {});
   enqueueCutscene({ image: '/Resource/UI/game-state/GameEnd.png' });
   afterCutsceneQueue(() => showGameOverPanel(ranks, scores));
 });
@@ -835,7 +837,7 @@ document.getElementById('btn-exit').onclick = () => {
 
 // 플레이어 시트 — 원형 배치
 // 원점: 화면 중앙(cx, cy), 타원 반지름(rx, ry), 모두 뷰포트 % 기준
-const CX = 50, CY = 38, RX = 29, RY = 21;
+const CX = 50, CY = 40, RX = 23, RY = 23;
 
 function renderSeats() {
   seatsEl.innerHTML = '';
@@ -894,6 +896,18 @@ function renderSeats() {
     div.style.top  = `${CY + RY * Math.sin(rad)}%`;
     seatsEl.appendChild(div);
   });
+}
+
+function renderScorePanel(scores) {
+  if (!scores || !Object.keys(scores).length) return;
+  const order = originalOrder.length > 0 ? originalOrder : turnOrder;
+  const rows = order.map(pid => {
+    const p = players.find(p => p.id === pid);
+    const name = p ? p.nickname : pid;
+    const val = scores[pid] ?? 0;
+    return `<div class="score-row"><span class="score-name">${name}</span><span class="score-val">${val}점</span></div>`;
+  }).join('');
+  scorePanelEl.innerHTML = `<div class="score-title">누적 점수</div>${rows}`;
 }
 
 function updateSeats() {
