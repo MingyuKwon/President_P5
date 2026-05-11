@@ -45,6 +45,8 @@ function playCards(state, playerId, cards) {
 
   const player = state.players[playerId];
 
+  if (cards.length > 4) return { error: 'invalid-play' };
+
   if (state.tableCards.length > 0) {
     if (!isValidPlay(cards, state.tableCards, state.revolution))
       return { error: 'invalid-play' };

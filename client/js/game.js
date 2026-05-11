@@ -1050,8 +1050,12 @@ function toggleCard(handIdx) {
   const isTaxSelecting = taxPhase && taxPhase.taxReturnCount > 0 && !taxSubmitted;
   if (!isTaxSelecting && (taxPhase || currentPlayerId !== myId)) return;
   const idx = selectedCards.indexOf(handIdx);
-  if (idx === -1) selectedCards.push(handIdx);
-  else selectedCards.splice(idx, 1);
+  if (idx === -1) {
+    if (selectedCards.length >= 4) return;
+    selectedCards.push(handIdx);
+  } else {
+    selectedCards.splice(idx, 1);
+  }
   renderHand();
 }
 
