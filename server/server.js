@@ -351,6 +351,18 @@ io.on('connection', (socket) => {
     processTaxReturn(session.roomId, sessionId, cards);
   });
 
+  socket.on('chat-message', ({ sessionId, message }) => {
+    const session = sessionMap.get(sessionId);
+    if (!session || !session.roomId) return;
+    const room = getRoom(session.roomId);
+    if (!room) return;
+    const player = room.players.find(p => p.id === sessionId);
+    const nickname = player ? player.nickname : '?';
+    const trimmed = String(message || '').trim().slice(0, 100);
+    if (!trimmed) return;
+    io.to(session.roomId).emit('chat-message', { senderId: sessionId, nickname, message: trimmed });
+  });
+
   // 페이지 이동 시 소켓만 끊기므로 즉시 방에서 제거하지 않음
   socket.on('disconnect', () => {
     socketSession.delete(socket.id);

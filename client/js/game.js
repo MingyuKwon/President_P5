@@ -1141,3 +1141,27 @@ window.onCutsceneQueueEmpty = () => {
   if (currentPlayerId === myId) { tryAutoPass(); tryAutoPlay(); }
   tryAutoTax();
 };
+
+// 채팅
+const chatMessagesEl = document.getElementById('chat-messages');
+const chatInputEl    = document.getElementById('chat-input');
+const chatSendEl     = document.getElementById('chat-send');
+
+function sendChat() {
+  const msg = chatInputEl.value.trim();
+  if (!msg) return;
+  socket.emit('chat-message', { sessionId: myId, message: msg });
+  chatInputEl.value = '';
+}
+
+chatSendEl.addEventListener('click', sendChat);
+chatInputEl.addEventListener('keydown', e => { if (e.key === 'Enter') sendChat(); });
+
+socket.on('chat-message', ({ senderId, nickname, message }) => {
+  const isMine = senderId === myId;
+  const div = document.createElement('div');
+  div.className = `chat-msg${isMine ? ' mine' : ''}`;
+  div.innerHTML = `<span class="chat-nick">${nickname}</span><span class="chat-text">${message.replace(/</g, '&lt;')}</span>`;
+  chatMessagesEl.appendChild(div);
+  chatMessagesEl.scrollTop = chatMessagesEl.scrollHeight;
+});
