@@ -34,7 +34,7 @@
       const img = document.createElement('img');
       img.src = image;
       Object.assign(img.style, {
-        width: `${27.44 * imageScale}vw`, height: `${21.56 * imageScale}vh`, objectFit: 'contain',
+        width: `${35.67 * imageScale}vw`, height: `${28.03 * imageScale}vh`, objectFit: 'contain',
       });
       content.appendChild(img);
     }
