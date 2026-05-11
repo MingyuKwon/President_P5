@@ -903,12 +903,14 @@ function renderSeats() {
 function renderScorePanel(scores) {
   const s = scores || {};
   const order = originalOrder.length > 0 ? originalOrder : turnOrder;
-  const rows = order.map(pid => {
-    const p = players.find(p => p.id === pid);
-    const name = p ? p.nickname : pid;
-    const val = s[pid] ?? 0;
-    return `<div class="score-row"><span class="score-name">${name}</span><span class="score-val">${val}점</span></div>`;
-  }).join('');
+  const rows = [...order]
+    .sort((a, b) => (s[b] ?? 0) - (s[a] ?? 0))
+    .map(pid => {
+      const p = players.find(p => p.id === pid);
+      const name = p ? p.nickname : pid;
+      const val = s[pid] ?? 0;
+      return `<div class="score-row"><span class="score-name">${name}</span><span class="score-val">${val}점</span></div>`;
+    }).join('');
   scorePanelEl.innerHTML = `<div class="score-title">누적 점수</div>${rows}`;
 }
 
