@@ -105,6 +105,7 @@ let myHand = sortHand(JSON.parse(sessionStorage.getItem('hand') || '[]'));
 let selectedCards = [];
 let currentPlayerId = sessionStorage.getItem('currentPlayerId');
 let roundEndAnimating = false;
+let playerFinishedAnimating = false;
 let players = JSON.parse(sessionStorage.getItem('players') || '[]');
 let turnOrder = JSON.parse(sessionStorage.getItem('turnOrder') || '[]');
 let originalOrder = [...turnOrder];
@@ -309,6 +310,7 @@ socket.on('game-started', ({ hand, turnOrder: to, currentPlayerId: cpId, players
   currentTableCards = [];
   currentRevolution = false;
   fallenPresidentId = null;
+  playerFinishedAnimating = false;
   leftPlayers = new Set();
   playerRanks = {};
   ps.forEach(p => { if (p.rank) playerRanks[p.id] = p.rank; });
@@ -396,6 +398,8 @@ socket.on('game-state-sync', ({ hand, tableCards, tablePile, currentPlayerId: cp
 
 socket.on('state-updated', ({ tableCards, tablePile, currentPlayerId: cpId, revolution, players: ps }) => {
   const wasMyTurn = currentPlayerId === myId;
+  const someoneJustFinished = ps.some(p => p.finished && !(players.find(op => op.id === p.id)?.finished));
+  if (someoneJustFinished) playerFinishedAnimating = true;
   currentPlayerId = cpId;
   players = ps;
   currentTableCards = tableCards || [];
@@ -404,7 +408,7 @@ socket.on('state-updated', ({ tableCards, tablePile, currentPlayerId: cpId, revo
   updateSeats();
   updateHandSelectability();
   renderCardOrder();
-  if (cpId === myId) { tryAutoPass(); tryAutoPlay(); }
+  if (cpId === myId && !someoneJustFinished) { tryAutoPass(); tryAutoPlay(); }
 });
 
 socket.on('card-played', ({ cards }) => {
@@ -520,9 +524,15 @@ socket.on('round-end', ({ reason }) => {
 socket.on('revolution', ({ active }) => enqueueCutscene({ image: '/Resource/UI/game-state/Revolution.png', imageScale: 1.4 }));
 
 socket.on('player-finished', ({ playerId, rank }) => {
-  if (rank === 'scum') return;
+  if (rank === 'scum') { playerFinishedAnimating = false; return; }
   const p = players.find(p => p.id === playerId);
   enqueueCutscene({ image: '/Resource/UI/game-state/allout.png', subImage: rankImg(rank), text: p ? p.nickname : playerId });
+  afterCutsceneQueue(() => {
+    playerFinishedAnimating = false;
+    updateSeats();
+    updateHandSelectability();
+    if (currentPlayerId === myId) { tryAutoPass(); tryAutoPlay(); }
+  });
 });
 
 socket.on('player-bot', ({ playerId }) => {
@@ -864,7 +874,7 @@ function renderSeats() {
     if (!p) return;
 
     const isMe     = playerId === myId;
-    const isActive = playerId === currentPlayerId;
+    const isActive = !playerFinishedAnimating && playerId === currentPlayerId;
     const rank     = playerRanks[playerId] || '';
 
     const div = document.createElement('div');
@@ -933,7 +943,7 @@ function updateSeats() {
   order.forEach(playerId => {
     const p = players.find(p => p.id === playerId);
     if (!p) return;
-    const isActive = !roundEndAnimating && playerId === currentPlayerId;
+    const isActive = !roundEndAnimating && !playerFinishedAnimating && playerId === currentPlayerId;
     const container = playerId === myId ? mySeatEl : seatsEl;
     const div = container.querySelector(`[data-player-id="${playerId}"]`);
     div.classList.toggle('active', isActive);
@@ -988,7 +998,7 @@ function updateHandSelectability() {
     myAreaEl.classList.add('active');
     btnPlay.disabled = selectedCards.length !== taxPhase.taxReturnCount;
   } else {
-    const canAct = isMyTurn && !taxPhase;
+    const canAct = isMyTurn && !taxPhase && !playerFinishedAnimating;
     myAreaEl.classList.toggle('active', canAct);
     btnPass.disabled = !canAct;
     btnPlay.disabled = !canAct || selectedCards.length === 0;
@@ -1029,7 +1039,7 @@ function renderHand() {
     myAreaEl.classList.add('active');
     btnPlay.disabled = selectedCards.length !== taxPhase.taxReturnCount;
   } else {
-    const canAct = isMyTurn && !taxPhase;
+    const canAct = isMyTurn && !taxPhase && !playerFinishedAnimating;
     myAreaEl.classList.toggle('active', canAct);
     btnPass.disabled = !canAct;
     btnPlay.disabled = !canAct || selectedCards.length === 0;
