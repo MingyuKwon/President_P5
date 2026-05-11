@@ -1146,22 +1146,35 @@ window.onCutsceneQueueEmpty = () => {
 const chatMessagesEl = document.getElementById('chat-messages');
 const chatInputEl    = document.getElementById('chat-input');
 const chatSendEl     = document.getElementById('chat-send');
+console.log('[chat] elements:', { chatMessagesEl, chatInputEl, chatSendEl });
 
 function sendChat() {
   const msg = chatInputEl.value.trim();
-  if (!msg) return;
+  console.log('[chat] sendChat() called, msg:', JSON.stringify(msg), '| myId:', myId);
+  if (!msg) { console.log('[chat] sendChat() — empty msg, abort'); return; }
+  console.log('[chat] emitting chat-message to server');
   socket.emit('chat-message', { sessionId: myId, message: msg });
   chatInputEl.value = '';
 }
 
-chatSendEl.addEventListener('click', sendChat);
-chatInputEl.addEventListener('keydown', e => { if (e.key === 'Enter') sendChat(); });
+chatSendEl.addEventListener('click', () => { console.log('[chat] send button clicked'); sendChat(); });
+chatInputEl.addEventListener('keydown', e => {
+  console.log('[chat] keydown:', e.key);
+  if (e.key === 'Enter') sendChat();
+});
+chatInputEl.addEventListener('input', e => {
+  console.log('[chat] input event, value:', chatInputEl.value);
+});
+chatInputEl.addEventListener('focus', () => console.log('[chat] input focused'));
+chatInputEl.addEventListener('blur',  () => console.log('[chat] input blurred'));
 
 socket.on('chat-message', ({ senderId, nickname, message }) => {
+  console.log('[chat] received chat-message — senderId:', senderId, '| nickname:', nickname, '| message:', message);
   const isMine = senderId === myId;
   const div = document.createElement('div');
   div.className = `chat-msg${isMine ? ' mine' : ''}`;
   div.innerHTML = `<span class="chat-nick">${nickname}</span><span class="chat-text">${message.replace(/</g, '&lt;')}</span>`;
   chatMessagesEl.appendChild(div);
   chatMessagesEl.scrollTop = chatMessagesEl.scrollHeight;
+  console.log('[chat] message appended, total messages:', chatMessagesEl.children.length);
 });

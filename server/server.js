@@ -352,14 +352,19 @@ io.on('connection', (socket) => {
   });
 
   socket.on('chat-message', ({ sessionId, message }) => {
+    console.log('[chat-message] received — sessionId:', sessionId, '| message:', message);
     const session = sessionMap.get(sessionId);
-    if (!session || !session.roomId) return;
+    console.log('[chat-message] session:', session ? `roomId:${session.roomId}` : 'NOT FOUND');
+    if (!session || !session.roomId) { console.log('[chat-message] abort: no session or roomId'); return; }
     const room = getRoom(session.roomId);
-    if (!room) return;
+    console.log('[chat-message] room:', room ? `found(${room.id})` : 'NOT FOUND');
+    if (!room) { console.log('[chat-message] abort: room not found'); return; }
     const player = room.players.find(p => p.id === sessionId);
     const nickname = player ? player.nickname : '?';
     const trimmed = String(message || '').trim().slice(0, 100);
-    if (!trimmed) return;
+    console.log('[chat-message] nickname:', nickname, '| trimmed:', trimmed);
+    if (!trimmed) { console.log('[chat-message] abort: empty message'); return; }
+    console.log('[chat-message] broadcasting to room:', session.roomId);
     io.to(session.roomId).emit('chat-message', { senderId: sessionId, nickname, message: trimmed });
   });
 
