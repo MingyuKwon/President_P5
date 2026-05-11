@@ -119,12 +119,15 @@ function pass(state, playerId) {
 function handlePlayerFinished(state, playerId, events) {
   const finishedOrder = [...state.finishedOrder, playerId];
   let turnOrder = state.turnOrder.filter(id => id !== playerId);
+  const successorIndex = turnOrder.length > 0 ? state.currentIndex % turnOrder.length : 0;
+  const alloutSuccessorId = turnOrder[successorIndex] || null;
   let next = {
     ...state,
     players: { ...state.players, [playerId]: { ...state.players[playerId], finished: true } },
     finishedOrder,
     turnOrder,
-    currentIndex: turnOrder.length > 0 ? state.currentIndex % turnOrder.length : 0,
+    currentIndex: successorIndex,
+    alloutSuccessorId,
   };
 
   // 대부호 방어 실패: 다른 사람이 먼저 끝냄
@@ -185,7 +188,7 @@ function startNewRound(state, reason, lastCardPlayerId, events) {
   if (reason === 'all-pass') {
     nextPlayerId = state.lastPlayerId;
     if (!state.turnOrder.includes(nextPlayerId)) {
-      nextPlayerId = state.turnOrder[state.currentIndex % state.turnOrder.length];
+      nextPlayerId = state.alloutSuccessorId || state.turnOrder[state.currentIndex % state.turnOrder.length];
     }
   } else {
     nextPlayerId = lastCardPlayerId || state.turnOrder[state.currentIndex];
