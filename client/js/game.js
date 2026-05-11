@@ -104,6 +104,7 @@ function computeSelectableSet(hand, selected, tableCards, revolution) {
 let myHand = sortHand(JSON.parse(sessionStorage.getItem('hand') || '[]'));
 let selectedCards = [];
 let currentPlayerId = sessionStorage.getItem('currentPlayerId');
+let roundEndAnimating = false;
 let players = JSON.parse(sessionStorage.getItem('players') || '[]');
 let turnOrder = JSON.parse(sessionStorage.getItem('turnOrder') || '[]');
 let originalOrder = [...turnOrder];
@@ -498,14 +499,19 @@ socket.on('round-end', ({ reason }) => {
   if (reason === '8-clear') enqueueCutscene({ image: '/Resource/UI/game-state/Eight_RoundEnd.png', text: '8 Clear!' });
   else if (reason === 'spade-reversal') enqueueCutscene({ image: '/Resource/UI/game-state/S3_RoundEnd.png', text: '♠ Reversal!' });
   else if (reason === 'all-pass') enqueueCutscene({ image: '/Resource/UI/game-state/AllPass_RoundENd.png', text: '전원 패스', duration: 0.6, fadeIn: 0.1 });
+  roundEndAnimating = true;
+  updateSeats();
   lockAnim();
   gsap.to('#table .table-group', {
     opacity: 0, y: -20, duration: 0.6, stagger: 0.05,
     onComplete: () => { tableEl.innerHTML = ''; },
   });
-  setTimeout(() => { tableEl.innerHTML = ''; unlockAnim(); }, 800);
-  // state-updated가 round-end보다 먼저 도착하므로, 내 차례면 재트리거
-  if (currentPlayerId === myId) { tryAutoPass(); tryAutoPlay(); }
+  setTimeout(() => {
+    tableEl.innerHTML = '';
+    roundEndAnimating = false;
+    updateSeats();
+    unlockAnim();
+  }, 800);
 });
 
 socket.on('revolution', ({ active }) => enqueueCutscene({ image: '/Resource/UI/game-state/Revolution.png', text: active ? '혁명 발동!' : '반혁명!', imageScale: 1.4 }));
@@ -924,7 +930,7 @@ function updateSeats() {
   order.forEach(playerId => {
     const p = players.find(p => p.id === playerId);
     if (!p) return;
-    const isActive = playerId === currentPlayerId;
+    const isActive = !roundEndAnimating && playerId === currentPlayerId;
     const container = playerId === myId ? mySeatEl : seatsEl;
     const div = container.querySelector(`[data-player-id="${playerId}"]`);
     div.classList.toggle('active', isActive);
