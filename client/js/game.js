@@ -287,7 +287,7 @@ socket.on('room-joined', ({ isHost: h }) => {
   isHost = h;
 });
 
-socket.on('game-started', ({ hand, turnOrder: to, currentPlayerId: cpId, players: ps, phase, taxInfo, autoSettings }) => {
+socket.on('game-started', ({ hand, turnOrder: to, currentPlayerId: cpId, players: ps, phase, taxInfo, autoSettings, scores }) => {
   clearCutsceneQueue();
   applyAutoSettings(autoSettings);
   clearTimeout(gameOverTimer);
@@ -311,7 +311,7 @@ socket.on('game-started', ({ hand, turnOrder: to, currentPlayerId: cpId, players
   leftPlayers = new Set();
   playerRanks = {};
   ps.forEach(p => { if (p.rank) playerRanks[p.id] = p.rank; });
-  renderScorePanel(JSON.parse(sessionStorage.getItem('gameOverScores') || '{}'));
+  renderScorePanel(scores || {});
   tableEl.innerHTML = '';
 
   enqueueCutscene({ image: '/Resource/UI/game-state/GameStart.png' });

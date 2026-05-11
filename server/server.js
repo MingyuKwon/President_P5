@@ -530,6 +530,7 @@ function doStartGame(roomId) {
           turnOrder: state.turnOrder,
           currentPlayerId: state.turnOrder[state.currentIndex],
           gameNumber, phase: 'tax', taxInfo,
+          scores: roomScores.get(roomId) || {},
           players: Object.values(state.players).map(q => ({
             id: q.id, nickname: q.nickname, cardCount: q.hand.length, finished: q.finished,
             rank: state.ranks[q.id] || 'citizen',
@@ -564,6 +565,7 @@ function emitGameStarted(roomId, state, gameNumber) {
         turnOrder: state.turnOrder,
         currentPlayerId: state.turnOrder[state.currentIndex],
         gameNumber,
+        scores: roomScores.get(roomId) || {},
         players: Object.values(state.players).map(q => ({
           id: q.id, nickname: q.nickname, cardCount: q.hand.length, finished: q.finished,
           rank: state.ranks[q.id] || 'citizen',
