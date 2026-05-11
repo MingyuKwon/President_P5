@@ -76,15 +76,15 @@
     #turn-timer .timer-text { position:absolute; font-size:1.15rem; font-weight:bold; color:#fff;
       text-shadow:0 1px 4px rgba(0,0,0,.9); }
     #turn-timer.urgent .timer-text { color:#e94560; }
-    #btn-exit { position:absolute; bottom:10px; left:10px;
+    #btn-exit { position:absolute; bottom:10px; left:30px;
       padding:0; background:none; border:none; cursor:pointer; z-index:110; }
     #btn-exit img { display:block; height:56px; width:auto; transition:opacity .15s, transform .1s; }
     #btn-exit:hover img { transform:scale(1.05); opacity:0.85; }
-    #btn-rules { position:absolute; top:10px; left:10px;
+    #btn-rules { position:absolute; top:10px; left:30px;
       padding:0; background:none; border:none; cursor:pointer; z-index:110; }
     #btn-rules img { display:block; height:56px; width:auto; transition:opacity .15s, transform .1s; }
     #btn-rules:hover img { transform:scale(1.05); opacity:0.85; }
-    #goal-items { position:absolute; top:76px; left:10px; z-index:110; display:flex; flex-direction:column; gap:22px; }
+    #goal-items { position:absolute; top:76px; left:30px; z-index:110; display:flex; flex-direction:column; gap:22px; }
     .goal-item { background:url('/Resource/UI/background/CardGame-goal-itemBG1%20%23596.png') center/100% 100% no-repeat;
       display:flex; align-items:center; justify-content:center;
       padding:10px 22px; min-height:40px;
@@ -134,7 +134,7 @@
       transition:opacity .15s, transform .1s; }
     #action-btns button:not(#btn-autopass):not(#btn-auto):disabled img { opacity:0.35; }
     #action-btns button:not(#btn-autopass):not(#btn-auto):not(:disabled):hover img { transform:scale(1.05); }
-    #autopass-row { position:absolute; bottom:95px; left:10px; display:flex; flex-direction:column; align-items:flex-start; gap:14px; z-index:20; }
+    #autopass-row { position:absolute; bottom:95px; left:30px; display:flex; flex-direction:column; align-items:flex-start; gap:14px; z-index:20; }
     #btn-autopass, #btn-auto { padding:0; background:none; border:none; cursor:pointer; }
     #btn-autopass img, #btn-auto img { display:block; height:68px; width:auto; transition:transform .12s, filter .15s; }
     #btn-autopass.on img, #btn-auto.on img { filter: sepia(1) saturate(6) hue-rotate(310deg); }
@@ -142,7 +142,7 @@
 
     /* 누적 점수 패널 */
     #score-panel {
-      position:absolute; left:10px; top:50%; transform:translateY(-50%);
+      position:absolute; left:30px; top:50%; transform:translateY(-50%);
       z-index:20; display:flex; flex-direction:column; gap:10px;
       background:rgba(0,0,0,0.75); border-radius:10px; padding:16px 20px;
       min-width:170px;

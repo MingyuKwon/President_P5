@@ -699,8 +699,10 @@ function finishTaxPhase(roomId, state) {
   gameStates.set(roomId, playingState);
   const firstPlayer = playingState.turnOrder[playingState.currentIndex];
   console.log('[finishTaxPhase] emitting tax-phase-end | firstPlayer:', firstPlayer);
-  io.to(roomId).emit('tax-phase-end', { currentPlayerId: firstPlayer });
-  startTurnTimer(roomId, playingState);
+  setTimeout(() => {
+    io.to(roomId).emit('tax-phase-end', { currentPlayerId: firstPlayer });
+    startTurnTimer(roomId, playingState);
+  }, 2500);
 }
 
 function publicPlayers(players) {
