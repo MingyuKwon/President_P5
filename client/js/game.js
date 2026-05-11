@@ -422,7 +422,7 @@ socket.on('player-passed', ({ playerId }) => {
     if (elapsed >= TOTAL_DURATION) return;
 
     const boardRect = gameBoardEl.getBoundingClientRect();
-    const scale = boardRect.width / 1600;
+    const scale = boardRect.width / 2100;
     const seatRect = seatEl.getBoundingClientRect();
     const imgW = 81, imgH = 62;
     const bx = (seatRect.left - boardRect.left) / scale - imgW - 10;
@@ -1128,10 +1128,10 @@ if (myHand.length > 0) {
 renderCardOrder();
 
 function scaleGameBoard() {
-  const scale = Math.min(window.innerWidth / 1600, window.innerHeight / 900);
+  const scale = Math.min(window.innerWidth / 2100, window.innerHeight / 900);
   const board = document.getElementById('game-board');
   board.style.transform = `scale(${scale})`;
-  board.style.left = `${(window.innerWidth - 1600 * scale) / 2}px`;
+  board.style.left = `${(window.innerWidth - 2100 * scale) / 2}px`;
   board.style.top  = `${(window.innerHeight - 900 * scale) / 2}px`;
 }
 window.addEventListener('resize', scaleGameBoard);
